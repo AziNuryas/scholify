@@ -27,6 +27,12 @@ Route::middleware('web')->group(function () {
     // Rute Profil (View & Update)
     Route::get('/student/profile', [StudentMenuController::class, 'profile'])->name('student.profile');
     Route::post('/student/profile', [StudentMenuController::class, 'updateProfile'])->name('student.profile.update');
+    
+    // Antrian Jadwal Temu & Catatan Disiplin (Student)
+    Route::get('/student/appointments', [StudentMenuController::class, 'appointments'])->name('student.appointments');
+    Route::post('/student/appointments', [StudentMenuController::class, 'storeAppointment'])->name('student.appointment.store');
+    
+    Route::get('/student/discipline', [StudentMenuController::class, 'discipline'])->name('student.discipline');
 });
 
 // Guru BK Area
@@ -37,4 +43,18 @@ Route::middleware('web')->group(function () {
     
     Route::get('/guru-bk/profile', [\App\Http\Controllers\GuruBkController::class, 'profile'])->name('gurubk.profile');
     Route::post('/guru-bk/profile', [\App\Http\Controllers\GuruBkController::class, 'updateProfile'])->name('gurubk.profile.update');
+    
+    // Antrian Jadwal Temu & Catatan Disiplin
+    Route::get('/guru-bk/appointments', [\App\Http\Controllers\GuruBkController::class, 'appointments'])->name('gurubk.appointments');
+    Route::post('/guru-bk/appointments/{id}/status', [\App\Http\Controllers\GuruBkController::class, 'updateAppointmentStatus'])->name('gurubk.appointment.status');
+    
+    Route::get('/guru-bk/discipline', [\App\Http\Controllers\GuruBkController::class, 'discipline'])->name('gurubk.discipline');
+    Route::post('/guru-bk/discipline', [\App\Http\Controllers\GuruBkController::class, 'storeDiscipline'])->name('gurubk.discipline.store');
+});
+
+// Chat API Routes (for AJAX)
+Route::middleware('web')->group(function () {
+    Route::get('/api/chat/fetch/{partnerId}', [\App\Http\Controllers\ChatController::class, 'fetch'])->name('chat.fetch');
+    Route::post('/api/chat/send', [\App\Http\Controllers\ChatController::class, 'send'])->name('chat.send');
+    Route::get('/api/chat/unread', [\App\Http\Controllers\ChatController::class, 'unreadCount'])->name('chat.unread');
 });

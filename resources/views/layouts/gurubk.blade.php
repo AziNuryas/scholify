@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Guru BK Portal - Schoolify')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -69,11 +70,11 @@
                     <i class='bx bx-user text-xl'></i>
                     <span class="font-semibold">Profil Saya</span>
                 </a>
-                <a href="#" onclick="alert('Histori Pelanggaran Siswa - Soon')" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors">
+                <a href="{{ route('gurubk.discipline') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('gurubk.discipline') ? 'bg-teal-600 text-white shadow-md shadow-teal-100 transition-transform hover:-translate-y-0.5' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors' }}">
                     <i class='bx bx-error-circle text-xl'></i>
                     <span class="font-semibold">Catatan Disiplin</span>
                 </a>
-                <a href="#" onclick="alert('Jadwal Temu & Antrian - Soon')" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors">
+                <a href="{{ route('gurubk.appointments') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('gurubk.appointments') ? 'bg-teal-600 text-white shadow-md shadow-teal-100 transition-transform hover:-translate-y-0.5' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors' }}">
                     <i class='bx bx-calendar text-xl'></i>
                     <span class="font-semibold">Jadwal Temu</span>
                 </a>

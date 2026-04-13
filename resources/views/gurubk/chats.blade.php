@@ -76,65 +76,129 @@
             </div>
 
             <!-- Message History Area -->
-            <div class="flex-1 p-6 overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-[#F8FAFC]/90">
+            <div id="chat-messages-container" class="flex-1 p-6 overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-[#F8FAFC]/90">
                 <div class="text-center mb-8">
                     <span class="bg-teal-100 text-teal-600 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Histori Percakapan Hari Ini</span>
                 </div>
-                
-                @foreach($messages as $msg)
-                    @php
-                        $isFromBK = ($msg->sender_id === auth()->id() || ($msg->sender && $msg->sender->role === 'guru_bk'));
-                    @endphp
-
-                    @if($isFromBK)
-                        <!-- Chat Guru (Kanan) -->
-                        <div class="flex items-end justify-end mb-6 w-full">
-                            <div class="flex flex-col items-end max-w-[70%]">
-                                <div class="bg-gradient-to-br from-teal-500 to-emerald-400 text-white p-4 rounded-3xl rounded-br-sm shadow-md">
-                                    <p class="text-sm leading-relaxed">{{ $msg->message }}</p>
-                                </div>
-                                <div class="flex items-center gap-1 mt-1.5">
-                                    <p class="text-[10px] font-semibold text-gray-400">{{ $msg->created_at->format('H:i') }}</p>
-                                    <i class="bx bx-check-double text-teal-500 text-sm"></i>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <!-- Chat Anak (Kiri) -->
-                        <div class="flex items-end gap-3 mb-6 w-full">
-                            <img src="{{ $selectedStudent->student->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($selectedStudent->name) }}" class="w-9 h-9 rounded-full shrink-0 shadow-md ring-4 ring-white relative top-2">
-                            <div class="flex flex-col items-start max-w-[70%]">
-                                <div class="bg-white border border-gray-100 p-4 rounded-3xl rounded-bl-sm shadow-md">
-                                    <p class="text-sm text-[#1E293B] font-medium leading-relaxed">{{ $msg->message }}</p>
-                                </div>
-                                <p class="text-[10px] font-semibold text-gray-400 mt-1.5 ml-2">{{ $msg->created_at->format('H:i') }} • {{ explode(' ', $selectedStudent->name)[0] }}</p>
-                            </div>
-                        </div>
-                    @endif
-                @endforeach
-
-                @if($messages->isEmpty())
-                <div class="h-full flex flex-col items-center justify-center text-gray-400 opacity-50 relative pb-10">
-                    <div class="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mb-4">
-                        <i class='bx bx-message-rounded-dots text-5xl text-teal-400'></i>
-                    </div>
-                    <p class="text-sm text-center font-medium">Belum ada riwayat percakapan.<br>Jawab keluhan siswa di bawah.</p>
-                </div>
-                @endif
+                <!-- JS will load messages here -->
             </div>
 
             <!-- Typing Area -->
             <div class="h-20 px-6 border-t border-gray-100 bg-white flex items-center shrink-0">
-                <form action="{{ route('gurubk.reply') }}" method="POST" class="w-full flex items-center gap-4">
-                    @csrf
-                    <input type="hidden" name="student_id" value="{{ $selectedStudent->id }}">
+                <form id="chat-form" class="w-full flex items-center gap-4" onsubmit="sendMessage(event)">
+                    <input type="hidden" id="student_id" value="{{ $selectedStudent->id }}">
                     <button type="button" class="text-gray-400 hover:text-teal-600 transition"><i class='bx bx-paperclip text-2xl'></i></button>
-                    <input type="text" name="message" placeholder="Ketik balasan untuk memotivasi anak ini..." required class="flex-1 bg-gray-100 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-teal-500 transition">
+                    <input type="text" id="chat-input" placeholder="Ketik balasan untuk memotivasi anak ini..." required class="flex-1 bg-gray-100 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-teal-500 transition">
                     <button type="submit" class="w-12 h-12 rounded-xl bg-teal-600 hover:bg-teal-700 shadow-md shadow-teal-200 text-white flex items-center justify-center transition transform hover:scale-105">
                         <i class='bx bxs-send text-xl relative left-0.5'></i>
                     </button>
                 </form>
             </div>
+            
+            <script>
+                const studentId = document.getElementById('student_id').value;
+                const chatContainer = document.getElementById('chat-messages-container');
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const studentAvatar = '{{ $selectedStudent->student->avatar ?? "https://ui-avatars.com/api/?name=" . urlencode($selectedStudent->name) }}';
+                const studentFirstName = '{{ explode(" ", $selectedStudent->name)[0] }}';
+
+                function scrollToBottom() {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+
+                async function fetchMessages() {
+                    if (!studentId) return;
+                    try {
+                        const res = await fetch(`/api/chat/fetch/${studentId}`);
+                        const data = await res.json();
+                        
+                        if (data.messages) {
+                            // Clear state but keep the header
+                            chatContainer.innerHTML = `
+                                <div class="text-center mb-8">
+                                    <span class="bg-teal-100 text-teal-600 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Histori Percakapan Hari Ini</span>
+                                </div>
+                            `;
+
+                            if (data.messages.length === 0) {
+                                chatContainer.innerHTML += `
+                                <div class="h-full flex flex-col items-center justify-center text-gray-400 opacity-50 relative pb-10 mt-10">
+                                    <div class="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mb-4">
+                                        <i class='bx bx-message-rounded-dots text-5xl text-teal-400'></i>
+                                    </div>
+                                    <p class="text-sm text-center font-medium">Belum ada riwayat percakapan.<br>Jawab keluhan siswa di bawah.</p>
+                                </div>`;
+                                return;
+                            }
+
+                            data.messages.forEach(msg => {
+                                const isMine = msg.is_mine;
+                                if (isMine) {
+                                    chatContainer.innerHTML += `
+                                        <div class="flex items-end justify-end mb-6 w-full">
+                                            <div class="flex flex-col items-end max-w-[70%]">
+                                                <div class="bg-gradient-to-br from-teal-500 to-emerald-400 text-white p-4 rounded-3xl rounded-br-sm shadow-md">
+                                                    <p class="text-sm leading-relaxed">${msg.message}</p>
+                                                </div>
+                                                <div class="flex items-center gap-1 mt-1.5">
+                                                    <p class="text-[10px] font-semibold text-gray-400">${msg.time}</p>
+                                                    <i class="bx bx-check-double text-teal-500 text-sm"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                } else {
+                                    chatContainer.innerHTML += `
+                                        <div class="flex items-end gap-3 mb-6 w-full">
+                                            <img src="${studentAvatar}" class="w-9 h-9 rounded-full shrink-0 shadow-md ring-4 ring-white relative top-2">
+                                            <div class="flex flex-col items-start max-w-[70%]">
+                                                <div class="bg-white border border-gray-100 p-4 rounded-3xl rounded-bl-sm shadow-md">
+                                                    <p class="text-sm text-[#1E293B] font-medium leading-relaxed">${msg.message}</p>
+                                                </div>
+                                                <p class="text-[10px] font-semibold text-gray-400 mt-1.5 ml-2">${msg.time} • ${studentFirstName}</p>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            });
+                        }
+                    } catch(e) {
+                        console.error('Error fetching messages', e);
+                    }
+                }
+
+                async function sendMessage(e) {
+                    e.preventDefault();
+                    const input = document.getElementById('chat-input');
+                    const message = input.value.trim();
+                    if (!message || !studentId) return;
+                    
+                    input.value = '';
+
+                    try {
+                        await fetch('/api/chat/send', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            body: JSON.stringify({
+                                receiver_id: studentId,
+                                message: message
+                            })
+                        });
+                        fetchMessages().then(scrollToBottom);
+                    } catch (e) {
+                        console.error('Failed to send message', e);
+                    }
+                }
+
+                // Polling every 3 seconds
+                setInterval(fetchMessages, 3000);
+                
+                // Initial fetch
+                fetchMessages().then(() => setTimeout(scrollToBottom, 500));
+            </script>
             @else
             <!-- Placeholder jika tidak ada chat terpilih -->
             <div class="flex-1 flex flex-col items-center justify-center text-center p-10 bg-gray-50">

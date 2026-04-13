@@ -160,4 +160,69 @@ class GuruBkController extends Controller
 
         return back()->with('success', 'Profil Guru BK berhasil diperbarui!');
     }
+
+    public function appointments()
+    {
+        $guruData = $this->getGuruBk();
+        $guru = collect($guruData ? $guruData->toArray() : []);
+
+        $appointments = \App\Models\Appointment::with(['student.schoolClass'])
+            ->where('teacher_id', auth()->id())
+            ->orderBy('date', 'desc')
+            ->orderBy('time', 'desc')
+            ->get();
+
+        return view('gurubk.appointments', compact('guru', 'appointments'));
+    }
+
+    public function updateAppointmentStatus(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|in:approved,rejected,completed']);
+        try {
+            $appointment = \App\Models\Appointment::findOrFail($id);
+            if ($appointment->teacher_id == auth()->id()) {
+                $appointment->update(['status' => $request->status]);
+                return back()->with('success', 'Status jadwal temu diperbarui.');
+            }
+        } catch (\Exception $e) {}
+        return back()->with('error', 'Gagal memperbarui status jadwal temu.');
+    }
+
+    public function discipline()
+    {
+        $guruData = $this->getGuruBk();
+        $guru = collect($guruData ? $guruData->toArray() : []);
+
+        $records = \App\Models\DisciplinaryRecord::with(['student.schoolClass'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $students = \App\Models\Student::with('schoolClass')->get();
+
+        return view('gurubk.discipline', compact('guru', 'records', 'students'));
+    }
+
+    public function storeDiscipline(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'date' => 'required|date',
+            'violation_type' => 'required|string',
+            'description' => 'required|string',
+            'points' => 'required|integer|min:0'
+        ]);
+
+        try {
+            \App\Models\DisciplinaryRecord::create([
+                'student_id' => $request->student_id,
+                'teacher_id' => auth()->id(),
+                'date' => $request->date,
+                'violation_type' => $request->violation_type,
+                'description' => $request->description,
+                'points' => $request->points
+            ]);
+            return back()->with('success', 'Catatan disiplin berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menambahkan catatan disiplin.');
+        }
+    }
 }

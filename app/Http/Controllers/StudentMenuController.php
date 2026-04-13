@@ -75,15 +75,14 @@ class StudentMenuController extends Controller
             try {
                 // Dianggap memakai nama tabel 'grades' langsung dari DB Facade agar safety jika model Grade belum ada
                 $d = \Illuminate\Support\Facades\DB::table('grades')
+                    ->join('subjects', 'grades.subject_id', '=', 'subjects.id')
+                    ->select('grades.*', 'subjects.name as subject_name')
                     ->where('student_id', $studentId)
                     ->get();
                 $grades = collect($d);
             } catch (\Exception $e) {
-                // Dummy fallback jika tabel blm ready
-                $grades = collect([
-                    (object)['subject_name' => 'Matematika', 'score' => 85, 'type' => 'Ujian Tengah Semester', 'semester' => 1],
-                    (object)['subject_name' => 'Bahasa Inggris', 'score' => 90, 'type' => 'Tugas Mingguan', 'semester' => 1],
-                ]);
+                // Fallback kosong jika tabel belum siap
+                $grades = collect([]);
             }
         }
 
@@ -108,7 +107,10 @@ class StudentMenuController extends Controller
             ->where('is_read', false)
             ->update(['is_read' => true]);
 
-        return view('student.counseling', compact('student', 'counselingHistory'));
+        // Cari Guru BK (default)
+        $bkUser = \App\Models\User::where('role', 'guru_bk')->first();
+
+        return view('student.counseling', compact('student', 'counselingHistory', 'bkUser'));
     }
 
     public function sendCounselingMessage(Request $request)
@@ -172,5 +174,62 @@ class StudentMenuController extends Controller
         $studentModel->save();
 
         return back()->with('success', 'Profil dan Foto berhasil diupdate!');
+    }
+
+    public function appointments()
+    {
+        $studentData = $this->getStudent();
+        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
+        
+        $appointments = collect([]);
+        if ($studentData) {
+            $appointments = \App\Models\Appointment::with('teacher')->where('student_id', $studentData->id)->orderBy('created_at', 'desc')->get();
+        }
+        
+        $bkUsers = \App\Models\User::where('role', 'guru_bk')->get();
+
+        return view('student.appointments', compact('student', 'appointments', 'bkUsers'));
+    }
+
+    public function storeAppointment(Request $request)
+    {
+        $request->validate([
+            'teacher_id' => 'required',
+            'date' => 'required|date',
+            'time' => 'required',
+            'notes' => 'required|string'
+        ]);
+
+        $studentData = $this->getStudent();
+        if (!$studentData) {
+            return back()->with('error', 'Data siswa tidak ditemukan. Pastikan kamu login sebagai siswa.');
+        }
+
+        try {
+            \App\Models\Appointment::create([
+                'student_id' => $studentData->id,
+                'teacher_id' => $request->teacher_id,
+                'date' => $request->date,
+                'time' => $request->time,
+                'notes' => $request->notes,
+                'status' => 'pending'
+            ]);
+            return back()->with('success', 'Jadwal temu berhasil diajukan! Menunggu persetujuan dari Guru BK.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal membuat jadwal temu: ' . $e->getMessage());
+        }
+    }
+
+    public function discipline()
+    {
+        $studentData = $this->getStudent();
+        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
+        
+        $records = collect([]);
+        if ($studentData) {
+            $records = \App\Models\DisciplinaryRecord::with('teacher')->where('student_id', $studentData->id)->orderBy('created_at', 'desc')->get();
+        }
+
+        return view('student.discipline', compact('student', 'records'));
     }
 }

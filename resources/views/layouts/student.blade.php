@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Schoolify - Student Space')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Tailwind CDN (Tidak Perlu Vite/NPM Run Dev lagi) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -78,6 +79,14 @@
                     <span class="absolute right-4 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm uppercase">{{ $unread }}</span>
                     @endif
                 </a>
+                <a href="{{ route('student.appointments') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.appointments') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }}">
+                    <i class='bx bx-calendar text-xl'></i>
+                    <span>Jadwal Temu</span>
+                </a>
+                <a href="{{ route('student.discipline') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.discipline') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }}">
+                    <i class='bx bx-error-circle text-xl'></i>
+                    <span>Catatan Disiplin</span>
+                </a>
             </nav>
         </div>
 
@@ -90,6 +99,17 @@
                 <p class="text-xs text-indigo-100 mb-4 relative z-10">Tinggal 14 hari lagi, persiapkan dirimu dari sekarang!</p>
                 <button class="w-full py-2 bg-white text-[#4318FF] rounded-lg text-sm font-semibold hover:bg-gray-50 transition relative z-10">Lihat Kisi-kisi</button>
             </div>
+        </div>
+
+        <!-- Logout Button -->
+        <div class="p-6 mt-auto border-t border-gray-100">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="flex items-center justify-center gap-2 w-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 font-bold py-3 rounded-xl transition cursor-pointer">
+                    <i class='bx bx-log-out text-lg'></i>
+                    <span>Keluar / Logout</span>
+                </button>
+            </form>
         </div>
     </aside>
 
