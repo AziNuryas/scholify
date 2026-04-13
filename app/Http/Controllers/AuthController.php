@@ -8,28 +8,34 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        if (session('user')) {
-            return redirect()->route('dashboard');
+        if (auth()->check()) {
+            return $this->redirectBasedOnRole(auth()->user());
         }
 
         return view('auth.login');
     }
 
+    private function redirectBasedOnRole($user)
+    {
+        if ($user->role === 'siswa') {
+            return redirect()->route('student.dashboard');
+        }
+        if ($user->role === 'guru_bk') {
+            return redirect()->route('gurubk.dashboard');
+        }
+        return redirect()->route('dashboard');
+    }
+
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        // Dummy login
-        if ($request->email === 'admin@school.com' && $request->password === 'admin123') {
-            
-            session([
-                'user' => $request->email
-            ]);
-
-            return redirect()->route('dashboard');
+        if (auth()->attempt($credentials)) {
+            $request->session()->regenerate();
+            return $this->redirectBasedOnRole(auth()->user());
         }
 
         return back()->with('error', 'Email atau password salah');
@@ -37,16 +43,18 @@ class AuthController extends Controller
 
     public function dashboard()
     {
-        if (!session('user')) {
+        if (!auth()->check()) {
             return redirect()->route('login');
         }
 
-        return view('admin.dashboard');
+        return $this->redirectBasedOnRole(auth()->user());
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        session()->flush();
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect()->route('login');
     }
 }

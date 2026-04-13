@@ -4,36 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Schoolify</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome untuk Ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .bg-schoolify { background-color: #1e56f3; } /* Warna biru utama dari logo Schoolify */
+        .bg-schoolify { background-color: #1e56f3; }
         .text-schoolify { color: #1e56f3; }
     </style>
 </head>
 <body class="bg-gray-50 flex items-center justify-center min-h-screen">
 
     <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-100">
-        <!-- Logo & Header -->
         <div class="text-center mb-10">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-schoolify text-white rounded-2xl mb-4 shadow-lg shadow-blue-200">
-                <i class="fas fa-user-graduate text-3xl"></i> <!-- Ikon topi sekolah seperti di dashboard -->
+                <i class="fas fa-user-graduate text-3xl"></i>
             </div>
             <h1 class="text-2xl font-bold text-gray-800">Schoolify</h1>
             <p class="text-gray-500 text-sm">School Management System</p>
         </div>
 
-        <!-- Form Login -->
-        <form action="{{ route('login') }}" method="POST">
+        @if($errors->any())
+            <div class="mb-4 p-3 bg-red-100 text-red-600 rounded-xl text-sm border border-red-200">
+                <i class="fas fa-exclamation-circle mr-1"></i> {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form action="{{ route('login.post') }}" method="POST">
             @csrf
             
-            <!-- Email -->
             <div class="mb-5">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
                 <div class="relative">
@@ -42,11 +41,10 @@
                     </span>
                     <input type="email" name="email" required 
                         class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200"
-                        placeholder="admin@schoolify.com">
+                        placeholder="admin@school.com">
                 </div>
             </div>
 
-            <!-- Password -->
             <div class="mb-6">
                 <div class="flex justify-between mb-2">
                     <label class="text-sm font-semibold text-gray-700">Password</label>
@@ -62,13 +60,6 @@
                 </div>
             </div>
 
-            <!-- Remember Me -->
-            <div class="flex items-center mb-8">
-                <input type="checkbox" id="remember" class="w-4 h-4 text-schoolify border-gray-300 rounded focus:ring-blue-500">
-                <label for="remember" class="ml-2 text-sm text-gray-600">Remember this device</label>
-            </div>
-
-            <!-- Login Button -->
             <button type="submit" 
                 class="w-full bg-schoolify hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 transition duration-300 flex items-center justify-center">
                 <span>Login Dashboard</span>
@@ -76,11 +67,26 @@
             </button>
         </form>
 
-        <!-- Footer -->
-        <div class="mt-8 text-center">
-            <p class="text-sm text-gray-500">
-                Don't have an account? <a href="#" class="font-semibold text-schoolify hover:underline">Contact Admin</a>
-            </p>
+        <div class="mt-8 text-center border-t border-gray-100 pt-6">
+            <div class="text-xs text-gray-600 bg-blue-50 p-4 rounded-xl text-left inline-block w-full border border-blue-100 shadow-sm">
+                <p class="font-bold mb-2 text-schoolify"><i class="fas fa-info-circle mr-1"></i> Mode Demo Aktif (Gunakan akun ini):</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-white p-2 rounded border border-gray-100">
+                        <span class="font-bold text-gray-700 text-[10px] uppercase shadow-sm px-1.5 py-0.5 bg-gray-100 rounded mr-1">ADMIN</span>
+                        <br>admin@school.com<br><span class="text-gray-400">admin123</span>
+                    </div>
+                    <div class="bg-white p-2 rounded border border-gray-100">
+                        <span class="font-bold text-schoolify text-[10px] uppercase shadow-sm px-1.5 py-0.5 bg-blue-100 rounded mr-1">SISWA</span>
+                        <br>siswa@school.com<br><span class="text-gray-400">siswa123</span>
+                    </div>
+                </div>
+                <div class="mt-2 text-left">
+                    <p class="text-[10px] font-bold text-teal-600 mb-1">GURU BK (MODUL BARU):</p>
+                    <div class="bg-white p-2 rounded border border-teal-100 bg-teal-50/20">
+                        azibk@gmail.com | <span class="text-gray-400">bk123</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
