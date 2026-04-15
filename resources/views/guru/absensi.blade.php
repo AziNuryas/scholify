@@ -124,7 +124,6 @@
                     </tr>
                     @endforeach
                 </tbody>
-            \dbs
         </div>
     </div>
 </div>

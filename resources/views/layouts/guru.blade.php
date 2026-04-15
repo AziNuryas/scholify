@@ -75,9 +75,10 @@
                         ['route' => 'guru.dashboard', 'icon' => 'layout-dashboard', 'label' => 'Dashboard'],
                         ['route' => 'guru.jadwal', 'icon' => 'calendar', 'label' => 'Jadwal'],
                         ['route' => 'guru.absensi', 'icon' => 'user-check', 'label' => 'Absensi'],
-                        ['route' => 'guru.nilai', 'icon' => 'clipboard-list', 'label' => 'Nilai & Tugas'],
-                        ['route' => 'guru.raport', 'icon' => 'file-spreadsheet', 'label' => 'Raport'],
+                        ['route' => 'guru.nilai', 'icon' => 'edit-3', 'label' => 'Nilai'],           // Icon: edit-3 (pensil untuk edit nilai)
+                        ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas'],    // Icon: clipboard-list (daftar tugas)     // Icon: file-text (dokumen raport)
                         ['route' => 'guru.pengumuman', 'icon' => 'megaphone', 'label' => 'Pengumuman'],
+                        ['route' => 'guru.profil', 'icon' => 'user-circle', 'label' => 'Profil'],     // Icon: user-circle (profil pengguna)
                     ];
                 @endphp
 

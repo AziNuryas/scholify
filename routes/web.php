@@ -112,25 +112,17 @@ Route::middleware(['auth'])->prefix('guru-bk')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('guru')->group(function () {
-
-    Route::get('/dashboard', fn() => view('guru.dashboard'))
-        ->name('guru.dashboard');
-
-    Route::get('/jadwal', fn() => view('guru.jadwal'))
-        ->name('guru.jadwal');
-
-    Route::get('/absensi', fn() => view('guru.absensi'))
-        ->name('guru.absensi');
-
-    Route::get('/nilai', fn() => view('guru.nilai'))
-        ->name('guru.nilai');
-
-    Route::get('/raport', fn() => view('guru.raport'))
-        ->name('guru.raport');
-
-    Route::get('/pengumuman', fn() => view('guru.pengumuman'))
-        ->name('guru.pengumuman');
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('guru')->name('guru.')->group(function () {
+        Route::get('/dashboard', fn() => view('guru.dashboard'))->name('dashboard');
+        Route::get('/jadwal', fn() => view('guru.jadwal'))->name('jadwal');
+        Route::get('/absensi', fn() => view('guru.absensi'))->name('absensi');
+        Route::get('/nilai', fn() => view('guru.nilai'))->name('nilai');
+        Route::get('/tugas', fn() => view('guru.tugas'))->name('tugas');          // ✅ SUDAH ADA
+        Route::get('/raport', fn() => view('guru.raport'))->name('raport');
+        Route::get('/pengumuman', fn() => view('guru.pengumuman'))->name('pengumuman');
+        Route::get('/profil', fn() => view('guru.profil'))->name('profil');       // ✅ TAMBAHKAN INI
+    });
 });
 
 
