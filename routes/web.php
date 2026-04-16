@@ -7,6 +7,7 @@ use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentMenuController;
 use App\Http\Controllers\GuruBkController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\GradeController; // 🔥 TAMBAHKAN INI
 
 /*
 |--------------------------------------------------------------------------
@@ -14,13 +15,11 @@ use App\Http\Controllers\ChatController;
 |--------------------------------------------------------------------------
 */
 
-// 🔥 FIX UTAMA: Tambahkan GET /login
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/login', [AuthController::class, 'showLogin']); // penting!
+Route::get('/login', [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Dashboard global (optional)
 Route::get('/dashboard', [AuthController::class, 'dashboard'])
     ->name('dashboard')
     ->middleware('auth');
@@ -108,20 +107,25 @@ Route::middleware(['auth'])->prefix('guru-bk')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| GURU NON BK (SIDEBAR KAMU 🔥)
+| GURU NON BK (🔥 SUDAH DIPERBAIKI)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth'])->group(function () {
     Route::prefix('guru')->name('guru.')->group(function () {
+
         Route::get('/dashboard', fn() => view('guru.dashboard'))->name('dashboard');
         Route::get('/jadwal', fn() => view('guru.jadwal'))->name('jadwal');
         Route::get('/absensi', fn() => view('guru.absensi'))->name('absensi');
-        Route::get('/nilai', fn() => view('guru.nilai'))->name('nilai');
-        Route::get('/tugas', fn() => view('guru.tugas'))->name('tugas');          // ✅ SUDAH ADA
+
+        // 🔥 NILAI (PAKAI CONTROLLER + STORE)
+        Route::get('/nilai', [GradeController::class, 'index'])->name('nilai');
+        Route::post('/nilai', [GradeController::class, 'store'])->name('nilai.store');
+
+        Route::get('/tugas', fn() => view('guru.tugas'))->name('tugas');
         Route::get('/raport', fn() => view('guru.raport'))->name('raport');
         Route::get('/pengumuman', fn() => view('guru.pengumuman'))->name('pengumuman');
-        Route::get('/profil', fn() => view('guru.profil'))->name('profil');       // ✅ TAMBAHKAN INI
+        Route::get('/profil', fn() => view('guru.profil'))->name('profil');
     });
 });
 
