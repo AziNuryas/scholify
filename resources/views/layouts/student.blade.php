@@ -12,7 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- Font Awesome 6 (Lebih reliable) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
@@ -63,6 +65,16 @@
         .animate-bounce-in {
             animation: elasticBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
         }
+        
+        /* Memastikan ikon selalu tampil */
+        .nav-icon {
+            width: 24px;
+            text-align: center;
+            font-size: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body class="antialiased flex h-screen overflow-hidden">
@@ -82,17 +94,17 @@
                 <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Menu Utama</p>
                 
                 <a href="{{ route('student.dashboard') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.dashboard') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class='bx bxs-dashboard text-xl'></i>
+                    <i class="fas fa-tachometer-alt text-xl nav-icon"></i>
                     <span>Dashboard</span>
                 </a>
                 
                 <a href="{{ route('student.schedule') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.schedule') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class='bx bx-calendar text-xl'></i>
+                    <i class="fas fa-calendar-alt text-xl nav-icon"></i>
                     <span>Jadwal Kelas</span>
                 </a>
                 
                 <a href="{{ route('student.assignments') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.assignments') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
-                    <i class='bx bx-book-content text-xl'></i>
+                    <i class="fas fa-book-open text-xl nav-icon"></i>
                     <span>Tugas Mandiri</span>
                 </a>
 
@@ -100,12 +112,12 @@
                 <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Layanan</p>
                 
                 <a href="{{ route('student.grades') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.grades') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class='bx bx-bar-chart-alt-2 text-xl'></i>
+                    <i class="fas fa-chart-line text-xl nav-icon"></i>
                     <span>E-Rapor & Nilai</span>
                 </a>
                 
                 <a href="{{ route('student.counseling') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.counseling') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
-                    <i class='bx bx-support text-xl'></i>
+                    <i class="fas fa-headset text-xl nav-icon"></i>
                     <span>Konsultasi BK</span>
                     @php $unread = 2; @endphp
                     @if($unread > 0)
@@ -114,8 +126,17 @@
                 </a>
 
                 <a href="{{ route('student.discipline') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.discipline') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class='bx bx-error-circle text-xl'></i>
+                    <i class="fas fa-exclamation-triangle text-xl nav-icon"></i>
                     <span>Poin Disiplin</span>
+                </a>
+
+                <!-- Menu Pengumuman (FIX) -->
+                <a href="{{ route('student.announcements') }}" 
+                class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl 
+                {{ request()->routeIs('student.announcements') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    
+                    <i class="fas fa-bullhorn text-xl nav-icon"></i>
+                    <span>Pengumuman</span>
                 </a>
             </nav>
         </div>
@@ -124,7 +145,7 @@
             <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                 @csrf
                 <button type="submit" class="flex items-center justify-center gap-2 w-full text-[#A3AED0] hover:text-red-500 font-semibold py-2 transition-colors">
-                    <i class='bx bx-log-out text-xl'></i>
+                    <i class="fas fa-sign-out-alt text-xl"></i>
                     <span>Keluar dari Akun</span>
                 </button>
             </form>
@@ -140,12 +161,12 @@
 
             <div class="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-[#F4F7FE]">
                 <div class="relative hidden lg:flex items-center bg-[#F4F7FE] rounded-xl px-4 py-2 w-72">
-                    <i class='bx bx-search text-[#A3AED0] text-lg'></i>
+                    <i class="fas fa-search text-[#A3AED0] text-lg"></i>
                     <input type="text" placeholder="Cari tugas..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-[#2B3674] placeholder-[#A3AED0]">
                 </div>
 
                 <button class="p-2.5 rounded-xl text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all relative">
-                    <i class='bx bxs-bell text-xl'></i>
+                    <i class="fas fa-bell text-xl"></i>
                     <span class="absolute top-2.5 right-3 w-2 h-2 rounded-full bg-red-500 border-2 border-white"></span>
                 </button>
 
@@ -159,7 +180,7 @@
                             <img src="https://ui-avatars.com/api/?name=Ahmad+Fauzi&background=4318FF&color=fff&rounded=true" alt="Profile" class="w-11 h-11 rounded-full object-cover shadow-sm ring-2 ring-white group-hover:ring-[#4318FF]/20 transition-all">
                             <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
-                        <i class='bx bx-chevron-down text-[#A3AED0] text-xl transition-transform duration-300' :class="open ? 'rotate-180 text-[#4318FF]' : ''"></i>
+                        <i class="fas fa-chevron-down text-[#A3AED0] text-xl transition-transform duration-300" :class="open ? 'rotate-180 text-[#4318FF]' : ''"></i>
                     </button>
 
                     <div x-show="open" 
@@ -178,14 +199,14 @@
 
                         <a href="{{ route('student.profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all font-semibold mx-2 rounded-xl">
                             <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                <i class='bx bx-user text-lg text-[#4318FF]'></i>
+                                <i class="fas fa-user text-lg text-[#4318FF]"></i>
                             </div>
                             Lihat Profil
                         </a>
 
                         <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] transition-all font-medium mx-2 rounded-xl">
                             <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
-                                <i class='bx bx-cog text-lg text-[#A3AED0]'></i>
+                                <i class="fas fa-cog text-lg text-[#A3AED0]"></i>
                             </div>
                             Pengaturan
                         </a>
@@ -196,7 +217,7 @@
                             @csrf
                             <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-all font-bold w-[calc(100%-1rem)] mx-2 rounded-xl text-left">
                                 <div class="w-8 h-8 rounded-lg bg-red-100/50 flex items-center justify-center">
-                                    <i class='bx bx-log-out text-lg'></i>
+                                    <i class="fas fa-sign-out-alt text-lg"></i>
                                 </div>
                                 Keluar Aplikasi
                             </button>
@@ -233,7 +254,7 @@
              class="bg-[#4318FF] rounded-[28px] relative overflow-hidden p-8 text-white shadow-[0_25px_60px_rgba(67,24,255,0.35)] border border-white/10">
             
             <button @click="closeForNow()" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
-                <i class='bx bx-x text-2xl'></i>
+                <i class="fas fa-times text-2xl"></i>
             </button>
 
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
@@ -241,7 +262,7 @@
 
             <div class="flex flex-col gap-6 relative z-10 text-center items-center">
                 <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner ring-1 ring-white/20">
-                    <i class='bx bxs-megaphone text-3xl text-yellow-300 animate-pulse'></i>
+                    <i class="fas fa-bullhorn text-3xl text-yellow-300 animate-pulse"></i>
                 </div>
                 
                 <div>

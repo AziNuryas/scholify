@@ -8,11 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --primary-indigo: #4F46E5;
+            --primary-purple: #7C3AED;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -51,6 +52,16 @@
             background: var(--primary-indigo);
             border-radius: 0 4px 4px 0;
         }
+
+        /* Animasi untuk tombol logout */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .logout-btn:hover i {
+            animation: pulse 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -75,10 +86,10 @@
                         ['route' => 'guru.dashboard', 'icon' => 'layout-dashboard', 'label' => 'Dashboard'],
                         ['route' => 'guru.jadwal', 'icon' => 'calendar', 'label' => 'Jadwal'],
                         ['route' => 'guru.absensi', 'icon' => 'user-check', 'label' => 'Absensi'],
-                        ['route' => 'guru.nilai', 'icon' => 'edit-3', 'label' => 'Nilai'],           // Icon: edit-3 (pensil untuk edit nilai)
-                        ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas'],    // Icon: clipboard-list (daftar tugas)     // Icon: file-text (dokumen raport)
+                        ['route' => 'guru.nilai', 'icon' => 'edit-3', 'label' => 'Nilai'],
+                        ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas'],
                         ['route' => 'guru.pengumuman', 'icon' => 'megaphone', 'label' => 'Pengumuman'],
-                        ['route' => 'guru.profil', 'icon' => 'user-circle', 'label' => 'Profil'],     // Icon: user-circle (profil pengguna)
+                        ['route' => 'guru.profil', 'icon' => 'user-circle', 'label' => 'Profil'],
                     ];
                 @endphp
 
@@ -99,26 +110,51 @@
                     <p class="text-slate-500 mt-1">@yield('page_subtitle', 'Kelola data akademik Anda dengan mudah.')</p>
                 </div>
 
+                <!-- Profile Dropdown dengan Tombol Logout yang Lebih Baik -->
                 <div class="relative group">
-                    <div class="flex items-center gap-4 bg-white p-1.5 pr-5 rounded-2xl shadow-sm border border-gray-100 cursor-pointer hover:border-indigo-200 transition-all">
-                        <div class="w-10 h-10 bg-indigo-600 text-white flex items-center justify-center rounded-xl font-bold shadow-indigo-200 shadow-lg">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    <div class="flex items-center gap-4 bg-white p-1.5 pr-5 rounded-2xl shadow-sm border border-gray-100 cursor-pointer hover:border-indigo-200 hover:shadow-md transition-all duration-300">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center rounded-xl font-bold shadow-lg shadow-indigo-200">
+                            BG
                         </div>
                         <div class="hidden sm:block">
-                            <p class="font-bold text-sm leading-none">{{ auth()->user()->name }}</p>
+                            <p class="font-bold text-sm leading-none text-slate-800">Bapak Guru Budi</p>
                             <span class="text-[10px] uppercase tracking-wider font-bold text-indigo-500">Tenaga Pendidik</span>
                         </div>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform"></i>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform duration-300"></i>
                     </div>
 
-                    <div class="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-2">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
-                                <i data-lucide="log-out" class="w-4 h-4"></i>
-                                Keluar Aplikasi
-                            </button>
-                        </form>
+                    <!-- Dropdown Menu Modern -->
+                    <div class="absolute top-full right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden">
+                        <!-- Header Dropdown -->
+                        <div class="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md">
+                                    BG
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm text-slate-800">Bapak Guru Budi</p>
+                                    <p class="text-xs text-slate-500">budi@schoolify.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Menu Items -->
+                        <div class="p-2">
+                            <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 rounded-xl transition-all duration-200 group">
+                                <i data-lucide="settings" class="w-4 h-4 text-indigo-500"></i>
+                                <span>Pengaturan</span>
+                            </a>
+                            <div class="border-t border-gray-100 my-2"></div>
+                            
+                            <!-- Tombol Logout yang Sudah Diperbaiki -->
+                            <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                                @csrf
+                                <button type="submit" class="logout-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group">
+                                    <i data-lucide="log-out" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+                                    <span>Keluar Aplikasi</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -129,6 +165,15 @@
 
     <script>
         lucide.createIcons();
+        
+        // Tambahan efek konfirmasi sebelum logout (opsional)
+        document.querySelectorAll('.logout-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if(!confirm('Apakah Anda yakin ingin keluar dari aplikasi?')) {
+                    e.preventDefault();
+                }
+            });
+        });
     </script>
 </body>
 </html>
