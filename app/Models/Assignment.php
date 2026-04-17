@@ -18,8 +18,18 @@ class Assignment extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
+
     public function submissions()
     {
         return $this->hasMany(Submission::class);
+    }
+
+    public function schoolClass()
+    {
+        return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 }

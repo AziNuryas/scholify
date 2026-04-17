@@ -20,4 +20,10 @@ class Grade extends Model
     {
         return $this->belongsTo(Student::class);
     }
+
+    // Relasi ke subject (mata pelajaran)
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
 }

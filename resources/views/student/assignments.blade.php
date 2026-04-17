@@ -1,56 +1,141 @@
 @extends('layouts.student')
-
 @section('title', 'Tugas - Schoolify')
+@section('page_title', 'Tugas')
 
 @section('content')
-<div class="space-y-6 max-w-5xl mx-auto">
-    <div class="flex justify-between items-end mb-8">
-        <div>
-            <h1 class="font-outfit font-bold text-3xl text-[#2B3674] mb-2">Daftar Tugas</h1>
-            <p class="text-[#A3AED0]">Selesaikan semua kewajiban akademismu tepat waktu.</p>
-        </div>
-        <div class="flex gap-2">
-            <button class="bg-[#4318FF] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-indigo-100">Sedang Aktif</button>
-            <button class="bg-white text-[#A3AED0] border border-gray-200 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-50">Selesai</button>
-        </div>
+<div class="space-y-5">
+    {{-- Tab switcher --}}
+    <div style="display:inline-flex; background:rgba(255,255,255,0.7); backdrop-filter:blur(12px); border:1.5px solid rgba(255,255,255,0.9); padding:5px; border-radius:18px; gap:4px; box-shadow:0 2px 12px rgba(99,102,241,0.07);">
+        <a href="{{ route('student.assignments', ['filter'=>'active']) }}" style="padding:10px 24px; border-radius:13px; font-size:14px; font-weight:700; text-decoration:none; transition:all 0.2s; {{ $filter==='active' ? 'background:white; color:#1e293b; box-shadow:0 2px 12px rgba(0,0,0,0.08);' : 'color:#94a3b8;' }}">Aktif</a>
+        <a href="{{ route('student.assignments', ['filter'=>'completed']) }}" style="padding:10px 24px; border-radius:13px; font-size:14px; font-weight:700; text-decoration:none; transition:all 0.2s; {{ $filter==='completed' ? 'background:white; color:#1e293b; box-shadow:0 2px 12px rgba(0,0,0,0.08);' : 'color:#94a3b8;' }}">Selesai</a>
     </div>
 
+    @if(session('success'))
+    <div style="display:flex; align-items:center; gap:12px; padding:16px 20px; background:#ecfdf5; border:1.5px solid rgba(16,185,129,0.25); border-radius:16px; font-size:14px; font-weight:600; color:#065f46;">
+        <div style="width:32px; height:32px; background:#10b981; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class='bx bx-check' style="color:white; font-size:18px;"></i></div>
+        {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div style="display:flex; align-items:center; gap:12px; padding:16px 20px; background:#fff1f2; border:1.5px solid rgba(239,68,68,0.25); border-radius:16px; font-size:14px; font-weight:600; color:#be123c;">
+        <div style="width:32px; height:32px; background:#ef4444; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class='bx bx-x' style="color:white; font-size:18px;"></i></div>
+        {{ session('error') }}
+    </div>
+    @endif
+
     @if($assignments->count() > 0)
-        <div class="grid grid-cols-1 gap-4">
-            @foreach($assignments as $assign)
-            <div class="glass-card bg-white p-5 rounded-2xl border border-gray-100 hover:border-indigo-200 transition-colors shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer group">
-                <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                        <i class='bx bx-book-bookmark'></i>
-                    </div>
-                    <div>
-                        <h3 class="font-outfit font-bold text-lg text-[#2B3674] group-hover:text-[#4318FF] transition">{{ $assign->title ?? 'Tugas Baru' }}</h3>
-                        <p class="text-sm font-medium text-[#A3AED0]">{{ $assign->subject->name ?? 'Mata Pelajaran' }} • Diberikan bulan ini</p>
-                    </div>
-                </div>
-                
-                <div class="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
-                    <!-- Deadline Box -->
-                    <div class="bg-red-50 border border-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1">
-                        <i class='bx bx-time-five text-sm'></i> 
-                        Tenggat: {{ $assign->due_date ? \Carbon\Carbon::parse($assign->due_date)->format('d M Y, H:i') : 'Segera' }}
-                    </div>
-                    <button class="w-full sm:w-auto bg-white border border-gray-200 hover:bg-gray-50 text-[#2B3674] px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm">
-                        Kumpulkan Tugas
+    <div style="display:flex; flex-direction:column; gap:12px;">
+        @foreach($assignments as $assign)
+        @php
+            $sub = $submittedIds->contains($assign->id);
+            $late = $assign->due_date && $assign->due_date->isPast() && !$sub;
+        @endphp
+        <div class="glass-card" style="padding:22px 26px; display:flex; align-items:center; gap:18px; {{ $late ? 'border-color:rgba(239,68,68,0.25);' : '' }}" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            {{-- Icon --}}
+            <div style="width:52px; height:52px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; {{ $sub ? 'background:rgba(16,185,129,0.1); color:#10b981;' : ($late ? 'background:rgba(239,68,68,0.1); color:#ef4444;' : 'background:rgba(99,102,241,0.1); color:#6366f1;') }}">
+                <i class='bx {{ $sub ? 'bx-check-circle' : ($late ? 'bx-error' : 'bx-file') }}'></i>
+            </div>
+            {{-- Info --}}
+            <div style="flex:1; min-width:0;">
+                <h3 style="font-size:16px; font-weight:700; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;">{{ $assign->title ?? 'Tugas' }}</h3>
+                <p style="font-size:13px; color:#64748b; font-weight:500;">{{ $assign->subject->name ?? '-' }}{{ $assign->teacher ? ' · ' . $assign->teacher->name : '' }}</p>
+                @if($assign->description)
+                <p style="font-size:12px; color:#94a3b8; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $assign->description }}</p>
+                @endif
+            </div>
+            {{-- Action --}}
+            <div style="flex-shrink:0; display:flex; align-items:center; gap:12px;">
+                @if($sub)
+                    <span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:#059669; background:#ecfdf5; border:1.5px solid rgba(5,150,105,0.2); padding:8px 16px; border-radius:12px;">
+                        <i class='bx bx-check'></i> Dikumpulkan
+                    </span>
+                @elseif($late)
+                    <span style="font-size:12px; font-weight:700; color:#ef4444;">Lewat deadline</span>
+                    <button onclick="openModal({{ $assign->id }}, '{{ addslashes($assign->title) }}')" style="background:linear-gradient(135deg,#f87171,#ef4444); color:white; border:none; border-radius:12px; padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(239,68,68,0.3); transition:all 0.2s; font-family:inherit;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">Kumpulkan</button>
+                @else
+                    <span style="font-size:12px; font-weight:600; color:#94a3b8;">{{ $assign->due_date ? $assign->due_date->format('d M, H:i') : '-' }}</span>
+                    <button onclick="openModal({{ $assign->id }}, '{{ addslashes($assign->title) }}')" class="btn-primary" style="padding:10px 20px; font-size:13px;">
+                        <i class='bx bx-upload'></i> Kumpulkan
                     </button>
-                </div>
+                @endif
             </div>
-            @endforeach
         </div>
+        @endforeach
+    </div>
     @else
-        <!-- Empty State -->
-        <div class="glass-card rounded-[24px] p-12 text-center bg-white border border-gray-100 mt-8">
-            <div class="w-24 h-24 bg-green-50 text-green-500 mx-auto rounded-full flex items-center justify-center text-4xl mb-6">
-                🎉
-            </div>
-            <h2 class="font-outfit font-bold text-2xl text-[#2B3674] mb-2">Tidak Ada Tugas Aktif!</h2>
-            <p class="text-[#A3AED0] max-w-md mx-auto">Selamat! Kamu sudah menyelesaikan semua tugas dari guru. Tetap pantau untuk update tugas baru.</p>
-        </div>
+    <div class="glass-card" style="padding:80px; text-align:center; max-width:440px; margin:40px auto;">
+        @if($filter === 'completed')
+        <div style="font-size:48px; margin-bottom:16px; opacity:0.4;">📂</div>
+        <h2 style="font-size:20px; font-weight:800; color:#1e293b; margin-bottom:8px;">Belum Ada Tugas Dikumpulkan</h2>
+        <p style="font-size:14px; color:#94a3b8; line-height:1.6;">Kerjakan tugasmu dari tab "Aktif"</p>
+        @else
+        <div style="font-size:48px; margin-bottom:16px; opacity:0.6;">🎉</div>
+        <h2 style="font-size:20px; font-weight:800; color:#1e293b; margin-bottom:8px;">Semua Tugas Selesai!</h2>
+        <p style="font-size:14px; color:#94a3b8; line-height:1.6;">Tetap pantau update tugas baru dari guru.</p>
+        @endif
+    </div>
     @endif
 </div>
+
+{{-- Modal --}}
+<div id="submit-modal" style="display:none; position:fixed; inset:0; background:rgba(241,245,249,0.7); backdrop-filter:blur(16px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="width:100%; max-width:440px; background:white; border-radius:32px; box-shadow:0 20px 40px rgba(0,0,0,0.08); display:flex; flex-direction:column; max-height:calc(100vh - 40px); overflow:hidden; border:1px solid rgba(226,232,240,0.6);">
+        <div style="padding:24px 32px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+            <h3 style="font-size:20px; font-weight:800; color:#0f172a;">Kumpulkan Tugas</h3>
+            <button onclick="closeModal()" style="width:36px; height:36px; border-radius:12px; background:#f8fafc; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; color:#64748b;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a';" onmouseout="this.style.background='#f8fafc'; this.style.color='#64748b';"><i class='bx bx-x' style="font-size:24px;"></i></button>
+        </div>
+        <form action="{{ route('student.assignment.submit') }}" method="POST" enctype="multipart/form-data" style="padding:0 32px 32px 32px; display:flex; flex-direction:column; gap:24px; overflow-y:auto;">
+            @csrf
+            <input type="hidden" name="assignment_id" id="modal-assign-id">
+            
+            <div style="background:#f8fafc; border-radius:20px; padding:16px 20px;">
+                <p style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:4px;">Tugas yang dipilih:</p>
+                <p style="font-size:15px; font-weight:800; color:#0f172a; line-height:1.4;" id="modal-assign-title"></p>
+            </div>
+            
+            <div>
+                <label style="display:block; font-size:13px; font-weight:700; color:#334155; margin-bottom:10px;">File Tugas</label>
+                <div style="border:2px dashed #cbd5e1; border-radius:24px; padding:32px; text-align:center; cursor:pointer; transition:all 0.2s; background:#f8fafc;" onclick="document.getElementById('file-input').click()" onmouseover="this.style.borderColor='#6366f1'; this.style.background='#eef2ff';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';">
+                    <div style="width:56px; height:56px; background:white; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; box-shadow:0 4px 12px rgba(0,0,0,0.03);"><i class='bx bx-cloud-upload' style="font-size:28px; color:#6366f1;"></i></div>
+                    <p style="font-size:14px; color:#334155; font-weight:700; margin-bottom:4px;" id="file-label">Pilih file untuk diupload</p>
+                    <p style="font-size:12px; color:#94a3b8; font-weight:500;">Max 10MB (PDF, DOC, ZIP, JPG)</p>
+                    <input type="file" id="file-input" name="file" style="display:none;" accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.png" onchange="updateLabel(this)">
+                </div>
+            </div>
+            
+            <div>
+                <label style="display:block; font-size:13px; font-weight:700; color:#334155; margin-bottom:10px;">Catatan Tambahan</label>
+                <textarea name="notes" rows="3" placeholder="Tambahkan pesan untuk guru jika ada..." style="width:100%; background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; padding:16px 20px; font-size:14px; color:#0f172a; outline:none; resize:none; font-family:inherit; transition:all 0.2s;" onfocus="this.style.borderColor='#6366f1'; this.style.background='white'; box-shadow='0 0 0 4px rgba(99,102,241,0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; box-shadow='none';"></textarea>
+            </div>
+            
+            <button type="submit" style="width:100%; background:#0f172a; color:white; border:none; border-radius:20px; padding:18px; font-size:15px; font-weight:800; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(15,23,42,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <i class='bx bx-send' style="font-size:18px;"></i> Kirim Sekarang
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(id, title) { 
+    document.getElementById('modal-assign-id').value = id; 
+    document.getElementById('modal-assign-title').textContent = title; 
+    document.getElementById('file-input').value = ''; 
+    document.getElementById('file-label').textContent = 'Pilih file untuk diupload'; 
+    document.getElementById('submit-modal').style.display = 'flex'; 
+    document.body.style.overflow = 'hidden';
+}
+function closeModal() { 
+    document.getElementById('submit-modal').style.display = 'none'; 
+    document.body.style.overflow = '';
+}
+function updateLabel(input) { 
+    if (input.files[0]) { 
+        document.getElementById('file-label').textContent = input.files[0].name; 
+        document.getElementById('file-label').style.color = '#6366f1';
+    } 
+}
+document.getElementById('submit-modal').addEventListener('click', function(e) { 
+    if (e.target === this) closeModal(); 
+});
+</script>
 @endsection

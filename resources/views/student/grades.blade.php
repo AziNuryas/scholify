@@ -1,83 +1,83 @@
 @extends('layouts.student')
-
-@section('title', 'Rekap Nilai - Schoolify')
+@section('title', 'Nilai & Rapor - Schoolify')
+@section('page_title', 'Nilai & Rapor')
 
 @section('content')
-<div class="space-y-6 max-w-5xl mx-auto">
-    <div class="flex justify-between items-end mb-8">
-        <div>
-            <h1 class="font-outfit font-bold text-3xl text-[#2B3674] mb-2">Rekapitulasi Nilai</h1>
-            <p class="text-[#A3AED0]">Cek pencapaian prestasimu semester ini.</p>
-        </div>
-        <!-- Filter Semester Dropdown (Mockup) -->
-        <select class="bg-white border border-gray-200 text-[#2B3674] font-bold px-4 py-2 rounded-xl outline-none cursor-pointer hover:bg-gray-50 shadow-sm">
-            <option>Semester Ganjil 2026/2027</option>
-            <option>Semester Genap 2025/2026</option>
-        </select>
+<div class="space-y-6">
+    <div style="display:flex; justify-content:flex-end;">
+        <form method="GET" action="{{ route('student.grades') }}">
+            <select name="semester" onchange="this.form.submit()" style="background:rgba(255,255,255,0.8); backdrop-filter:blur(12px); border:1.5px solid rgba(255,255,255,0.9); border-radius:14px; padding:11px 20px; font-size:14px; font-weight:700; color:#1e293b; cursor:pointer; outline:none; box-shadow:0 2px 12px rgba(99,102,241,0.07); font-family:'Plus Jakarta Sans',sans-serif;">
+                @if($availableSemesters->count() > 0)
+                    @foreach($availableSemesters as $sem)
+                        <option value="{{ $sem }}" {{ $semester === $sem ? 'selected' : '' }}>Semester {{ $sem }}</option>
+                    @endforeach
+                @else
+                    <option value="Ganjil" {{ $semester === 'Ganjil' ? 'selected' : '' }}>Semester Ganjil</option>
+                    <option value="Genap" {{ $semester === 'Genap' ? 'selected' : '' }}>Semester Genap</option>
+                @endif
+            </select>
+        </form>
     </div>
 
     @if($grades->count() > 0)
-        <!-- Tabel Nilai -->
-        <div class="glass-card bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50/50 text-[#A3AED0] text-sm uppercase tracking-wider">
-                            <th class="p-5 font-semibold w-12 text-center">#</th>
-                            <th class="p-5 font-semibold">Mata Pelajaran</th>
-                            <th class="p-5 font-semibold">Jenis Tugas/Ujian</th>
-                            <th class="p-5 font-semibold text-center">Nilai Akhir</th>
-                            <th class="p-5 font-semibold text-center">Predikat</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100/60">
-                        @foreach($grades as $idx => $grade)
-                        <tr class="hover:bg-gray-50/50 transition">
-                            <td class="p-5 text-center text-[#A3AED0] font-medium">{{ $idx + 1 }}</td>
-                            <td class="p-5 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-indigo-50 text-[#4318FF] flex items-center justify-center text-lg">
-                                    <i class='bx bx-book'></i>
-                                </div>
-                                <span class="font-bold text-[#2B3674]">{{ $grade->subject_name ?? 'Mata Pelajaran' }}</span>
-                            </td>
-                            <td class="p-5 text-[#A3AED0] font-medium">{{ $grade->type ?? 'Ulangan Harian' }}</td>
-                            <td class="p-5">
-                                <div class="flex items-center justify-center">
-                                    <span class="font-outfit font-black text-xl 
-                                        {{ ($grade->score ?? 0) >= 85 ? 'text-green-500' : (($grade->score ?? 0) >= 70 ? 'text-orange-500' : 'text-red-500') }}">
-                                        {{ $grade->score ?? 0 }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="p-5 text-center">
-                                @php
-                                    $score = $grade->score ?? 0;
-                                    $predikat = $score >= 90 ? 'A' : ($score >= 80 ? 'B' : ($score >= 70 ? 'C' : 'D'));
-                                    $color = $score >= 90 ? 'bg-green-100 text-green-700' : ($score >= 80 ? 'bg-blue-100 text-blue-700' : ($score >= 70 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'));
-                                @endphp
-                                <span class="px-3 py-1 rounded-md text-sm font-bold shadow-sm inline-block w-10 {{ $color }}">
-                                    {{ $predikat }}
-                                </span>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <!-- Pagination / Footer Info -->
-            <div class="px-6 py-4 border-t border-gray-100 text-sm text-[#A3AED0] font-medium">
-                Sistem Penilaian Kurikulum Merdeka (KKM: 75)
+    <div class="glass-card" style="overflow:hidden;">
+        <table class="premium-table">
+            <thead>
+                <tr>
+                    <th style="text-align:center; width:56px;">#</th>
+                    <th>Mata Pelajaran</th>
+                    <th>Jenis Ujian</th>
+                    <th style="text-align:center;">Nilai</th>
+                    <th style="text-align:center;">Predikat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($grades as $i => $grade)
+                @php
+                    $s = $grade->score ?? 0;
+                    $pred = $s >= 90 ? 'A' : ($s >= 80 ? 'B' : ($s >= 70 ? 'C' : 'D'));
+                    $scoreColor = $s >= 85 ? '#059669' : ($s >= 70 ? '#d97706' : '#ef4444');
+                    $badgeBg = $s >= 90 ? '#d1fae5' : ($s >= 80 ? '#dbeafe' : ($s >= 70 ? '#fef3c7' : '#ffe4e6'));
+                    $badgeColor = $s >= 90 ? '#065f46' : ($s >= 80 ? '#1e40af' : ($s >= 70 ? '#92400e' : '#9f1239'));
+                @endphp
+                <tr>
+                    <td style="text-align:center; color:#94a3b8; font-weight:600; font-size:13px;">{{ $i + 1 }}</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:40px; height:40px; border-radius:13px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class='bx bx-book-alt' style="font-size:18px; color:#6366f1;"></i>
+                            </div>
+                            <span style="font-weight:700; color:#1e293b; font-size:15px;">{{ $grade->subject->name ?? '-' }}</span>
+                        </div>
+                    </td>
+                    <td style="color:#64748b; font-weight:500; font-size:14px;">{{ $grade->type ?? '-' }}</td>
+                    <td style="text-align:center;">
+                        <span style="font-size:24px; font-weight:900; color:{{ $scoreColor }};">{{ $s }}</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span style="display:inline-block; padding:6px 16px; border-radius:99px; background:{{ $badgeBg }}; color:{{ $badgeColor }}; font-size:13px; font-weight:800;">{{ $pred }}</span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        {{-- Footer --}}
+        <div style="padding:16px 28px; border-top:1px solid rgba(226,232,240,0.5); display:flex; justify-content:space-between; align-items:center; background:rgba(248,250,252,0.5);">
+            <span style="font-size:13px; color:#94a3b8; font-weight:600;">KKM: <strong style="color:#1e293b;">75</strong></span>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:13px; color:#94a3b8; font-weight:600;">Rata-rata Kelas</span>
+                <span style="font-size:26px; font-weight:900; color:{{ $averageScore >= 75 ? '#059669' : '#ef4444' }};">{{ $averageScore }}</span>
             </div>
         </div>
+    </div>
     @else
-        <!-- Empty State -->
-        <div class="glass-card rounded-[24px] p-12 text-center bg-white border border-gray-100 mt-8">
-            <div class="w-24 h-24 bg-indigo-50 text-indigo-500 mx-auto rounded-full flex items-center justify-center text-4xl mb-6">
-                📝
-            </div>
-            <h2 class="font-outfit font-bold text-2xl text-[#2B3674] mb-2">Belum Ada Riwayat Nilai</h2>
-            <p class="text-[#A3AED0] max-w-md mx-auto">Nilai ulangan kamu belum diinput atau masa ujian belum berlangsung.</p>
+    <div class="glass-card" style="padding:80px; text-align:center; max-width:440px; margin:40px auto;">
+        <div style="width:80px; height:80px; background:rgba(99,102,241,0.1); border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:36px; color:#6366f1;">
+            <i class='bx bx-bar-chart-alt-2'></i>
         </div>
+        <h2 style="font-size:22px; font-weight:800; color:#1e293b; margin-bottom:8px;">Belum Ada Nilai</h2>
+        <p style="font-size:15px; color:#94a3b8; line-height:1.6;">Nilai untuk semester <strong style="color:#1e293b;">{{ $semester }}</strong> belum diinput oleh guru.</p>
+    </div>
     @endif
 </div>
 @endsection

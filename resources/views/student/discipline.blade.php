@@ -1,60 +1,55 @@
 @extends('layouts.student')
-
-@section('title', 'Catatan Disiplin - Schoolify')
+@section('title', 'Kedisiplinan - Schoolify')
+@section('page_title', 'Kedisiplinan')
 
 @section('content')
-<div class="max-w-5xl mx-auto space-y-6">
-    <div class="mb-4">
-        <h1 class="font-outfit font-bold text-3xl text-[#2B3674] mb-2">Catatan Kedisiplinan</h1>
-        <p class="text-[#A3AED0]">Lihat riwayat pelanggaran dan poin kedisiplinan kamu selama di sekolah.</p>
-    </div>
-
-    <!-- Poin Keseluruhan -->
-    <div class="bg-gradient-to-r from-red-500 to-rose-600 rounded-3xl p-8 text-white flex items-center justify-between shadow-lg shadow-red-200">
-        <div>
-            <p class="text-rose-100 font-medium mb-1">Total Poin Pelanggaran Kamu</p>
-            <h2 class="font-outfit font-extrabold text-5xl">{{ $records->sum('points') }} <span class="text-xl font-medium">poin</span></h2>
+<div class="space-y-6">
+    @php $total = $records->sum('points'); @endphp
+    
+    {{-- Summary --}}
+    <div style="border-radius:28px; padding:36px 44px; display:flex; align-items:center; justify-content:space-between; position:relative; overflow:hidden; background:{{ $total > 0 ? 'linear-gradient(135deg,#f43f5e,#ef4444,#dc2626)' : 'linear-gradient(135deg,#10b981,#059669,#047857)' }}; box-shadow:{{ $total > 0 ? '0 16px 48px rgba(244,63,94,0.35)' : '0 16px 48px rgba(16,185,129,0.3)' }};">
+        <div style="position:absolute; right:-30px; bottom:-30px; width:160px; height:160px; background:rgba(255,255,255,0.08); border-radius:50%; filter:blur(2px);"></div>
+        <div class="relative" style="z-index:1;">
+            <p style="color:rgba(255,255,255,0.7); font-size:15px; font-weight:600; margin-bottom:6px;">Total Poin Pelanggaran</p>
+            <h2 style="font-size:52px; font-weight:900; color:white; line-height:1; margin-bottom:0;">{{ $total }} <span style="font-size:20px; font-weight:600; opacity:0.7;">poin</span></h2>
         </div>
-        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur text-3xl">
-            <i class='bx bx-pie-chart-alt-2'></i>
+        <div style="width:72px; height:72px; background:rgba(255,255,255,0.15); border-radius:22px; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2); position:relative; z-index:1;">
+            <i class='bx {{ $total > 0 ? "bx-shield-x" : "bx-shield" }}' style="font-size:32px; color:white;"></i>
         </div>
     </div>
 
-    <div class="glass-card bg-white rounded-3xl border border-indigo-50 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/50 border-b border-gray-100 text-xs uppercase text-[#A3AED0] font-bold tracking-wider">
-                        <th class="px-6 py-4">Tanggal</th>
-                        <th class="px-6 py-4">Pelanggaran</th>
-                        <th class="px-6 py-4">Keterangan</th>
-                        <th class="px-6 py-4 text-center">Poin</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm">
-                    @forelse($records as $record)
-                    <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition">
-                        <td class="px-6 py-4 font-medium text-[#2B3674]">{{ \Carbon\Carbon::parse($record->date)->format('d M Y') }}</td>
-                        <td class="px-6 py-4 font-bold text-[#2B3674]">{{ $record->violation_type }}</td>
-                        <td class="px-6 py-4 text-[#A3AED0]">{{ $record->description }}</td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="px-3 py-1 bg-red-100 text-red-600 rounded-lg font-bold">+{{ $record->points }}</span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-6 py-12 text-center">
-                            <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">
-                                <i class='bx bx-check-shield'></i>
-                            </div>
-                            <p class="font-bold text-[#2B3674]">Bagus! Tidak ada catatan pelanggaran.</p>
-                            <p class="text-sm text-[#A3AED0] mt-1">Pertahankan terus kedisiplinanmu ya!</p>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+    {{-- Table --}}
+    <div class="glass-card" style="overflow:hidden;">
+        <table class="premium-table">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Pelanggaran</th>
+                    <th>Keterangan</th>
+                    <th style="text-align:center;">Poin</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($records as $rec)
+                <tr>
+                    <td style="font-weight:600; color:#1e293b; white-space:nowrap;">{{ \Carbon\Carbon::parse($rec->date)->format('d M Y') }}</td>
+                    <td style="font-weight:700; color:#1e293b;">{{ $rec->violation_type }}</td>
+                    <td style="color:#64748b; font-weight:500;">{{ $rec->description }}</td>
+                    <td style="text-align:center;">
+                        <span style="display:inline-block; padding:5px 14px; border-radius:99px; background:#ffe4e6; color:#9f1239; font-size:13px; font-weight:800;">+{{ $rec->points }}</span>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:80px;">
+                        <div style="font-size:52px; margin-bottom:16px; opacity:0.4;">🏆</div>
+                        <h3 style="font-size:18px; font-weight:800; color:#1e293b; margin-bottom:6px;">Tidak ada catatan pelanggaran</h3>
+                        <p style="font-size:14px; color:#94a3b8;">Pertahankan kedisiplinanmu!</p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 @endsection

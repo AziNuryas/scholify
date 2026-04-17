@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Auto-inject data student (nama, kelas, avatar, unread) ke semua view student
+        View::composer('layouts.student', \App\View\Composers\StudentDataComposer::class);
     }
 }

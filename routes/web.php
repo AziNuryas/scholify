@@ -42,26 +42,24 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
     Route::get('/assignments', [StudentMenuController::class, 'assignments'])
         ->name('student.assignments');
 
+    Route::post('/assignments/submit', [StudentMenuController::class, 'submitAssignment'])
+        ->name('student.assignment.submit');
+
     Route::get('/grades', [StudentMenuController::class, 'grades'])
         ->name('student.grades');
 
+    // Layanan BK — Info BK + Ajukan Jadwal Temu (tanpa chat)
     Route::get('/counseling', [StudentMenuController::class, 'counseling'])
         ->name('student.counseling');
 
-    Route::post('/counseling', [StudentMenuController::class, 'sendCounselingMessage'])
-        ->name('student.counseling.send');
+    Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])
+        ->name('student.appointment.store');
 
     Route::get('/profile', [StudentMenuController::class, 'profile'])
         ->name('student.profile');
 
     Route::post('/profile', [StudentMenuController::class, 'updateProfile'])
         ->name('student.profile.update');
-
-    Route::get('/appointments', [StudentMenuController::class, 'appointments'])
-        ->name('student.appointments');
-
-    Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])
-        ->name('student.appointment.store');
 
     Route::get('/discipline', [StudentMenuController::class, 'discipline'])
         ->name('student.discipline');
