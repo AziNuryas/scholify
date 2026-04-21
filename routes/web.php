@@ -8,16 +8,19 @@ use App\Http\Controllers\GuruBkController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AssignmentController;
 
 /*
 |--------------------------------------------------------------------------
 | AUTH
 |--------------------------------------------------------------------------
 */
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/login', [AuthController::class, 'showLogin']);
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/', 'showLogin')->name('login');
+    Route::get('/login', 'showLogin');
+    Route::post('/login', 'login')->name('login.post');
+    Route::post('/logout', 'logout')->name('logout');
+});
 
 Route::middleware('auth')->get('/dashboard', [AuthController::class, 'dashboard'])
     ->name('dashboard');
@@ -30,24 +33,29 @@ Route::middleware('auth')->get('/dashboard', [AuthController::class, 'dashboard'
 */
 Route::middleware('auth')->prefix('student')->name('student.')->group(function () {
 
-    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::controller(StudentDashboardController::class)->group(function () {
+        Route::get('/dashboard', 'index')->name('dashboard');
+    });
 
-    Route::get('/schedule', [StudentMenuController::class, 'schedule'])->name('schedule');
-    Route::get('/assignments', [StudentMenuController::class, 'assignments'])->name('assignments');
-    Route::get('/grades', [StudentMenuController::class, 'grades'])->name('grades');
+    Route::controller(StudentMenuController::class)->group(function () {
+        Route::get('/schedule', 'schedule')->name('schedule');
+        Route::get('/assignments', 'assignments')->name('assignments');
+        Route::post('/assignments/submit', 'submitAssignment')->name('assignments.submit'); // ✅ TAMBAHKAN INI
+        Route::get('/grades', 'grades')->name('grades');
 
-    Route::get('/counseling', [StudentMenuController::class, 'counseling'])->name('counseling');
-    Route::post('/counseling', [StudentMenuController::class, 'sendCounselingMessage'])->name('counseling.send');
+        Route::get('/counseling', 'counseling')->name('counseling');
+        Route::post('/counseling', 'sendCounselingMessage')->name('counseling.send');
 
-    Route::get('/profile', [StudentMenuController::class, 'profile'])->name('profile');
-    Route::post('/profile', [StudentMenuController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/profile', 'profile')->name('profile');
+        Route::post('/profile', 'updateProfile')->name('profile.update');
 
-    Route::get('/appointments', [StudentMenuController::class, 'appointments'])->name('appointments');
-    Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])->name('appointments.store');
+        Route::get('/appointments', 'appointments')->name('appointments');
+        Route::post('/appointments', 'storeAppointment')->name('appointments.store');
 
-    Route::get('/discipline', [StudentMenuController::class, 'discipline'])->name('discipline');
+        Route::get('/discipline', 'discipline')->name('discipline');
+    });
 
-    // ✅ Pengumuman siswa
+    // Pengumuman siswa
     Route::get('/announcements', [AnnouncementController::class, 'studentIndex'])
         ->name('announcements');
 });
@@ -60,19 +68,21 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
 */
 Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function () {
 
-    Route::get('/dashboard', [GuruBkController::class, 'index'])->name('dashboard');
+    Route::controller(GuruBkController::class)->group(function () {
+        Route::get('/dashboard', 'index')->name('dashboard');
 
-    Route::get('/chats', [GuruBkController::class, 'chats'])->name('chats');
-    Route::post('/chats/reply', [GuruBkController::class, 'reply'])->name('reply');
+        Route::get('/chats', 'chats')->name('chats');
+        Route::post('/chats/reply', 'reply')->name('reply');
 
-    Route::get('/profile', [GuruBkController::class, 'profile'])->name('profile');
-    Route::post('/profile', [GuruBkController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/profile', 'profile')->name('profile');
+        Route::post('/profile', 'updateProfile')->name('profile.update');
 
-    Route::get('/appointments', [GuruBkController::class, 'appointments'])->name('appointments');
-    Route::post('/appointments/{id}/status', [GuruBkController::class, 'updateAppointmentStatus'])->name('appointments.status');
+        Route::get('/appointments', 'appointments')->name('appointments');
+        Route::post('/appointments/{id}/status', 'updateAppointmentStatus')->name('appointments.status');
 
-    Route::get('/discipline', [GuruBkController::class, 'discipline'])->name('discipline');
-    Route::post('/discipline', [GuruBkController::class, 'storeDiscipline'])->name('discipline.store');
+        Route::get('/discipline', 'discipline')->name('discipline');
+        Route::post('/discipline', 'storeDiscipline')->name('discipline.store');
+    });
 });
 
 
@@ -83,34 +93,48 @@ Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function ()
 */
 Route::middleware('auth')->prefix('guru')->name('guru.')->group(function () {
 
-    Route::get('/dashboard', fn() => view('guru.dashboard'))->name('dashboard');
-    Route::get('/jadwal', fn() => view('guru.jadwal'))->name('jadwal');
-    Route::get('/absensi', fn() => view('guru.absensi'))->name('absensi');
-
-    Route::get('/nilai', [GradeController::class, 'index'])->name('nilai');
-    Route::post('/nilai', [GradeController::class, 'store'])->name('nilai.store');
-
-    Route::get('/raport', fn() => view('guru.raport'))->name('raport');
-    Route::get('/tugas', fn() => view('guru.tugas'))->name('tugas');
-    Route::get('/profil', fn() => view('guru.profil'))->name('profil');
+    /*
+    |----------------------------------
+    | Dashboard & Static Pages
+    |----------------------------------
+    */
+    Route::view('/dashboard', 'guru.dashboard')->name('dashboard');
+    Route::view('/jadwal', 'guru.jadwal')->name('jadwal');
+    Route::view('/absensi', 'guru.absensi')->name('absensi');
+    Route::view('/raport', 'guru.raport')->name('raport');
+    Route::view('/profil', 'guru.profil')->name('profil');
 
     /*
-    |--------------------------------------------------------------------------
-    | ✅ PENGUMUMAN (FIX FINAL)
-    |--------------------------------------------------------------------------
+    |----------------------------------
+    | NILAI
+    |----------------------------------
     */
+    Route::controller(GradeController::class)->group(function () {
+        Route::get('/nilai', 'index')->name('nilai');
+        Route::post('/nilai', 'store')->name('nilai.store');
+    });
 
-    // halaman
-    Route::get('/pengumuman', [AnnouncementController::class, 'guruIndex'])
-        ->name('pengumuman');
+    /*
+    |----------------------------------
+    | TUGAS (CORE FEATURE 🔥)
+    |----------------------------------
+    */
+    Route::controller(AssignmentController::class)->group(function () {
+        Route::get('/tugas', 'index')->name('tugas');
+        Route::post('/tugas', 'store')->name('tugas.store');
+        Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
+    });
 
-    // simpan
-    Route::post('/pengumuman', [AnnouncementController::class, 'store'])
-        ->name('pengumuman.store');
-
-    // hapus
-    Route::delete('/pengumuman/{id}', [AnnouncementController::class, 'destroy'])
-        ->name('pengumuman.destroy');
+    /*
+    |----------------------------------
+    | PENGUMUMAN
+    |----------------------------------
+    */
+    Route::controller(AnnouncementController::class)->group(function () {
+        Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
+        Route::post('/pengumuman', 'store')->name('pengumuman.store');
+        Route::delete('/pengumuman/{id}', 'destroy')->name('pengumuman.destroy');
+    });
 });
 
 
