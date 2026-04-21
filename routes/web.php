@@ -9,6 +9,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\AppointmentController; // ✅ TAMBAHKAN INI
 
 /*
 |--------------------------------------------------------------------------
@@ -40,7 +41,7 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
     Route::controller(StudentMenuController::class)->group(function () {
         Route::get('/schedule', 'schedule')->name('schedule');
         Route::get('/assignments', 'assignments')->name('assignments');
-        Route::post('/assignments/submit', 'submitAssignment')->name('assignments.submit'); // ✅ TAMBAHKAN INI
+        Route::post('/assignments/submit', 'submitAssignment')->name('assignments.submit');
         Route::get('/grades', 'grades')->name('grades');
 
         Route::get('/counseling', 'counseling')->name('counseling');
@@ -54,6 +55,10 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
 
         Route::get('/discipline', 'discipline')->name('discipline');
     });
+
+    // ✅ TAMBAHKAN ROUTE APPOINTMENT INI
+    Route::post('/appointment/store', [AppointmentController::class, 'store'])
+        ->name('appointment.store');
 
     // Pengumuman siswa
     Route::get('/announcements', [AnnouncementController::class, 'studentIndex'])
@@ -93,43 +98,24 @@ Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function ()
 */
 Route::middleware('auth')->prefix('guru')->name('guru.')->group(function () {
 
-    /*
-    |----------------------------------
-    | Dashboard & Static Pages
-    |----------------------------------
-    */
     Route::view('/dashboard', 'guru.dashboard')->name('dashboard');
     Route::view('/jadwal', 'guru.jadwal')->name('jadwal');
     Route::view('/absensi', 'guru.absensi')->name('absensi');
     Route::view('/raport', 'guru.raport')->name('raport');
     Route::view('/profil', 'guru.profil')->name('profil');
 
-    /*
-    |----------------------------------
-    | NILAI
-    |----------------------------------
-    */
     Route::controller(GradeController::class)->group(function () {
         Route::get('/nilai', 'index')->name('nilai');
         Route::post('/nilai', 'store')->name('nilai.store');
     });
 
-    /*
-    |----------------------------------
-    | TUGAS (CORE FEATURE 🔥)
-    |----------------------------------
-    */
     Route::controller(AssignmentController::class)->group(function () {
         Route::get('/tugas', 'index')->name('tugas');
         Route::post('/tugas', 'store')->name('tugas.store');
+        Route::put('/tugas/{id}', 'update')->name('tugas.update');
         Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
     });
 
-    /*
-    |----------------------------------
-    | PENGUMUMAN
-    |----------------------------------
-    */
     Route::controller(AnnouncementController::class)->group(function () {
         Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
         Route::post('/pengumuman', 'store')->name('pengumuman.store');

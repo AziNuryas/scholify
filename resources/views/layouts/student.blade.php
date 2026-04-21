@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome 6 (Lebih reliable) -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -75,76 +75,96 @@
             align-items: center;
             justify-content: center;
         }
+        
+        /* Sidebar Active State */
+        .sidebar-active {
+            background: #4318FF;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 16px -4px rgba(67, 24, 255, 0.15);
+        }
+        
+        /* Logo image style */
+        .logo-image {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body class="antialiased flex h-screen overflow-hidden">
 
+    <!-- Sidebar dengan Logo Scholify -->
     <aside class="w-[290px] bg-white h-full flex flex-col transition-all duration-300 z-20 border-r border-[#E0E5F2]">
-        <div class="h-24 flex-none flex items-center px-8">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4318FF] to-[#868CFF] flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">
-                    S
+        <!-- Logo Scholify - Ukuran Normal -->
+        <div class="h-28 flex-none flex items-center px-6 border-b border-[#F4F7FE]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-indigo-200 bg-gradient-to-br from-[#4318FF] to-[#868CFF] flex items-center justify-center">
+                    <img src="{{ asset('images/scholify-logo.png') }}" 
+                         alt="Scholify Logo" 
+                         class="w-full h-full object-cover">
                 </div>
-                <span class="font-outfit font-extrabold text-2xl tracking-tight text-[#2B3674]">Schoolify<span class="text-[#4318FF]">.</span></span>
+                <div class="flex flex-col">
+                    <span class="font-outfit font-extrabold text-2xl tracking-tight text-[#2B3674] leading-tight">Scholify</span>
+                    <span class="text-xs font-semibold text-[#A3AED0] tracking-wide mt-0.5">BELAJAR · TERHUBUNG · BERKEMBANG</span>
+                </div>
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-4">
-            <nav class="space-y-1.5 mt-4 font-outfit">
+        <div class="flex-1 overflow-y-auto px-4 py-4">
+            <nav class="space-y-1.5 font-outfit">
+                <!-- MENU UTAMA -->
                 <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Menu Utama</p>
                 
-                <a href="{{ route('student.dashboard') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.dashboard') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.dashboard') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.dashboard') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i class="fas fa-tachometer-alt text-xl nav-icon"></i>
                     <span>Dashboard</span>
                 </a>
                 
-                <a href="{{ route('student.schedule') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.schedule') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.schedule') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.schedule') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i class="fas fa-calendar-alt text-xl nav-icon"></i>
                     <span>Jadwal Kelas</span>
                 </a>
                 
-                <a href="{{ route('student.assignments') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.assignments') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
-                    <i class="fas fa-book-open text-xl nav-icon"></i>
-                    <span>Tugas Mandiri</span>
+                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium">
+                    <i class="fas fa-user-check text-xl nav-icon"></i>
+                    <span>Absensi</span>
                 </a>
-
-                <div class="my-6 border-t border-[#F4F7FE] mx-4"></div>
-                <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Layanan</p>
                 
-                <a href="{{ route('student.grades') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.grades') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.grades') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.grades') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i class="fas fa-chart-line text-xl nav-icon"></i>
-                    <span>E-Rapor & Nilai</span>
+                    <span>Nilai & Rapor</span>
                 </a>
                 
-                <a href="{{ route('student.counseling') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.counseling') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
-                    <i class="fas fa-headset text-xl nav-icon"></i>
-                    <span>Konsultasi BK</span>
-                    @php $unread = 2; @endphp
-                    @if($unread > 0)
-                    <span class="absolute right-4 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ring-4 ring-white">{{ $unread }}</span>
-                    @endif
+                <a href="{{ route('student.assignments') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.assignments') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
+                    <i class="fas fa-book-open text-xl nav-icon"></i>
+                    <span>Tugas</span>
                 </a>
 
-                <a href="{{ route('student.discipline') }}" class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('student.discipline') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class="fas fa-exclamation-triangle text-xl nav-icon"></i>
-                    <span>Poin Disiplin</span>
-                </a>
-
-                <!-- Menu Pengumuman (FIX) -->
+                <!-- Pengumuman -->
                 <a href="{{ route('student.announcements') }}" 
-                class="nav-link flex items-center gap-3 px-4 py-3.5 rounded-xl 
-                {{ request()->routeIs('student.announcements') ? 'bg-[#4318FF] text-white font-semibold shadow-xl shadow-indigo-100 active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl 
+                   {{ request()->routeIs('student.announcements') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i class="fas fa-bullhorn text-xl nav-icon"></i>
                     <span>Pengumuman</span>
+                </a>
+
+                <!-- LAINNYA -->
+                <div class="my-6 border-t border-[#F4F7FE] mx-4"></div>
+                <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Lainnya</p>
+                
+                <a href="{{ route('student.profile') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.profile') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i class="fas fa-user-circle text-xl nav-icon"></i>
+                    <span>Profil Saya</span>
                 </a>
             </nav>
         </div>
 
+        <!-- Tombol Logout -->
         <div class="p-6 flex-none border-t border-[#F4F7FE]">
             <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                 @csrf
-                <button type="submit" class="flex items-center justify-center gap-2 w-full text-[#A3AED0] hover:text-red-500 font-semibold py-2 transition-colors">
+                <button type="submit" class="flex items-center justify-center gap-2 w-full text-[#A3AED0] hover:text-red-500 font-semibold py-2.5 transition-colors">
                     <i class="fas fa-sign-out-alt text-xl"></i>
                     <span>Keluar dari Akun</span>
                 </button>
@@ -234,6 +254,7 @@
         </div>
     </main>
 
+    <!-- Popup Notification -->
     <div x-data="{ 
             showPopup: false,
             init() {
@@ -286,5 +307,23 @@
         </div>
     </div>
 
+    <script>
+        // Konfirmasi logout dengan custom dialog
+        document.querySelectorAll('form[action*="logout"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const confirmed = confirm('⚠️ Apakah Anda yakin ingin keluar?\n\nSemua sesi akan berakhir dan Anda perlu login kembali.');
+                
+                if(confirmed) {
+                    const btn = this.querySelector('button');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+                    btn.disabled = true;
+                    this.submit();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
