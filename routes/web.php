@@ -2,119 +2,150 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentMenuController;
 use App\Http\Controllers\GuruBkController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GradeController;
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AssignmentController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes - School Management System (Schoolify)
+| AUTH
 |--------------------------------------------------------------------------
 */
-
-// --- AUTHENTICATION ---
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/login', [AuthController::class, 'showLogin']);
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Dashboard Utama (Auto-redirect based on role)
-Route::get('/dashboard', [AuthController::class, 'dashboard'])
-    ->name('dashboard')
-    ->middleware('auth');
-
-/*
-|--------------------------------------------------------------------------
-| STUDENT AREA (AREA SISWA)
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth'])->prefix('student')->group(function () {
-    
-    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
-    Route::get('/schedule', [StudentMenuController::class, 'schedule'])->name('student.schedule');
-    Route::get('/assignments', [StudentMenuController::class, 'assignments'])->name('student.assignments');
-    Route::post('/assignments/submit', [StudentMenuController::class, 'submitAssignment'])->name('student.assignment.submit');
-    Route::get('/grades', [StudentMenuController::class, 'grades'])->name('student.grades');
-
-    // Menu Konsultasi & Chat (Siswa)
-    Route::get('/counseling', [StudentMenuController::class, 'counseling'])->name('student.counseling');
-    Route::post('/counseling', [StudentMenuController::class, 'sendCounselingMessage'])->name('student.counseling.send');
-
-    // Profil
-    Route::get('/profile', [StudentMenuController::class, 'profile'])->name('student.profile');
-    Route::post('/profile', [StudentMenuController::class, 'updateProfile'])->name('student.profile.update');
-
-    // Janji Temu BK
-    Route::get('/appointments', [StudentMenuController::class, 'appointments'])->name('student.appointments');
-    Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])->name('student.appointment.store');
-
-    // Kedisiplinan & Pengumuman
-    Route::get('/discipline', [StudentMenuController::class, 'discipline'])->name('student.discipline');
-    Route::get('/announcements', [StudentMenuController::class, 'announcements'])->name('student.announcements');
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/', 'showLogin')->name('login');
+    Route::get('/login', 'showLogin');
+    Route::post('/login', 'login')->name('login.post');
+    Route::post('/logout', 'logout')->name('logout');
 });
 
+Route::middleware('auth')->get('/dashboard', [AuthController::class, 'dashboard'])
+    ->name('dashboard');
+
+
 /*
 |--------------------------------------------------------------------------
-| GURU BK AREA
+| STUDENT
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('guru-bk')->group(function () {
+Route::middleware('auth')->prefix('student')->name('student.')->group(function () {
 
-    Route::get('/dashboard', [GuruBkController::class, 'index'])->name('gurubk.dashboard');
-    
-    // Chat & Konsultasi
-    Route::get('/chats', [GuruBkController::class, 'chats'])->name('gurubk.chats');
-    Route::post('/chats/reply', [GuruBkController::class, 'reply'])->name('gurubk.reply');
+    Route::controller(StudentDashboardController::class)->group(function () {
+        Route::get('/dashboard', 'index')->name('dashboard');
+    });
 
-    // Profil Guru BK
-    Route::get('/profile', [GuruBkController::class, 'profile'])->name('gurubk.profile');
-    Route::post('/profile', [GuruBkController::class, 'updateProfile'])->name('gurubk.profile.update');
+    Route::controller(StudentMenuController::class)->group(function () {
+        Route::get('/schedule', 'schedule')->name('schedule');
+        Route::get('/assignments', 'assignments')->name('assignments');
+        Route::post('/assignments/submit', 'submitAssignment')->name('assignments.submit'); // ✅ TAMBAHKAN INI
+        Route::get('/grades', 'grades')->name('grades');
 
-    // Janji Temu
-    Route::get('/appointments', [GuruBkController::class, 'appointments'])->name('gurubk.appointments');
-    Route::post('/appointments/{id}/status', [GuruBkController::class, 'updateAppointmentStatus'])->name('gurubk.appointment.status');
+        Route::get('/counseling', 'counseling')->name('counseling');
+        Route::post('/counseling', 'sendCounselingMessage')->name('counseling.send');
 
-    // Kedisiplinan
-    Route::get('/discipline', [GuruBkController::class, 'discipline'])->name('gurubk.discipline');
-    Route::post('/discipline', [GuruBkController::class, 'storeDiscipline'])->name('gurubk.discipline.store');
+        Route::get('/profile', 'profile')->name('profile');
+        Route::post('/profile', 'updateProfile')->name('profile.update');
+
+        Route::get('/appointments', 'appointments')->name('appointments');
+        Route::post('/appointments', 'storeAppointment')->name('appointments.store');
+
+        Route::get('/discipline', 'discipline')->name('discipline');
+    });
+
+    // Pengumuman siswa
+    Route::get('/announcements', [AnnouncementController::class, 'studentIndex'])
+        ->name('announcements');
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| GURU MATA PELAJARAN AREA
+| GURU BK
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
+Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function () {
 
-    Route::get('/dashboard', fn() => view('guru.dashboard'))->name('dashboard');
-    Route::get('/jadwal', fn() => view('guru.jadwal'))->name('jadwal');
-    Route::get('/absensi', fn() => view('guru.absensi'))->name('absensi');
+    Route::controller(GuruBkController::class)->group(function () {
+        Route::get('/dashboard', 'index')->name('dashboard');
 
-    // Nilai & Raport
-    Route::get('/nilai', [GradeController::class, 'index'])->name('nilai');
-    Route::post('/nilai', [GradeController::class, 'store'])->name('nilai.store');
-    Route::get('/raport', fn() => view('guru.raport'))->name('raport');
+        Route::get('/chats', 'chats')->name('chats');
+        Route::post('/chats/reply', 'reply')->name('reply');
 
-    // Materi & Tugas
-    Route::get('/tugas', fn() => view('guru.tugas'))->name('tugas');
-    Route::get('/profil', fn() => view('guru.profil'))->name('profil');
+        Route::get('/profile', 'profile')->name('profile');
+        Route::post('/profile', 'updateProfile')->name('profile.update');
 
-    // --- BAGIAN PENGUMUMAN (FIX UNTUK ERROR 500) ---
-    Route::get('/pengumuman', fn() => view('guru.pengumuman'))->name('pengumuman');
-    // Rute ini menangani action="{{ route('guru.announcement.store') }}"
-    Route::post('/pengumuman', [StudentMenuController::class, 'storeAnnouncement'])->name('announcement.store');
+        Route::get('/appointments', 'appointments')->name('appointments');
+        Route::post('/appointments/{id}/status', 'updateAppointmentStatus')->name('appointments.status');
+
+        Route::get('/discipline', 'discipline')->name('discipline');
+        Route::post('/discipline', 'storeDiscipline')->name('discipline.store');
+    });
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| SHARED CHAT API
+| GURU MAPEL
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('api/chat')->group(function () {
-    Route::get('/fetch/{partnerId}', [ChatController::class, 'fetch'])->name('chat.fetch');
-    Route::post('/send', [ChatController::class, 'send'])->name('chat.send');
-    Route::get('/unread', [ChatController::class, 'unreadCount'])->name('chat.unread');
+Route::middleware('auth')->prefix('guru')->name('guru.')->group(function () {
+
+    /*
+    |----------------------------------
+    | Dashboard & Static Pages
+    |----------------------------------
+    */
+    Route::view('/dashboard', 'guru.dashboard')->name('dashboard');
+    Route::view('/jadwal', 'guru.jadwal')->name('jadwal');
+    Route::view('/absensi', 'guru.absensi')->name('absensi');
+    Route::view('/raport', 'guru.raport')->name('raport');
+    Route::view('/profil', 'guru.profil')->name('profil');
+
+    /*
+    |----------------------------------
+    | NILAI
+    |----------------------------------
+    */
+    Route::controller(GradeController::class)->group(function () {
+        Route::get('/nilai', 'index')->name('nilai');
+        Route::post('/nilai', 'store')->name('nilai.store');
+    });
+
+    /*
+    |----------------------------------
+    | TUGAS (CORE FEATURE 🔥)
+    |----------------------------------
+    */
+    Route::controller(AssignmentController::class)->group(function () {
+        Route::get('/tugas', 'index')->name('tugas');
+        Route::post('/tugas', 'store')->name('tugas.store');
+        Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
+    });
+
+    /*
+    |----------------------------------
+    | PENGUMUMAN
+    |----------------------------------
+    */
+    Route::controller(AnnouncementController::class)->group(function () {
+        Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
+        Route::post('/pengumuman', 'store')->name('pengumuman.store');
+        Route::delete('/pengumuman/{id}', 'destroy')->name('pengumuman.destroy');
+    });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| CHAT API
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->prefix('api/chat')->name('chat.')->group(function () {
+
+    Route::get('/fetch/{partnerId}', [ChatController::class, 'fetch'])->name('fetch');
+    Route::post('/send', [ChatController::class, 'send'])->name('send');
+    Route::get('/unread', [ChatController::class, 'unreadCount'])->name('unread');
 });

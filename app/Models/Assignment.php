@@ -6,20 +6,30 @@ use Illuminate\Database\Eloquent\Model;
 
 class Assignment extends Model
 {
-    protected $table = 'assignments';
-    protected $guarded = [];
-
-    protected $casts = [
-        'due_date' => 'datetime'
+    protected $fillable = [
+        'teacher_id',
+        'class_id',
+        'subject_id',
+        'title',
+        'description',
+        'file',
+        'type',
+        'due_date'
     ];
+
+    // RELASI
+    public function class()
+    {
+        return $this->belongsTo(\App\Models\SchoolClass::class, 'class_id');
+    }
 
     public function subject()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsTo(\App\Models\Subject::class, 'subject_id');
     }
 
-    public function submissions()
+    public function teacher()
     {
-        return $this->hasMany(Submission::class);
+        return $this->belongsTo(\App\Models\User::class, 'teacher_id');
     }
 }
