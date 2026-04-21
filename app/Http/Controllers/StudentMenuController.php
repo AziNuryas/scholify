@@ -56,24 +56,81 @@ class StudentMenuController extends Controller
         return view('student.schedule', compact('student', 'schedulesGrouped'));
     }
 
-    public function assignments()
+    public function assignments(Request $request)
     {
         $studentData = $this->getStudent();
         $student = $this->formatStudent($studentData);
         $classId = $studentData->class_id ?? null;
-
+        $studentId = $studentData->id ?? null;
+        
+        $filter = $request->query('filter', 'active');
         $assignments = collect([]);
 
-        if ($classId) {
+        if ($classId && $studentId) {
             try {
-                $assignments = Assignment::with('subject')
-                    ->where('class_id', $classId)
-                    ->orderBy('due_date')
-                    ->get();
+                $submittedIds = DB::table('submissions')
+                    ->where('student_id', $studentId)
+                    ->pluck('assignment_id')
+                    ->toArray();
+
+                $query = Assignment::with('subject')->where('class_id', $classId);
+
+                if ($filter === 'active') {
+                    $query->whereNotIn('id', $submittedIds)
+                          ->where(function($q) {
+                              $q->whereNull('due_date')->orWhere('due_date', '>=', now());
+                          });
+                } else if ($filter === 'completed') {
+                    $query->whereIn('id', $submittedIds);
+                }
+
+                $assignments = $query->orderBy('due_date')->get();
             } catch (\Exception $e) {}
         }
 
         return view('student.assignments', compact('student', 'assignments'));
+    }
+
+    public function submitAssignment(Request $request)
+    {
+        $request->validate([
+            'assignment_id' => 'required|exists:assignments,id',
+            'file' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:10240', // 10MB Max
+        ]);
+
+        $studentData = $this->getStudent();
+        
+        if (!$studentData) {
+            return back()->with('error', 'Data siswa tidak ditemukan.');
+        }
+
+        try {
+            // Cek jika sudah pernah submit
+            $existing = DB::table('submissions')
+                ->where('assignment_id', $request->assignment_id)
+                ->where('student_id', $studentData->id)
+                ->first();
+
+            if ($existing) {
+                return back()->with('error', 'Kamu sudah mengumpulkan tugas ini sebelumnya.');
+            }
+
+            $path = $request->file('file')->store('submissions', 'public');
+
+            DB::table('submissions')->insert([
+                'assignment_id' => $request->assignment_id,
+                'student_id' => $studentData->id,
+                'file_url' => '/storage/' . $path,
+                'notes' => $request->notes,
+                'status' => 'Submitted',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return back()->with('success', 'Tugas berhasil dikumpulkan!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengumpulkan tugas: ' . $e->getMessage());
+        }
     }
 
     public function grades()
@@ -248,13 +305,7 @@ class StudentMenuController extends Controller
                 ->latest()
                 ->get();
         } catch (\Exception $e) {
-            $announcements = collect([
-                (object)[
-                    'title' => 'Ujian Semester',
-                    'content' => 'Ujian dimulai 14 hari lagi',
-                    'created_at' => now()
-                ]
-            ]);
+            $announcements = collect([]);
         }
 
         return view('student.announcements', compact('student', 'announcements'));

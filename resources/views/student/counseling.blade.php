@@ -3,207 +3,172 @@
 @section('title', 'Ruang Konsultasi BK - Schoolify')
 
 @section('content')
-<div class="max-w-5xl mx-auto space-y-6">
-    <div class="mb-4">
-        <h1 class="font-outfit font-bold text-3xl text-[#2B3674] mb-2">Konsultasi BK</h1>
-        <p class="text-[#A3AED0]">Butuh teman cerita soal akademis, jurusan, atau beban pikiran? Guru BK siap membantumu!</p>
+<div class="max-w-5xl mx-auto space-y-8">
+    <!-- Header Section -->
+    <div class="glass-card bg-gradient-to-br from-[#4318FF] to-[#3A14E0] rounded-[32px] p-10 text-white relative overflow-hidden shadow-xl shadow-indigo-200/50 mt-4">
+        <div class="relative z-10 w-full md:w-2/3">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-widest mb-4">
+                <i class='bx bx-support text-lg'></i> Layanan Bimbingan Konseling
+            </div>
+            <h1 class="font-outfit font-bold text-4xl mb-4 leading-tight">Jangan Ragu Bercerita,<br>Kami Siap Mendengar!</h1>
+            <p class="text-indigo-100 text-sm md:text-base mb-8 leading-relaxed max-w-lg">
+                Punya beban pikiran, kebingungan memilih jurusan, atau masalah akademis? Ajukan jadwal pertemuan langsung dengan Guru BK-mu sekarang.
+            </p>
+            <button onclick="document.getElementById('modal-appointment').classList.remove('hidden'); document.getElementById('modal-appointment').classList.add('flex')" class="bg-white text-[#4318FF] px-8 py-3.5 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 hover:bg-gray-50 flex items-center justify-center gap-3 transition-all">
+                <i class='bx bx-calendar-plus text-xl'></i> Ajukan Jadwal Pertemuan
+            </button>
+        </div>
+        
+        <!-- Dekorasi Abstrak -->
+        <div class="absolute -right-16 -top-16 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div class="absolute right-10 bottom-10 w-40 h-40 bg-indigo-300 opacity-20 rounded-full blur-2xl"></div>
+        
+        <!-- Ilustrasi/Icon -->
+        <div class="hidden md:flex absolute right-12 top-1/2 -translate-y-1/2 w-64 h-64 items-center justify-center">
+            <i class='bx bx-conversation text-[180px] text-white/10 rotate-12'></i>
+        </div>
     </div>
 
-    <!-- Alert Success -->
+    <!-- Alert Messages -->
     @if(session('success'))
-    <div class="bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 font-medium">
-        <i class='bx bx-check-circle text-xl'></i> {{ session('success') }}
+    <div class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl flex items-center gap-3 font-medium shadow-sm animate-in fade-in slide-in-from-top-4">
+        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+            <i class='bx bx-check text-2xl'></i>
+        </div>
+        {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center gap-3 font-medium shadow-sm animate-in fade-in slide-in-from-top-4">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+            <i class='bx bx-x text-2xl'></i>
+        </div>
+        {{ session('error') }}
     </div>
     @endif
 
-    <!-- Pilihan Tindakan Cepat -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Direct Chat -->
-        <div class="bg-gradient-to-br from-[#868CFF] to-[#4318FF] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-indigo-200">
-            <div class="relative z-10 w-full md:w-3/4">
-                <h2 class="font-outfit font-bold text-2xl mb-2 flex items-center gap-2"><i class='bx bx-message-rounded-dots'></i> Pesan Cepat</h2>
-                <p class="text-indigo-100 text-sm mb-6">Hubungi Guru BK-mu saat ini juga via pesan rahasia.</p>
-                
-                <form action="{{ route('student.counseling.send') }}" method="POST" class="space-y-3">
-                    @csrf
-                    <textarea name="message" rows="3" placeholder="Ceritakan keluhan akademis atau kebingunganmu di sini..." class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm resize-none" required></textarea>
-                    <button type="submit" class="bg-white text-[#4318FF] px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-gray-50 flex items-center justify-center gap-2 transition w-full md:w-auto">
-                        Kirim Pesan <i class='bx bx-send'></i>
-                    </button>
-                </form>
-            </div>
-            <!-- Dekorasi Abstrak -->
-            <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl"></div>
+    <!-- Riwayat Janji Temu -->
+    <div>
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="font-bold text-[#2B3674] text-xl flex items-center gap-2">
+                <i class='bx bx-history text-[#4318FF]'></i> Riwayat Pengajuan
+            </h3>
         </div>
 
-        <!-- Minta Jadwal Ketemu Fisik -->
-        <div class="glass-card bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative cursor-pointer hover:border-indigo-100 transition pt-20">
-            <div class="absolute top-8 left-8 w-12 h-12 rounded-xl bg-orange-50 text-orange-500 text-2xl flex items-center justify-center">
-                <i class='bx bx-calendar-heart'></i>
+        @if(isset($appointments) && $appointments->count() > 0)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($appointments as $appt)
+                    <div class="glass-card bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                        <!-- Status Strip -->
+                        <div class="absolute top-0 left-0 w-full h-1.5 
+                            {{ $appt->status === 'approved' ? 'bg-green-500' : ($appt->status === 'rejected' ? 'bg-red-500' : 'bg-amber-400') }}">
+                        </div>
+
+                        <div class="flex justify-between items-start mb-4 mt-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 group-hover:scale-110 transition-transform">
+                                    <i class='bx bx-calendar text-xl'></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">{{ \Carbon\Carbon::parse($appt->date)->translatedFormat('d M Y') }}</p>
+                                    <p class="text-xs text-slate-500 font-medium">{{ \Carbon\Carbon::parse($appt->time)->format('H:i') }} WIB</p>
+                                </div>
+                            </div>
+                            
+                            @if($appt->status === 'approved')
+                                <span class="bg-green-50 text-green-600 border border-green-200 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                    <i class='bx bx-check'></i> Disetujui
+                                </span>
+                            @elseif($appt->status === 'rejected')
+                                <span class="bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                    <i class='bx bx-x'></i> Ditolak
+                                </span>
+                            @else
+                                <span class="bg-amber-50 text-amber-600 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                    <i class='bx bx-time'></i> Menunggu
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 mt-4">
+                            <p class="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Topik/Tujuan</p>
+                            <p class="text-sm text-slate-700 font-medium line-clamp-2" title="{{ $appt->notes }}">{{ $appt->notes }}</p>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-            <h2 class="font-outfit font-bold text-2xl text-[#2B3674] mb-2">Buat Janji Temu</h2>
-            <p class="text-[#A3AED0] text-sm mb-6">Atur waktu ketemu langsung di ruang BK untuk membicarakan karir / minat kuliah.</p>
-            <button onclick="document.getElementById('modal-appointment').classList.remove('hidden')" class="w-full bg-[#F4F7FE] text-[#2B3674] border-none px-6 py-3 rounded-xl font-bold hover:bg-[#E2E8F0] transition flex items-center justify-center gap-2">
-                Atur Jadwal Konsultasi
-            </button>
-        </div>
+        @else
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-12 text-center flex flex-col items-center justify-center">
+                <div class="w-20 h-20 bg-indigo-50 text-indigo-300 rounded-full flex items-center justify-center text-4xl mb-4">
+                    <i class='bx bx-calendar-x'></i>
+                </div>
+                <h4 class="font-bold text-lg text-slate-800 mb-1">Belum Ada Riwayat</h4>
+                <p class="text-sm text-slate-500 max-w-sm">Kamu belum pernah mengajukan jadwal pertemuan dengan Guru BK.</p>
+            </div>
+        @endif
     </div>
 
     <!-- Modal Buat Janji -->
-    <div id="modal-appointment" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="font-outfit font-bold text-xl text-[#1E293B]">Ajukan Jadwal Temu</h3>
-                <button onclick="document.getElementById('modal-appointment').classList.add('hidden')" class="text-gray-400 hover:text-red-500"><i class='bx bx-x text-2xl'></i></button>
+    <div id="modal-appointment" class="hidden fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#4318FF] rounded-xl flex items-center justify-center shadow-sm">
+                        <i class='bx bx-calendar-plus text-white text-xl'></i>
+                    </div>
+                    <div>
+                        <h3 class="font-outfit font-bold text-lg text-[#1E293B]">Ajukan Jadwal Temu</h3>
+                        <p class="text-xs text-slate-500 font-medium">Pilih waktu yang pas untuk konsultasi</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('modal-appointment').classList.add('hidden'); document.getElementById('modal-appointment').classList.remove('flex')" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-all">
+                    <i class='bx bx-x text-xl'></i>
+                </button>
             </div>
-            <form action="{{ route('student.appointment.store') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('student.appointment.store') }}" method="POST" class="p-6 space-y-5">
                 @csrf
                 <input type="hidden" name="teacher_id" value="{{ $bkUser ? $bkUser->id : '' }}">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Pilih Tanggal</label>
-                    <input type="date" name="date" required min="{{ date('Y-m-d') }}" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#4318FF] outline-none">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Pilih Tanggal <span class="text-red-500">*</span></label>
+                        <input type="date" name="date" required min="{{ date('Y-m-d') }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#4318FF] focus:bg-white outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Pilih Jam <span class="text-red-500">*</span></label>
+                        <input type="time" name="time" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#4318FF] focus:bg-white outline-none transition-all">
+                    </div>
                 </div>
+                
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Pilih Jam</label>
-                    <input type="time" name="time" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#4318FF] outline-none">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Topik Pembicaraan <span class="text-red-500">*</span></label>
+                    <textarea name="notes" rows="3" placeholder="Misal: Saya bingung memilih jurusan IPA atau IPS..." required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#4318FF] focus:bg-white outline-none transition-all resize-none"></textarea>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Tujuan / Catatan Acara</label>
-                    <textarea name="notes" rows="3" placeholder="Misal: Konsultasi pemilihan jurusan kuliah..." required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-[#4318FF] outline-none"></textarea>
-                </div>
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-[#4318FF] hover:bg-blue-800 text-white rounded-xl py-3 font-bold shadow-md shadow-indigo-200 transition">Ajukan Jadwal</button>
+                
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="document.getElementById('modal-appointment').classList.add('hidden'); document.getElementById('modal-appointment').classList.remove('flex')" class="flex-1 px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all text-sm">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 px-6 py-3 rounded-xl bg-[#4318FF] hover:bg-[#3311CC] text-white font-bold shadow-lg shadow-indigo-200 transition-all text-sm">
+                        Kirim Pengajuan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-
-    <!-- Ruang Obrolan / Riwayat Chat -->
-    <div class="pt-8">
-        <h3 class="font-bold text-[#2B3674] text-xl mb-4">Ruang Percakapan BK</h3>
-        <div class="glass-card bg-white rounded-3xl border border-indigo-50 overflow-hidden flex flex-col h-[550px] shadow-sm relative">
-            
-            <div id="chat-messages-container" class="flex-1 p-6 overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-[#F8FAFC]/90">
-                <div class="text-center mb-8">
-                    <span class="bg-indigo-100 text-indigo-500 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Histori Percakapan Hari Ini</span>
-                </div>
-                <!-- Messages will be loaded here via JS -->
-            </div>
-
-            <!-- Typing Area -->
-            <div class="h-20 px-6 border-t border-gray-100 bg-white flex items-center shrink-0">
-                <form id="chat-form" class="w-full flex items-center gap-4" onsubmit="sendMessage(event)">
-                    <button type="button" class="text-gray-400 hover:text-[#4318FF] transition"><i class='bx bx-paperclip text-2xl'></i></button>
-                    <input type="text" id="chat-input" placeholder="Ketik pesan..." required class="flex-1 bg-gray-100 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#4318FF] transition">
-                    <button type="submit" class="w-12 h-12 rounded-xl bg-[#4318FF] hover:bg-blue-800 shadow-md shadow-indigo-200 text-white flex items-center justify-center transition transform hover:scale-105">
-                        <i class='bx bxs-send text-xl relative left-0.5'></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 
-<script>
-    const bkUserId = {{ $bkUser ? $bkUser->id : 'null' }};
-    const chatContainer = document.getElementById('chat-messages-container');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    function scrollToBottom() {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
-
-    async function fetchMessages() {
-        if (!bkUserId) return;
-        try {
-            const res = await fetch(`/api/chat/fetch/${bkUserId}`);
-            const data = await res.json();
-            
-            if (data.messages) {
-                // Clear state but keep the header
-                chatContainer.innerHTML = `
-                    <div class="text-center mb-8">
-                        <span class="bg-indigo-100 text-indigo-500 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Histori Percakapan Hari Ini</span>
-                    </div>
-                `;
-
-                if (data.messages.length === 0) {
-                     chatContainer.innerHTML += `
-                     <div class="h-full flex flex-col items-center justify-center text-gray-400 opacity-50 relative pb-10 mt-10">
-                        <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
-                            <i class='bx bx-message-rounded-dots text-5xl text-indigo-400'></i>
-                        </div>
-                        <p class="text-sm text-center font-medium">Ruang chat masih kosong.<br>Silakan kirimkan pesanmu.</p>
-                    </div>`;
-                    return;
-                }
-
-                data.messages.forEach(msg => {
-                    const isMine = msg.is_mine;
-                    if (isMine) {
-                        chatContainer.innerHTML += `
-                            <div class="flex items-end justify-end mb-6 w-full">
-                                <div class="flex flex-col items-end max-w-[70%]">
-                                    <div class="bg-gradient-to-br from-[#4318FF] to-[#3A14E0] text-white p-4 rounded-3xl rounded-br-sm shadow-md">
-                                        <p class="text-sm leading-relaxed">${msg.message}</p>
-                                    </div>
-                                    <div class="flex items-center gap-1 mt-1.5">
-                                        <p class="text-[10px] font-semibold text-gray-400">${msg.time}</p>
-                                        <i class="bx bx-check-double text-[#4318FF] text-sm"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        chatContainer.innerHTML += `
-                            <div class="flex items-end gap-3 mb-6 w-full">
-                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md font-bold text-xs ring-4 ring-white relative top-2">BK</div>
-                                <div class="flex flex-col items-start max-w-[70%]">
-                                    <div class="bg-white border border-gray-100 p-4 rounded-3xl rounded-bl-sm shadow-md">
-                                        <p class="text-sm text-[#2B3674] font-medium leading-relaxed">${msg.message}</p>
-                                    </div>
-                                    <p class="text-[10px] font-semibold text-gray-400 mt-1.5 ml-2">${msg.time} • Guru BK</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-            }
-        } catch(e) {
-            console.error('Error fetching messages', e);
-        }
+    @keyframes zoom-in {
+        from { transform: scale(0.95); }
+        to { transform: scale(1); }
     }
-
-    async function sendMessage(e) {
-        e.preventDefault();
-        const input = document.getElementById('chat-input');
-        const message = input.value.trim();
-        if (!message || !bkUserId) return;
-        
-        input.value = ''; // Clear input eagerly
-
-        try {
-            await fetch('/api/chat/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    receiver_id: bkUserId,
-                    message: message
-                })
-            });
-            fetchMessages().then(scrollToBottom);
-        } catch (e) {
-            console.error('Failed to send message', e);
-        }
-    }
-
-    // Polling every 3 seconds
-    setInterval(fetchMessages, 3000);
-    
-    // Initial fetch
-    fetchMessages().then(() => setTimeout(scrollToBottom, 500));
-</script>
+    .animate-in { animation-duration: 0.2s; animation-fill-mode: both; }
+    .fade-in { animation-name: fade-in; }
+    .zoom-in { animation-name: zoom-in; }
+</style>
 @endsection

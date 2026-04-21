@@ -36,6 +36,7 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
     Route::get('/schedule', [StudentMenuController::class, 'schedule'])->name('student.schedule');
     Route::get('/assignments', [StudentMenuController::class, 'assignments'])->name('student.assignments');
+    Route::post('/assignments/submit', [StudentMenuController::class, 'submitAssignment'])->name('student.assignment.submit');
     Route::get('/grades', [StudentMenuController::class, 'grades'])->name('student.grades');
 
     // Menu Konsultasi & Chat (Siswa)

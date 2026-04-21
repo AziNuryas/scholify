@@ -61,8 +61,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <!-- Input Nama Lengkap -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap</label>
-                        <input type="text" name="name" value="{{ $student['name'] ?? 'Nama Siswa' }}" class="w-full bg-[#F4F7FE] border-none text-[#2B3674] font-medium px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#4318FF] outline-none">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap <span class="text-xs text-red-500 font-normal ml-1">(Tidak dapat diubah)</span></label>
+                        <input type="text" name="name" value="{{ $student['name'] ?? 'Nama Siswa' }}" readonly class="w-full bg-gray-100 border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
                     </div>
                     
                     <!-- Input Nomor Telepon -->
@@ -75,14 +75,14 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <!-- Input NISN -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">NISN (Nomor Induk Siswa Nasional)</label>
-                        <input type="text" name="nisn" value="{{ $studentData->nisn ?? '' }}" placeholder="Masukkan 10 Digit NISN" class="w-full bg-[#F4F7FE] border-none text-[#2B3674] font-medium px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#4318FF] outline-none">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">NISN <span class="text-xs text-red-500 font-normal ml-1">(Tidak dapat diubah)</span></label>
+                        <input type="text" name="nisn" value="{{ $studentData->nisn ?? '' }}" readonly class="w-full bg-gray-100 border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
                     </div>
 
                     <!-- Input Tempat Lahir -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Tempat Lahir</label>
-                        <input type="text" name="birth_place" value="{{ $studentData->birth_place ?? '' }}" placeholder="Misal: Jakarta" class="w-full bg-[#F4F7FE] border-none text-[#2B3674] font-medium px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#4318FF] outline-none">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Tempat Lahir <span class="text-xs text-red-500 font-normal ml-1">(Tidak dapat diubah)</span></label>
+                        <input type="text" name="birth_place" value="{{ $studentData->birth_place ?? '' }}" readonly class="w-full bg-gray-100 border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
                     </div>
                 </div>
 
