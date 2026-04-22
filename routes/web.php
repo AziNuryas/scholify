@@ -40,7 +40,7 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
     Route::controller(StudentMenuController::class)->group(function () {
         Route::get('/schedule', 'schedule')->name('schedule');
         Route::get('/assignments', 'assignments')->name('assignments');
-        Route::post('/assignments/submit', 'submitAssignment')->name('assignments.submit'); // ✅ TAMBAHKAN INI
+        Route::post('/assignments/submit', 'submitAssignment')->name('assignments.submit');
         Route::get('/grades', 'grades')->name('grades');
 
         Route::get('/counseling', 'counseling')->name('counseling');
@@ -53,6 +53,10 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         Route::post('/appointments', 'storeAppointment')->name('appointments.store');
 
         Route::get('/discipline', 'discipline')->name('discipline');
+        
+        // ✅ TAMBAHKAN ROUTE ABSENSI DI SINI
+        Route::get('/absensi', 'absensi')->name('absensi');
+        Route::post('/absensi/store', 'storeAbsensi')->name('absensi.store');
     });
 
 
@@ -120,6 +124,7 @@ Route::middleware('auth')->prefix('guru')->name('guru.')->group(function () {
     Route::controller(AssignmentController::class)->group(function () {
         Route::get('/tugas', 'index')->name('tugas');
         Route::post('/tugas', 'store')->name('tugas.store');
+        Route::put('/tugas/{id}', 'update')->name('tugas.update'); // ✅ TAMBAHKAN INI
         Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
     });
 

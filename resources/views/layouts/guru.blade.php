@@ -162,6 +162,13 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
+        
+        /* Logo image style */
+        .logo-image {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -172,15 +179,22 @@
     <div class="mesh-orb orb-3"></div>
 
     <div class="flex min-h-screen relative z-10">
-        <!-- Sidebar -->
+        <!-- Sidebar dengan Logo Scholify (Gambar) -->
         <aside class="w-72 bg-white/60 backdrop-blur-xl border-r border-white/40 shadow-xl p-6 sticky top-0 h-screen">
-            <div class="flex items-center gap-3 mb-10">
-                <div class="bg-gradient-to-br from-indigo-600 to-purple-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200">
-                    <i data-lucide="graduation-cap" class="text-white w-6 h-6"></i>
+            <!-- Logo Scholify dengan Gambar -->
+            <div class="flex items-center gap-3 mb-8">
+                <!-- Logo Gambar Scholify - Ganti dari ikon toga ke gambar -->
+                <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-indigo-200 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                    <img src="{{ asset('images/scholify-logo.png') }}" 
+                         alt="Scholify Logo" 
+                         class="w-full h-full object-cover">
                 </div>
-                <h1 class="text-2xl font-heading font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
-                    Schoolify<span class="text-indigo-600">.</span>
-                </h1>
+                <div class="flex flex-col">
+                    <h1 class="text-2xl font-heading font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent leading-tight">
+                        Scholify<span class="text-indigo-600">.</span>
+                    </h1>
+                    <p class="text-[10px] font-semibold text-slate-400 tracking-wide uppercase mt-0.5">Belajar · Terhubung · Berkembang</p>
+                </div>
             </div>
 
             <nav class="space-y-1.5">
@@ -192,7 +206,7 @@
                         ['route' => 'guru.jadwal', 'icon' => 'calendar', 'label' => 'Jadwal Kelas', 'badge' => null],
                         ['route' => 'guru.absensi', 'icon' => 'user-check', 'label' => 'Absensi', 'badge' => null],
                         ['route' => 'guru.nilai', 'icon' => 'edit-3', 'label' => 'Nilai & Rapor', 'badge' => null],
-                        ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas', 'badge' => '3'],
+                        ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas', 'badge' => ''],
                         ['route' => 'guru.pengumuman', 'icon' => 'megaphone', 'label' => 'Pengumuman', 'badge' => null],
                     ];
                 @endphp
@@ -251,7 +265,7 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform duration-300"></i>
                     </div>
 
-                    <!-- Dropdown Menu Premium - Lengkap dengan semua menu -->
+                    <!-- Dropdown Menu Premium -->
                     <div class="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden dropdown-menu">
                         <!-- Header Dropdown -->
                         <div class="relative px-4 py-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 border-b border-indigo-100">
@@ -281,7 +295,7 @@
                             
                             <div class="border-t border-gray-100 my-2"></div>
                             
-                            <!-- Tombol Logout yang Ditingkatkan -->
+                            <!-- Tombol Logout -->
                             <form method="POST" action="{{ route('logout') }}" class="logout-form">
                                 @csrf
                                 <button type="submit" class="logout-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 rounded-xl transition-all duration-300 group">
