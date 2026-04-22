@@ -19,19 +19,19 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         
         <!-- Kartu Identitas (Kiri) -->
-        <div class="glass-card bg-white rounded-[24px] border border-gray-100 shadow-sm p-8 text-center flex flex-col items-center relative">
+        <div class="neo-flat rounded-[24px] p-8 text-center flex flex-col items-center relative">
             <div class="relative mb-6">
                 <!-- Gunakan asset path / public bila upload dr storage berhasil -->
-                <img id="avatar-preview" src="{{ str_starts_with($student['avatar'] ?? '', 'http') ? $student['avatar'] : asset($student['avatar'] ?? 'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff') }}" alt="Avatar" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-50 shadow-md">
+                <img id="avatar-preview" src="{{ str_starts_with($student['avatar'] ?? '', 'http') ? $student['avatar'] : asset($student['avatar'] ?? 'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff') }}" alt="Avatar" class="w-32 h-32 rounded-full object-cover neo-pressed p-1">
                 
                 <!-- JS Trigger buat buka file upload tersembunyi yang ada di dalam form -->
-                <button type="button" onclick="document.getElementById('avatar-input').click()" class="absolute bottom-1 right-1 w-8 h-8 bg-[#4318FF] text-white rounded-full flex items-center justify-center shadow hover:bg-blue-700 transition" title="Ganti Foto Profil">
+                <button type="button" onclick="document.getElementById('avatar-input').click()" class="absolute bottom-1 right-1 w-10 h-10 neo-badge-blue text-white rounded-full flex items-center justify-center transition" title="Ganti Foto Profil">
                     <i class='bx bx-camera'></i>
                 </button>
             </div>
             
-            <h2 class="font-outfit font-bold text-xl text-[#2B3674] mb-1">{{ $student['name'] ?? 'Nama Siswa' }}</h2>
-            <p class="text-sm font-bold text-[#A3AED0] mb-4 bg-gray-50 px-3 py-1 rounded inline-block border border-gray-100">
+            <h2 class="font-outfit font-bold text-xl text-[var(--brand-secondary)] mb-1">{{ $student['name'] ?? 'Nama Siswa' }}</h2>
+            <p class="text-sm font-bold text-[var(--brand-secondary)] mb-4 neo-pressed px-4 py-1.5 rounded-lg inline-block">
                 Siswa Kelas {{ $student['class'] ?? 'X' }}
             </p>
             
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Form Edit Data (Kanan dan Kiri dibungkus) -->
-        <div class="md:col-span-2 glass-card bg-white rounded-[24px] border border-gray-100 shadow-sm p-8">
+        <div class="md:col-span-2 neo-flat rounded-[24px] p-8">
             <h3 class="font-bold text-[#2B3674] text-lg mb-6 flex items-center gap-2 pb-4 border-b border-gray-100">
                 <i class='bx bx-user-pin text-[#4318FF]'></i> Data Pribadi Lengkap
             </h3>
@@ -62,13 +62,13 @@
                     <!-- Input Nama Lengkap -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap <span class="text-xs text-red-500 font-normal ml-1">(Tidak dapat diubah)</span></label>
-                        <input type="text" name="name" value="{{ $student['name'] ?? 'Nama Siswa' }}" readonly class="w-full bg-gray-100 border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
+                        <input type="text" name="name" value="{{ $student['name'] ?? 'Nama Siswa' }}" readonly class="w-full neo-flat border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
                     </div>
                     
                     <!-- Input Nomor Telepon -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">WhatsApp / No. HP</label>
-                        <input type="text" name="phone" value="{{ $studentData->phone ?? '' }}" class="w-full bg-[#F4F7FE] border-none text-[#2B3674] font-medium px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#4318FF] outline-none placeholder-gray-400">
+                        <input type="text" name="phone" value="{{ $studentData->phone ?? '' }}" class="w-full neo-pressed border-none text-[var(--brand-secondary)] font-medium px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#4318FF] outline-none placeholder-gray-400">
                     </div>
                 </div>
 
@@ -76,24 +76,24 @@
                     <!-- Input NISN -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">NISN <span class="text-xs text-red-500 font-normal ml-1">(Tidak dapat diubah)</span></label>
-                        <input type="text" name="nisn" value="{{ $studentData->nisn ?? '' }}" readonly class="w-full bg-gray-100 border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
+                        <input type="text" name="nisn" value="{{ $studentData->nisn ?? '' }}" readonly class="w-full neo-flat border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
                     </div>
 
                     <!-- Input Tempat Lahir -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Tempat Lahir <span class="text-xs text-red-500 font-normal ml-1">(Tidak dapat diubah)</span></label>
-                        <input type="text" name="birth_place" value="{{ $studentData->birth_place ?? '' }}" readonly class="w-full bg-gray-100 border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
+                        <input type="text" name="birth_place" value="{{ $studentData->birth_place ?? '' }}" readonly class="w-full neo-flat border-none text-gray-500 font-medium px-4 py-3 rounded-xl cursor-not-allowed outline-none">
                     </div>
                 </div>
 
                 <!-- Input Alamat -->
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Alamat Lengkap Domisili</label>
-                    <textarea name="address" rows="3" placeholder="Masukkan alamat lengkap rumahmu saat ini" class="w-full bg-[#F4F7FE] border-none text-[#2B3674] font-medium px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#4318FF] outline-none resize-none">{{ $studentData->address ?? '' }}</textarea>
+                    <textarea name="address" rows="3" placeholder="Masukkan alamat lengkap rumahmu saat ini" class="w-full neo-pressed border-none text-[var(--brand-secondary)] font-medium px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#4318FF] outline-none resize-none">{{ $studentData->address ?? '' }}</textarea>
                 </div>
                 
-                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
-                    <button type="submit" class="px-6 py-2.5 bg-[#4318FF] text-white font-bold rounded-xl hover:bg-[#3311CC] transition shadow-md shadow-indigo-200">
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="submit" class="px-8 py-3 neo-badge-blue text-white font-bold rounded-full transition">
                         Simpan Perubahan
                     </button>
                 </div>

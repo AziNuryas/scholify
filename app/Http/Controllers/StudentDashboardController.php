@@ -15,14 +15,17 @@ class StudentDashboardController extends Controller
                 ->first();
             
             if (!$studentModel) {
-                // Jika data profil belum ada, coba fallback ke siswa pertama atau tampilkan pesan kosong
-                $studentModel = \App\Models\Student::with('schoolClass')->first();
-            }
+                // Jangan gunakan data dummy/siswa lain. Gunakan nama dari auth user saja.
+                $user = auth()->user();
+                $student = [
+                    'name'   => $user->name ?? 'Siswa',
+                    'class'  => 'Belum Masuk Kelas',
+                    'nis'    => '-',
+                    'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($user->name ?? 'Siswa') . '&background=6366f1&color=fff'
+                ];
 
-            if (!$studentModel) {
-                // Jika DB berhasil konek TAPI tabel masih kosong, kembalikan array kosong
                 return view('student.dashboard', [
-                    'student' => ['name' => 'Belum ada data di DB', 'class' => '-', 'avatar' => ''],
+                    'student' => $student,
                     'todaySchedules' => [],
                     'urgentAssignments' => []
                 ]);
@@ -75,13 +78,13 @@ class StudentDashboardController extends Controller
             $urgentAssignments = [];
             foreach ($assignmentsQuery as $assign) {
                 // Coba ambil kolom tenggat waktu yang umum
-                $deadline = $assign->due_date ?? $assign->deadline ?? $assign->created_at;
+                $deadline = $assign->due_date ?? $assign->deadline ?? null;
                 
                 $urgentAssignments[] = [
-                    'title'    => $assign->title ?? 'Tugas Baru',
-                    'subject'  => $assign->subject->name ?? 'Mata Pelajaran',
+                    'title'    => $assign->title ?? 'Tanpa Judul',
+                    'subject'  => $assign->subject->name ?? '-',
                     'due_date' => $deadline ? \Carbon\Carbon::parse($deadline)->format('d M, H:i') : '-',
-                    'type'     => $assign->type ?? 'Tugas'
+                    'type'     => $assign->type ?? '-'
                 ];
             }
 

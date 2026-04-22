@@ -65,15 +65,22 @@ class AnnouncementController extends Controller
     {
         $user = Auth::user();
 
+        // Get class_id from the students table (not users table)
+        $student = \App\Models\Student::where('user_id', $user->id)->first();
+        $classId = $student->class_id ?? null;
+
         $announcements = Announcement::where('target', 'all')
-            ->orWhere(function ($query) use ($user) {
+            ->orWhere(function ($query) use ($classId) {
                 $query->where('target', 'class')
-                      ->where('class_id', $user->class_id);
+                      ->where('class_id', $classId);
             })
             ->latest()
             ->get();
 
-        return view('student.announcements', compact('announcements'));
+        // Get classes for filter sidebar
+        $classes = SchoolClass::orderBy('name')->get();
+
+        return view('student.notifications', compact('announcements', 'classes'));
     }
 
     /**

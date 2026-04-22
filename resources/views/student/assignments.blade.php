@@ -15,64 +15,60 @@
             <p class="text-[#A3AED0] text-base">Kelola dan selesaikan semua tugas akademismu tepat waktu.</p>
         </div>
         
-        <!-- Stat Cards Premium -->
+        <!-- Stat Cards Neumorphism Combo -->
         <div class="flex gap-4">
-            <div class="group relative bg-white rounded-2xl px-6 py-4 text-center min-w-[110px] shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-orange-200">
-                <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="relative">
-                    <div class="text-3xl font-bold text-orange-600 mb-1">{{ $assignments->where('status', 'pending')->count() }}</div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pending</p>
-                    <div class="w-8 h-0.5 bg-orange-200 mx-auto mt-2 rounded-full group-hover:w-12 transition-all duration-300"></div>
+            <div class="neo-flat rounded-2xl px-6 py-4 text-center min-w-[110px] transition-all duration-500 hover:neo-pressed">
+                <div class="relative flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full neo-flat flex items-center justify-center mb-2">
+                        <div class="text-xl font-bold text-orange-500">{{ $assignments->where('status', 'pending')->count() }}</div>
+                    </div>
+                    <p class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wide">Pending</p>
                 </div>
             </div>
-            <div class="group relative bg-white rounded-2xl px-6 py-4 text-center min-w-[110px] shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-green-200">
-                <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="relative">
-                    <div class="text-3xl font-bold text-green-600 mb-1">{{ $assignments->where('status', 'submitted')->count() }}</div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Submitted</p>
-                    <div class="w-8 h-0.5 bg-green-200 mx-auto mt-2 rounded-full group-hover:w-12 transition-all duration-300"></div>
+            <div class="neo-flat rounded-2xl px-6 py-4 text-center min-w-[110px] transition-all duration-500 hover:neo-pressed">
+                <div class="relative flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full neo-flat flex items-center justify-center mb-2">
+                        <div class="text-xl font-bold text-green-500">{{ $assignments->where('status', 'submitted')->count() }}</div>
+                    </div>
+                    <p class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wide">Submitted</p>
                 </div>
             </div>
-            <div class="group relative bg-white rounded-2xl px-6 py-4 text-center min-w-[110px] shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-purple-200">
-                <div class="absolute inset-0 bg-gradient-to-br from-purple-50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="relative">
-                    <div class="text-3xl font-bold text-purple-600 mb-1">{{ $assignments->where('is_late', true)->count() }}</div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Late</p>
-                    <div class="w-8 h-0.5 bg-purple-200 mx-auto mt-2 rounded-full group-hover:w-12 transition-all duration-300"></div>
+            <div class="neo-flat rounded-2xl px-6 py-4 text-center min-w-[110px] transition-all duration-500 hover:neo-pressed">
+                <div class="relative flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full neo-flat flex items-center justify-center mb-2">
+                        <div class="text-xl font-bold text-purple-500">{{ $assignments->where('is_late', true)->count() }}</div>
+                    </div>
+                    <p class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wide">Late</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabs Filter Premium -->
-    <div class="flex flex-wrap gap-2 border-b border-gray-100 pb-0">
-        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-xl" data-filter="all">
-            <span class="relative z-10 flex items-center gap-2">
-                <i class='bx bx-grid-alt text-lg'></i>
+    <!-- Tabs Filter Neumorphism -->
+    <div class="flex flex-wrap gap-4 pb-0 mt-4">
+        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-xl neo-flat" data-filter="all">
+            <span class="relative z-10 flex items-center gap-2 text-[var(--brand-secondary)]">
+                <i class='bx bx-grid-alt text-lg text-blue-500'></i>
                 <span>Semua Tugas</span>
             </span>
-            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#4318FF] to-[#9F7AEA] scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </button>
-        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-xl" data-filter="active">
-            <span class="relative z-10 flex items-center gap-2">
-                <i class='bx bx-play-circle text-lg'></i>
+        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-xl neo-btn" data-filter="active">
+            <span class="relative z-10 flex items-center gap-2 text-[var(--brand-secondary)]">
+                <i class='bx bx-play-circle text-lg text-green-500'></i>
                 <span>Aktif</span>
             </span>
-            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#4318FF] to-[#9F7AEA] scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </button>
-        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-xl" data-filter="completed">
-            <span class="relative z-10 flex items-center gap-2">
-                <i class='bx bx-check-circle text-lg'></i>
+        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-xl neo-btn" data-filter="completed">
+            <span class="relative z-10 flex items-center gap-2 text-[var(--brand-secondary)]">
+                <i class='bx bx-check-circle text-lg text-indigo-500'></i>
                 <span>Selesai</span>
             </span>
-            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#4318FF] to-[#9F7AEA] scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </button>
-        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-xl" data-filter="late">
-            <span class="relative z-10 flex items-center gap-2">
-                <i class='bx bx-alarm-exclamation text-lg'></i>
+        <button class="filter-btn group relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-xl neo-btn" data-filter="late">
+            <span class="relative z-10 flex items-center gap-2 text-[var(--brand-secondary)]">
+                <i class='bx bx-alarm-exclamation text-lg text-red-500'></i>
                 <span>Terlambat</span>
             </span>
-            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#4318FF] to-[#9F7AEA] scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </button>
     </div>
 
@@ -83,8 +79,8 @@
             @php
                 $status = $assign->status ?? 'pending';
                 $isLate = $assign->is_late ?? false;
-                $dueDate = $assign->due_date ? \Carbon\Carbon::parse($assign->due_date) : \Carbon\Carbon::now()->addDays(7);
-                $isUrgent = $dueDate->isToday() || $dueDate->diffInDays(now()) <= 2;
+                $dueDate = $assign->due_date ? \Carbon\Carbon::parse($assign->due_date) : null;
+                $isUrgent = $dueDate ? ($dueDate->isToday() || $dueDate->diffInDays(now()) <= 2) : false;
                 $submission = null;
                 $progress = null;
                 
@@ -93,22 +89,24 @@
                     $progress = $submission ? $submission->score : null;
                 }
                 
-                // Perbaikan: Menghitung hari dengan pembulatan ke bawah
-                $daysLeft = now()->startOfDay()->diffInDays($dueDate->startOfDay(), false);
-                if($daysLeft < 0) {
-                    $deadlineText = 'Terlambat ' . abs($daysLeft) . ' hari';
-                } elseif($daysLeft == 0) {
-                    $deadlineText = 'Hari terakhir';
-                } elseif($daysLeft == 1) {
-                    $deadlineText = 'Besok';
-                } else {
-                    $deadlineText = $daysLeft . ' hari lagi';
+                $deadlineText = '-';
+                if ($dueDate) {
+                    $daysLeft = now()->startOfDay()->diffInDays($dueDate->startOfDay(), false);
+                    if($daysLeft < 0) {
+                        $deadlineText = 'Terlambat ' . abs($daysLeft) . ' hari';
+                    } elseif($daysLeft == 0) {
+                        $deadlineText = 'Hari terakhir';
+                    } elseif($daysLeft == 1) {
+                        $deadlineText = 'Besok';
+                    } else {
+                        $deadlineText = $daysLeft . ' hari lagi';
+                    }
                 }
             @endphp
-            <div class="task-card group relative bg-white rounded-2xl border border-gray-100 hover:border-[#4318FF]/20 transition-all duration-500 overflow-hidden shadow-sm hover:shadow-2xl" data-status="{{ $status }}">
+            <div class="task-card group relative neo-flat rounded-2xl transition-all duration-500 overflow-hidden" data-status="{{ $status }}">
                 <!-- Premium Gradient Progress Bar -->
-                <div class="h-1 w-full bg-gray-100">
-                    <div class="h-full bg-gradient-to-r from-[#4318FF] to-[#9F7AEA] transition-all duration-700 ease-out" style="width: {{ $progress ? min(($progress / 100) * 100, 100) : 0 }}%"></div>
+                <div class="h-1 w-full neo-pressed">
+                    <div class="h-full neo-badge-blue transition-all duration-700 ease-out" style="width: {{ $progress ? min(($progress / 100) * 100, 100) : 0 }}%"></div>
                 </div>
                 
                 <div class="p-6">
@@ -122,15 +120,15 @@
                         </div>
                         <div class="flex gap-2">
                             @if($isUrgent && $status == 'pending')
-                                <span class="relative px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md">
+                                <span class="relative px-3 py-1 text-xs font-bold rounded-full neo-badge-red text-white">
                                     <i class='bx bx-time-five mr-1'></i> Urgent
                                 </span>
                             @elseif($status == 'submitted')
-                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md">
+                                <span class="px-3 py-1 text-xs font-bold rounded-full neo-badge-green text-white">
                                     <i class='bx bx-check-circle mr-1'></i> Completed
                                 </span>
                             @elseif($isLate)
-                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md">
+                                <span class="px-3 py-1 text-xs font-bold rounded-full neo-badge-orange text-white">
                                     <i class='bx bx-alarm-exclamation mr-1'></i> Late
                                 </span>
                             @endif
@@ -139,17 +137,17 @@
 
                     <!-- Content Premium -->
                     <h3 class="font-outfit font-bold text-xl text-[#2B3674] mb-3 line-clamp-1 group-hover:text-[#4318FF] transition-colors duration-300">
-                        {{ $assign->title ?? 'Tugas Baru' }}
+                        {{ $assign->title ?? 'Tanpa Judul' }}
                     </h3>
                     
-                    <div class="flex flex-wrap items-center gap-2 text-sm text-[#A3AED0] mb-4">
-                        <div class="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg">
+                    <div class="flex flex-wrap items-center gap-2 text-sm text-[var(--text-muted)] mb-4">
+                        <div class="flex items-center gap-1.5 neo-pressed px-3 py-1.5 rounded-lg text-[var(--brand-secondary)] font-medium">
                             <i class='bx bx-book-open text-xs'></i>
-                            <span>{{ $assign->subject->name ?? 'Mata Pelajaran' }}</span>
+                            <span>{{ $assign->subject->name ?? '-' }}</span>
                         </div>
-                        <div class="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg">
+                        <div class="flex items-center gap-1.5 neo-pressed px-3 py-1.5 rounded-lg text-[var(--brand-secondary)] font-medium">
                             <i class='bx bx-calendar text-xs'></i>
-                            <span>{{ $dueDate->format('d M Y') }}</span>
+                            <span>{{ $dueDate ? $dueDate->format('d M Y') : 'Tanpa Tenggat' }}</span>
                         </div>
                     </div>
                     
@@ -168,24 +166,25 @@
                                 <div class="flex items-center gap-1.5">
                                     <div class="w-2 h-2 rounded-full {{ ($isUrgent && $status == 'pending') || $isLate ? 'bg-red-500 animate-pulse' : 'bg-gray-400' }}"></div>
                                     <span class="text-sm font-bold {{ ($isUrgent && $status == 'pending') || $isLate ? 'text-red-600' : 'text-[#2B3674]' }}">
-                                        {{ $dueDate->format('H:i') }} WIB
+                                        {{ $dueDate ? $dueDate->format('H:i') . ' WIB' : '-' }}
                                     </span>
                                 </div>
-                                @if($status == 'pending' && !$isLate)
-                                    <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ $deadlineText }}</span>
-                                @elseif($isLate)
-                                    <span class="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">{{ $deadlineText }}</span>
+                                @if($dueDate)
+                                    @if($status == 'pending' && !$isLate)
+                                        <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ $deadlineText }}</span>
+                                    @elseif($isLate)
+                                        <span class="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">{{ $deadlineText }}</span>
+                                    @endif
                                 @endif
                             </div>
                         </div>
                         
                         @if($status != 'submitted')
-                            <button class="submit-btn relative overflow-hidden bg-gradient-to-r from-[#4318FF] to-[#5B4DFF] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-md shadow-indigo-200 hover:shadow-xl hover:scale-105 active:scale-95" data-id="{{ $assign->id }}">
+                            <button class="submit-btn relative overflow-hidden neo-badge-blue px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95" data-id="{{ $assign->id }}">
                                 <span class="relative z-10 flex items-center gap-2">
                                     <i class='bx bx-upload'></i> 
                                     <span>Submit</span>
                                 </span>
-                                <div class="absolute inset-0 bg-gradient-to-r from-[#5B4DFF] to-[#4318FF] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </button>
                         @else
                             <div class="text-right">

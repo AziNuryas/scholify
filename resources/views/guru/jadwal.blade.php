@@ -9,38 +9,8 @@
     $currentTime = date('H:i');
     
     // Simulasi Data (Bisa ditarik dari DB)
-    $schedules = [
-        [
-            'id' => 1,
-            'time_start' => '07:30',
-            'time_end' => '09:00',
-            'subject' => 'Matematika Aljabar',
-            'class' => '10-IPA 1',
-            'room' => 'Ruang 04 - Lt. 2',
-            'material' => 'Bab 3: Logaritma',
-            'students_count' => 32
-        ],
-        [
-            'id' => 2,
-            'time_start' => '09:15',
-            'time_end' => '14:45',
-            'subject' => 'Fisika Dasar',
-            'class' => '11-IPA 2',
-            'room' => 'Lab Fisika Utama',
-            'material' => 'Hukum Newton II',
-            'students_count' => 30
-        ],
-        [
-            'id' => 3,
-            'time_start' => '15:00',
-            'time_end' => '16:30',
-            'subject' => 'Matematika Peminatan',
-            'class' => '12-IPA 1',
-            'room' => 'Ruang 02 - Lt. 1',
-            'material' => 'Turunan Trigonometri',
-            'students_count' => 28
-        ],
-    ];
+    // Karena masih belum ada di DB, kita kosongkan saja agar tidak membingungkan
+    $schedules = [];
 
     function getStatus($start, $end, $current) {
         if ($current >= $start && $current <= $end) return 'ongoing';

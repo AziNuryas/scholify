@@ -55,9 +55,7 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         Route::get('/discipline', 'discipline')->name('discipline');
     });
 
-    // Pengumuman siswa
-    Route::get('/announcements', [AnnouncementController::class, 'studentIndex'])
-        ->name('announcements');
+
 });
 
 

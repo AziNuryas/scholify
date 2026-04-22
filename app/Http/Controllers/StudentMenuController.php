@@ -7,7 +7,6 @@ use App\Models\Student;
 use App\Models\Schedule;
 use App\Models\Assignment;
 use App\Models\User;
-use App\Models\Chat;
 use Illuminate\Support\Facades\DB;
 
 class StudentMenuController extends Controller
@@ -20,14 +19,15 @@ class StudentMenuController extends Controller
                 ->first();
         }
 
-        return Student::with('schoolClass')->first();
+        return null;
     }
 
     private function formatStudent($studentData)
     {
+        $user = auth()->user();
         return collect($studentData ? $studentData->toArray() : [
-            'name' => 'Siswa',
-            'avatar' => null
+            'name' => $user->name ?? 'Siswa',
+            'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($user->name ?? 'Siswa') . '&background=6366f1&color=fff'
         ]);
     }
 
@@ -163,20 +163,15 @@ class StudentMenuController extends Controller
         $studentData = $this->getStudent();
         $student = $this->formatStudent($studentData);
 
-        $counselingHistory = Chat::where(function ($q) use ($studentData) {
-                $q->where('sender_id', $studentData->user_id)
-                  ->orWhere('receiver_id', $studentData->user_id);
-            })
-            ->orderBy('created_at')
-            ->get();
-
-        Chat::where('receiver_id', auth()->id())
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
-
         $bkUser = User::where('role', 'guru_bk')->first();
 
-        return view('student.counseling', compact('student', 'counselingHistory', 'bkUser'));
+        $appointments = $studentData
+            ? \App\Models\Appointment::where('student_id', $studentData->id)
+                ->latest()
+                ->get()
+            : collect([]);
+
+        return view('student.counseling', compact('student', 'bkUser', 'appointments'));
     }
 
     public function sendCounselingMessage(Request $request)
