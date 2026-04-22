@@ -120,7 +120,7 @@
         box-shadow: 0 1px 2px rgba(139, 92, 246, 0.2);
     }
     
-    /* Badge styles - Soft pastel colors */
+    /* Badge styles */
     .badge {
         font-size: 0.6875rem;
         font-weight: 500;
@@ -155,7 +155,6 @@
         ========================== --}}
         <div class="lg:col-span-5 animate-slideInLeft">
             <div class="bg-white rounded-xl shadow-sm border border-purple-100 overflow-hidden">
-                <!-- Header kalem -->
                 <div class="bg-gradient-to-r from-purple-50 to-indigo-50 px-5 py-4 border-b border-purple-100">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -173,7 +172,6 @@
                 <form action="{{ route('guru.tugas.store') }}" method="POST" enctype="multipart/form-data" class="p-5 space-y-4">
                     @csrf
 
-                    <!-- Judul Tugas -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Judul Tugas</label>
                         <input type="text" name="title" value="{{ old('title') }}"
@@ -184,7 +182,6 @@
                         @enderror
                     </div>
 
-                    <!-- Deskripsi -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Deskripsi</label>
                         <textarea name="description" rows="3"
@@ -192,7 +189,6 @@
                                   class="form-input w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white transition-all resize-none">{{ old('description') }}</textarea>
                     </div>
 
-                    <!-- Kelas & Mapel -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kelas</label>
@@ -225,7 +221,6 @@
                         </div>
                     </div>
 
-                    <!-- Tipe & Deadline -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tipe</label>
@@ -243,7 +238,6 @@
                         </div>
                     </div>
 
-                    <!-- File Upload -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Lampiran</label>
                         <div class="relative">
@@ -264,7 +258,6 @@
                         @enderror
                     </div>
 
-                    <!-- Submit Button -->
                     <button class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm">
                         Simpan Tugas
                     </button>
@@ -277,7 +270,6 @@
         ========================== --}}
         <div class="lg:col-span-7 animate-slideInRight">
             <div class="bg-white rounded-xl shadow-sm border border-emerald-100 overflow-hidden">
-                <!-- Header kalem -->
                 <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-5 py-4 border-b border-emerald-100">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-3">
@@ -297,7 +289,6 @@
                         </div>
                     </div>
                     
-                    <!-- Filter Buttons -->
                     <div class="flex gap-1.5 mt-3">
                         <button onclick="filterTasks('all')" id="filterAll" class="filter-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-500 text-white shadow-sm">
                             Semua
@@ -313,10 +304,11 @@
 
                 <div class="divide-y divide-slate-100 max-h-[520px] overflow-y-auto custom-scroll" id="tasksList">
                     @forelse($assignments as $task)
-                        <div class="task-card p-4 hover:bg-slate-50/50 transition-all {{ $task->is_completed ? 'completed' : '' }}" data-status="{{ $task->is_completed ? 'completed' : 'active' }}">
+                        <div class="task-card p-4 hover:bg-slate-50/50 transition-all {{ $task->is_completed ? 'completed' : '' }}" 
+                             data-status="{{ $task->is_completed ? 'completed' : 'active' }}">
                             <div class="flex justify-between items-start gap-3">
                                 <div class="flex-1 min-w-0">
-                                    <!-- Badges - Soft pastel colors -->
+                                    <!-- Badges -->
                                     <div class="flex flex-wrap gap-1.5 mb-2">
                                         <span class="badge 
                                             @if($task->type == 'tugas') bg-sky-100 text-sky-700
@@ -334,19 +326,19 @@
                                         </span>
                                         
                                         @if($task->due_date)
-                                        <span class="badge bg-amber-100 text-amber-700">
-                                            Deadline: {{ \Carbon\Carbon::parse($task->due_date)->format('d M Y H:i') }}
-                                        </span>
+                                            <span class="badge bg-amber-100 text-amber-700">
+                                                Deadline: {{ \Carbon\Carbon::parse($task->due_date)->format('d M Y H:i') }}
+                                            </span>
                                         @endif
                                         
                                         @if($task->is_completed)
-                                        <span class="badge bg-emerald-100 text-emerald-700">
-                                            Selesai
-                                        </span>
+                                            <span class="badge bg-emerald-100 text-emerald-700">
+                                                Selesai
+                                            </span>
                                         @else
-                                        <span class="badge bg-amber-100 text-amber-700">
-                                            Belum Selesai
-                                        </span>
+                                            <span class="badge bg-amber-100 text-amber-700">
+                                                Belum Selesai
+                                            </span>
                                         @endif
                                     </div>
 
@@ -377,7 +369,9 @@
                                         @method('PUT')
                                         <input type="hidden" name="toggle_complete" value="1">
                                         <button type="submit" 
-                                                class="btn-action w-7 h-7 rounded-md flex items-center justify-center transition-all {{ $task->is_completed ? 'bg-rose-50 hover:bg-rose-100 text-rose-500' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-500' }}">
+                                                class="btn-action w-7 h-7 rounded-md flex items-center justify-center transition-all 
+                                                {{ $task->is_completed ? 'bg-rose-50 hover:bg-rose-100 text-rose-500' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-500' }}"
+                                                title="{{ $task->is_completed ? 'Tandai belum selesai' : 'Tandai selesai' }}">
                                             @if($task->is_completed)
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -396,7 +390,8 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
-                                                class="btn-action w-7 h-7 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-500 bg-slate-100 hover:bg-rose-50 transition-all">
+                                                class="btn-action w-7 h-7 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-500 bg-slate-100 hover:bg-rose-50 transition-all"
+                                                title="Hapus tugas">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
@@ -446,8 +441,10 @@
         const filterCompleted = document.getElementById('filterCompleted');
         
         [filterAll, filterActive, filterCompleted].forEach(btn => {
-            btn.classList.remove('active', 'bg-purple-500', 'text-white');
-            btn.classList.add('bg-slate-100', 'text-slate-600');
+            if(btn) {
+                btn.classList.remove('active', 'bg-purple-500', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            }
         });
         
         let activeBtn;
@@ -455,16 +452,16 @@
         else if(status === 'active') activeBtn = filterActive;
         else activeBtn = filterCompleted;
         
-        activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
-        activeBtn.classList.add('active', 'bg-purple-500', 'text-white');
+        if(activeBtn) {
+            activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+            activeBtn.classList.add('active', 'bg-purple-500', 'text-white');
+        }
         
         tasks.forEach(task => {
             if(status === 'all') {
                 task.style.display = 'flex';
-            } else if(status === 'active') {
-                task.style.display = task.dataset.status === 'active' ? 'flex' : 'none';
-            } else if(status === 'completed') {
-                task.style.display = task.dataset.status === 'completed' ? 'flex' : 'none';
+            } else {
+                task.style.display = task.dataset.status === status ? 'flex' : 'none';
             }
         });
     }

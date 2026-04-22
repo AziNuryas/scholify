@@ -8,6 +8,7 @@ use App\Models\Schedule;
 use App\Models\Assignment;
 use App\Models\User;
 use App\Models\Chat;
+use App\Models\Absensi; // ✅ TAMBAHKAN INI
 use Illuminate\Support\Facades\DB;
 
 class StudentMenuController extends Controller
@@ -97,6 +98,92 @@ class StudentMenuController extends Controller
         }
 
         return view('student.grades', compact('student', 'grades'));
+    }
+
+    // ================= ✅ ABSENSI SISWA =================
+
+    /**
+     * Menampilkan halaman absensi siswa
+     */
+    public function absensi()
+    {
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+        
+        $absensi = collect([]);
+        $statistik = ['hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alpha' => 0];
+        $todayAbsen = null;
+        
+        if ($studentData && $studentData->id) {
+            try {
+                // Ambil data absensi siswa dengan pagination
+                $absensi = Absensi::where('siswa_id', $studentData->id)
+                    ->orderBy('tanggal', 'desc')
+                    ->paginate(10);
+                
+                // Statistik kehadiran
+                $statistik = [
+                    'hadir' => Absensi::where('siswa_id', $studentData->id)->where('status', 'hadir')->count(),
+                    'izin' => Absensi::where('siswa_id', $studentData->id)->where('status', 'izin')->count(),
+                    'sakit' => Absensi::where('siswa_id', $studentData->id)->where('status', 'sakit')->count(),
+                    'alpha' => Absensi::where('siswa_id', $studentData->id)->where('status', 'alpha')->count(),
+                ];
+                
+                // Cek apakah sudah absen hari ini
+                $todayAbsen = Absensi::where('siswa_id', $studentData->id)
+                    ->where('tanggal', date('Y-m-d'))
+                    ->first();
+                    
+            } catch (\Exception $e) {
+                // Jika tabel belum ada, tampilkan data kosong
+                $absensi = collect([]);
+            }
+        }
+        
+        return view('student.absensi', compact('student', 'studentData', 'absensi', 'statistik', 'todayAbsen'));
+    }
+
+    /**
+     * Menyimpan data absensi siswa
+     */
+    public function storeAbsensi(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:hadir,izin,sakit,alpha',
+            'tanggal' => 'required|date',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+        
+        $studentData = $this->getStudent();
+        
+        if (!$studentData || !$studentData->id) {
+            return back()->with('error', 'Data siswa tidak ditemukan! Silakan hubungi admin.');
+        }
+        
+        try {
+            // Cek apakah sudah absen pada tanggal tersebut
+            $existing = Absensi::where('siswa_id', $studentData->id)
+                ->where('tanggal', $request->tanggal)
+                ->first();
+                
+            if ($existing) {
+                return back()->with('error', 'Anda sudah melakukan absensi untuk tanggal ' . date('d/m/Y', strtotime($request->tanggal)) . '!');
+            }
+            
+            // Buat absensi baru
+            Absensi::create([
+                'siswa_id' => $studentData->id,
+                'kelas_id' => $studentData->class_id,
+                'tanggal' => $request->tanggal,
+                'status' => $request->status,
+                'keterangan' => $request->keterangan,
+            ]);
+            
+            return back()->with('success', '✅ Absensi berhasil direkam! Terima kasih.');
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menyimpan absensi: ' . $e->getMessage());
+        }
     }
 
     // ================= KONSULTASI =================
@@ -236,7 +323,7 @@ class StudentMenuController extends Controller
         return view('student.discipline', compact('student', 'records'));
     }
 
-    // ================= ✅ PENGUMUMAN (FIX ERROR) =================
+    // ================= PENGUMUMAN =================
 
     public function announcements()
     {

@@ -5,14 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Assignment;
 use App\Models\SchoolClass;
 use App\Models\Subject;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class AssignmentController extends Controller
 {
     /**
-     * Display a listing of the assignments.
+     * Display a listing of the assignments (untuk Guru).
      */
     public function index()
     {
@@ -23,6 +25,23 @@ class AssignmentController extends Controller
             abort(403, 'User bukan guru');
         }
 
+        // ✅ AUTO-COMPLETE TUGAS YANG MELEWATI DEADLINE
+        $now = Carbon::now();
+        
+        // Ambil semua tugas yang belum selesai dan melewati deadline
+        $overdueAssignments = Assignment::where('teacher_id', $teacher->id)
+            ->where('is_completed', false)
+            ->whereNotNull('due_date')
+            ->where('due_date', '<', $now)
+            ->get();
+        
+        foreach ($overdueAssignments as $assignment) {
+            $assignment->is_completed = true;
+            $assignment->completed_at = $assignment->due_date; // tandai selesai di tanggal deadline
+            $assignment->save();
+        }
+        
+        // Ambil tugas dengan data terbaru
         $assignments = Assignment::with(['class', 'subject'])
             ->where('teacher_id', $teacher->id)
             ->latest()
@@ -41,7 +60,6 @@ class AssignmentController extends Controller
     {
         $teacher = Auth::user()->teacher;
 
-        // Cegah kalau bukan guru
         if (!$teacher) {
             abort(403, 'User bukan guru');
         }
@@ -62,6 +80,16 @@ class AssignmentController extends Controller
             $filePath = $request->file('file')->store('assignments', 'public');
         }
 
+        // Cek apakah deadline sudah lewat
+        $dueDate = $request->due_date ? Carbon::parse($request->due_date) : null;
+        $isCompleted = false;
+        $completedAt = null;
+        
+        if ($dueDate && $dueDate->isPast() && !$dueDate->isToday()) {
+            $isCompleted = true;
+            $completedAt = $dueDate;
+        }
+
         Assignment::create([
             'teacher_id' => $teacher->id,
             'class_id' => $request->class_id,
@@ -71,11 +99,13 @@ class AssignmentController extends Controller
             'type' => $request->type,
             'file' => $filePath,
             'due_date' => $request->due_date,
-            'is_completed' => false,
-            'completed_at' => null,
+            'is_completed' => $isCompleted,
+            'completed_at' => $completedAt,
         ]);
 
-        return redirect()->route('guru.tugas')->with('success', 'Tugas berhasil dibuat!');
+        $message = $isCompleted ? 'Tugas berhasil dibuat (Deadline sudah lewat, otomatis ditandai selesai)!' : 'Tugas berhasil dibuat!';
+        
+        return redirect()->route('guru.tugas')->with('success', $message);
     }
 
     /**
@@ -91,7 +121,6 @@ class AssignmentController extends Controller
 
         $assignment = Assignment::findOrFail($id);
 
-        // Pastikan hanya guru pemilik yang bisa update
         if ($assignment->teacher_id != $teacher->id) {
             abort(403, 'Anda tidak memiliki izin untuk mengubah tugas ini');
         }
@@ -119,6 +148,17 @@ class AssignmentController extends Controller
             'due_date' => 'nullable|date',
         ]);
 
+        // Cek deadline baru apakah sudah lewat
+        $dueDate = $request->due_date ? Carbon::parse($request->due_date) : null;
+        $isCompleted = $assignment->is_completed;
+        
+        if (!$isCompleted && $dueDate && $dueDate->isPast() && !$dueDate->isToday()) {
+            $isCompleted = true;
+            $completedAt = $dueDate;
+        } else {
+            $completedAt = $assignment->completed_at;
+        }
+
         $assignment->update([
             'title' => $request->title,
             'description' => $request->description,
@@ -126,6 +166,8 @@ class AssignmentController extends Controller
             'subject_id' => $request->subject_id,
             'type' => $request->type,
             'due_date' => $request->due_date,
+            'is_completed' => $isCompleted,
+            'completed_at' => $completedAt,
         ]);
 
         return redirect()->route('guru.tugas')->with('success', 'Tugas berhasil diperbarui!');
@@ -138,19 +180,16 @@ class AssignmentController extends Controller
     {
         $teacher = Auth::user()->teacher;
 
-        // Cegah kalau bukan guru
         if (!$teacher) {
             abort(403, 'User bukan guru');
         }
 
         $assignment = Assignment::findOrFail($id);
 
-        // Pastikan hanya guru pemilik yang bisa hapus
         if ($assignment->teacher_id != $teacher->id) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus tugas ini');
         }
 
-        // Hapus file jika ada
         if ($assignment->file && Storage::disk('public')->exists($assignment->file)) {
             Storage::disk('public')->delete($assignment->file);
         }
@@ -161,65 +200,85 @@ class AssignmentController extends Controller
     }
 
     /**
-     * Toggle assignment completion status (AJAX version).
+     * Get assignments with proper status for student (SISWA)
+     * ✅ Auto-mark tugas yang melewati deadline sebagai LATE
      */
-    public function toggleComplete($id)
+    public function getStudentAssignments()
     {
-        try {
-            $teacher = Auth::user()->teacher;
-
-            if (!$teacher) {
-                return response()->json(['error' => 'Unauthorized'], 403);
+        $studentId = Auth::id();
+        $now = Carbon::now();
+        
+        // Ambil semua tugas berdasarkan kelas siswa
+        $assignments = Assignment::whereHas('class.students', function($query) use ($studentId) {
+            $query->where('students.id', $studentId);
+        })
+        ->with(['subject', 'submissions' => function($query) use ($studentId) {
+            $query->where('student_id', $studentId);
+        }])
+        ->orderBy('due_date', 'asc')
+        ->get();
+        
+        // Proses setiap tugas untuk menentukan status yang benar
+        foreach ($assignments as $assignment) {
+            $submission = $assignment->submissions->first();
+            
+            // ✅ Jika sudah submit
+            if ($submission && $submission->status == 'submitted') {
+                $assignment->status = 'submitted';
+                $assignment->is_late = false;
+            } 
+            // ✅ Jika belum submit dan melewati deadline
+            else if ($assignment->due_date && Carbon::parse($assignment->due_date)->isPast()) {
+                $assignment->status = 'late';
+                $assignment->is_late = true;
+                
+                // ✅ OTOMATIS TANDAI TUGAS SEBAGAI TERLAMBAT (TIDAK SELESAI)
+                // Untuk sisi guru, tugas tetap belum selesai, tapi untuk siswa statusnya late
+            } 
+            // ✅ Status pending (belum dikerjakan, deadline masih ada)
+            else {
+                $assignment->status = 'pending';
+                $assignment->is_late = false;
             }
-
-            $assignment = Assignment::findOrFail($id);
-
-            if ($assignment->teacher_id != $teacher->id) {
-                return response()->json(['error' => 'Forbidden'], 403);
-            }
-
-            $assignment->is_completed = !$assignment->is_completed;
-            $assignment->completed_at = $assignment->is_completed ? now() : null;
-            $assignment->save();
-
-            return response()->json([
-                'success' => true,
-                'is_completed' => $assignment->is_completed,
-                'completed_at' => $assignment->completed_at,
-                'message' => $assignment->is_completed ? 'Tugas ditandai selesai' : 'Tugas ditandai belum selesai'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
+        
+        return $assignments;
     }
-
+    
     /**
-     * Bulk delete assignments.
+     * ✅ METHOD BARU: Auto-mark overdue assignments as completed (untuk GURU)
+     * Bisa dipanggil via cron job atau setiap kali load halaman
      */
-    public function bulkDestroy(Request $request)
+    public function autoCompleteOverdueAssignments()
     {
         $teacher = Auth::user()->teacher;
-
+        
         if (!$teacher) {
-            abort(403, 'User bukan guru');
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:assignments,id'
-        ]);
-
-        $assignments = Assignment::whereIn('id', $request->ids)
-            ->where('teacher_id', $teacher->id)
+        
+        $now = Carbon::now();
+        
+        // Tugas yang belum selesai dan melewati deadline
+        $overdueAssignments = Assignment::where('teacher_id', $teacher->id)
+            ->where('is_completed', false)
+            ->whereNotNull('due_date')
+            ->where('due_date', '<', $now)
             ->get();
-
-        foreach ($assignments as $assignment) {
-            if ($assignment->file && Storage::disk('public')->exists($assignment->file)) {
-                Storage::disk('public')->delete($assignment->file);
-            }
-            $assignment->delete();
+        
+        $updatedCount = 0;
+        
+        foreach ($overdueAssignments as $assignment) {
+            $assignment->is_completed = true;
+            $assignment->completed_at = $assignment->due_date;
+            $assignment->save();
+            $updatedCount++;
         }
-
-        return redirect()->route('guru.tugas')->with('success', count($assignments) . ' tugas berhasil dihapus!');
+        
+        return response()->json([
+            'success' => true,
+            'updated_count' => $updatedCount,
+            'message' => "{$updatedCount} tugas telah otomatis ditandai selesai karena melewati deadline"
+        ]);
     }
 }

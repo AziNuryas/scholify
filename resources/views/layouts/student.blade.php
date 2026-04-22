@@ -8,12 +8,13 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome 6 -->
+    <!-- Font Awesome 6 (untuk backup jika diperlukan) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -66,16 +67,6 @@
             animation: elasticBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
         }
         
-        /* Memastikan ikon selalu tampil */
-        .nav-icon {
-            width: 24px;
-            text-align: center;
-            font-size: 1.25rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
         /* Sidebar Active State */
         .sidebar-active {
             background: #4318FF;
@@ -90,13 +81,19 @@
             width: 100%;
             height: 100%;
         }
+        
+        /* Icon styling */
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body class="antialiased flex h-screen overflow-hidden">
 
     <!-- Sidebar dengan Logo Scholify -->
     <aside class="w-[290px] bg-white h-full flex flex-col transition-all duration-300 z-20 border-r border-[#E0E5F2]">
-        <!-- Logo Scholify - Ukuran Normal -->
+        <!-- Logo Scholify -->
         <div class="h-28 flex-none flex items-center px-6 border-b border-[#F4F7FE]">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-indigo-200 bg-gradient-to-br from-[#4318FF] to-[#868CFF] flex items-center justify-center">
@@ -117,27 +114,27 @@
                 <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Menu Utama</p>
                 
                 <a href="{{ route('student.dashboard') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.dashboard') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class="fas fa-tachometer-alt text-xl nav-icon"></i>
+                    <i data-lucide="layout-dashboard" class="nav-icon"></i>
                     <span>Dashboard</span>
                 </a>
                 
                 <a href="{{ route('student.schedule') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.schedule') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class="fas fa-calendar-alt text-xl nav-icon"></i>
+                    <i data-lucide="calendar" class="nav-icon"></i>
                     <span>Jadwal Kelas</span>
                 </a>
                 
-                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium">
-                    <i class="fas fa-user-check text-xl nav-icon"></i>
+                <a href="{{ route('student.absensi') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.absensi') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="user-check" class="nav-icon"></i>
                     <span>Absensi</span>
                 </a>
                 
                 <a href="{{ route('student.grades') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.grades') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class="fas fa-chart-line text-xl nav-icon"></i>
+                    <i data-lucide="trending-up" class="nav-icon"></i>
                     <span>Nilai & Rapor</span>
                 </a>
                 
                 <a href="{{ route('student.assignments') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.assignments') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
-                    <i class="fas fa-book-open text-xl nav-icon"></i>
+                    <i data-lucide="clipboard-list" class="nav-icon"></i>
                     <span>Tugas</span>
                 </a>
 
@@ -145,7 +142,7 @@
                 <a href="{{ route('student.announcements') }}" 
                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl 
                    {{ request()->routeIs('student.announcements') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class="fas fa-bullhorn text-xl nav-icon"></i>
+                    <i data-lucide="megaphone" class="nav-icon"></i>
                     <span>Pengumuman</span>
                 </a>
 
@@ -154,7 +151,7 @@
                 <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Lainnya</p>
                 
                 <a href="{{ route('student.profile') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.profile') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i class="fas fa-user-circle text-xl nav-icon"></i>
+                    <i data-lucide="user-circle" class="nav-icon"></i>
                     <span>Profil Saya</span>
                 </a>
             </nav>
@@ -165,7 +162,7 @@
             <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                 @csrf
                 <button type="submit" class="flex items-center justify-center gap-2 w-full text-[#A3AED0] hover:text-red-500 font-semibold py-2.5 transition-colors">
-                    <i class="fas fa-sign-out-alt text-xl"></i>
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
                     <span>Keluar dari Akun</span>
                 </button>
             </form>
@@ -181,12 +178,12 @@
 
             <div class="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-[#F4F7FE]">
                 <div class="relative hidden lg:flex items-center bg-[#F4F7FE] rounded-xl px-4 py-2 w-72">
-                    <i class="fas fa-search text-[#A3AED0] text-lg"></i>
+                    <i data-lucide="search" class="w-5 h-5 text-[#A3AED0]"></i>
                     <input type="text" placeholder="Cari tugas..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-[#2B3674] placeholder-[#A3AED0]">
                 </div>
 
                 <button class="p-2.5 rounded-xl text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all relative">
-                    <i class="fas fa-bell text-xl"></i>
+                    <i data-lucide="bell" class="w-5 h-5"></i>
                     <span class="absolute top-2.5 right-3 w-2 h-2 rounded-full bg-red-500 border-2 border-white"></span>
                 </button>
 
@@ -200,7 +197,7 @@
                             <img src="https://ui-avatars.com/api/?name=Ahmad+Fauzi&background=4318FF&color=fff&rounded=true" alt="Profile" class="w-11 h-11 rounded-full object-cover shadow-sm ring-2 ring-white group-hover:ring-[#4318FF]/20 transition-all">
                             <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
-                        <i class="fas fa-chevron-down text-[#A3AED0] text-xl transition-transform duration-300" :class="open ? 'rotate-180 text-[#4318FF]' : ''"></i>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-[#A3AED0] transition-transform duration-300" :class="open ? 'rotate-180 text-[#4318FF]' : ''"></i>
                     </button>
 
                     <div x-show="open" 
@@ -219,14 +216,14 @@
 
                         <a href="{{ route('student.profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all font-semibold mx-2 rounded-xl">
                             <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                <i class="fas fa-user text-lg text-[#4318FF]"></i>
+                                <i data-lucide="user" class="w-4 h-4 text-[#4318FF]"></i>
                             </div>
                             Lihat Profil
                         </a>
 
                         <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] transition-all font-medium mx-2 rounded-xl">
                             <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
-                                <i class="fas fa-cog text-lg text-[#A3AED0]"></i>
+                                <i data-lucide="settings" class="w-4 h-4 text-[#A3AED0]"></i>
                             </div>
                             Pengaturan
                         </a>
@@ -237,7 +234,7 @@
                             @csrf
                             <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-all font-bold w-[calc(100%-1rem)] mx-2 rounded-xl text-left">
                                 <div class="w-8 h-8 rounded-lg bg-red-100/50 flex items-center justify-center">
-                                    <i class="fas fa-sign-out-alt text-lg"></i>
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
                                 </div>
                                 Keluar Aplikasi
                             </button>
@@ -275,7 +272,7 @@
              class="bg-[#4318FF] rounded-[28px] relative overflow-hidden p-8 text-white shadow-[0_25px_60px_rgba(67,24,255,0.35)] border border-white/10">
             
             <button @click="closeForNow()" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
-                <i class="fas fa-times text-2xl"></i>
+                <i data-lucide="x" class="w-6 h-6"></i>
             </button>
 
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
@@ -283,7 +280,7 @@
 
             <div class="flex flex-col gap-6 relative z-10 text-center items-center">
                 <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner ring-1 ring-white/20">
-                    <i class="fas fa-bullhorn text-3xl text-yellow-300 animate-pulse"></i>
+                    <i data-lucide="megaphone" class="w-8 h-8 text-yellow-300 animate-pulse"></i>
                 </div>
                 
                 <div>
@@ -308,6 +305,9 @@
     </div>
 
     <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
         // Konfirmasi logout dengan custom dialog
         document.querySelectorAll('form[action*="logout"]').forEach(form => {
             form.addEventListener('submit', function(e) {
