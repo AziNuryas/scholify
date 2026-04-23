@@ -62,7 +62,7 @@ class CatatanKonselingController extends Controller
         CatatanKonseling::create($validated);
 
         return redirect()
-            ->route('catatan-konseling.index')
+            ->route('gurubk.catatan-konseling.index')
             ->with('success', 'Catatan konseling berhasil disimpan.');
     }
 
@@ -104,7 +104,7 @@ class CatatanKonselingController extends Controller
         $catatanKonseling->update($validated);
 
         return redirect()
-            ->route('catatan-konseling.index')
+            ->route('gurubk.catatan-konseling.index')
             ->with('success', 'Catatan konseling berhasil diperbarui.');
     }
 
@@ -116,7 +116,7 @@ class CatatanKonselingController extends Controller
         $catatanKonseling->delete();
 
         return redirect()
-            ->route('catatan-konseling.index')
+            ->route('gurubk.catatan-konseling.index')
             ->with('success', 'Catatan konseling berhasil dihapus.');
     }
 }

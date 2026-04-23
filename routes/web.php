@@ -9,6 +9,10 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\DeteksiDiniController;
+use App\Http\Controllers\LaporanSiswaController;
+use App\Http\Controllers\AsesmenController;
+use App\Http\Controllers\CatatanKonselingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,8 +57,7 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         Route::post('/appointments', 'storeAppointment')->name('appointments.store');
 
         Route::get('/discipline', 'discipline')->name('discipline');
-        
-        // ✅ TAMBAHKAN ROUTE ABSENSI DI SINI
+
         Route::get('/absensi', 'absensi')->name('absensi');
         Route::post('/absensi/store', 'storeAbsensi')->name('absensi.store');
     });
@@ -62,6 +65,14 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
     // Pengumuman siswa
     Route::get('/announcements', [AnnouncementController::class, 'studentIndex'])
         ->name('announcements');
+
+    // Asesmen mandiri siswa
+    Route::prefix('asesmen')->name('asesmen.')->group(function () {
+        Route::get('/',                  [AsesmenController::class, 'index'])->name('index');
+        Route::get('/isi/{jenis}',       [AsesmenController::class, 'isi'])->name('isi');
+        Route::post('/simpan/{asesmen}', [AsesmenController::class, 'simpan'])->name('simpan');
+        Route::get('/hasil/{asesmen}',   [AsesmenController::class, 'hasil'])->name('hasil');
+    });
 });
 
 
@@ -86,6 +97,8 @@ Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function ()
 
         Route::get('/discipline', 'discipline')->name('discipline');
         Route::post('/discipline', 'storeDiscipline')->name('discipline.store');
+        // Catatan Konseling
+        Route::resource('catatan-konseling', CatatanKonselingController::class);
     });
 });
 
@@ -97,48 +110,56 @@ Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function ()
 */
 Route::middleware('auth')->prefix('guru')->name('guru.')->group(function () {
 
-    /*
-    |----------------------------------
-    | Dashboard & Static Pages
-    |----------------------------------
-    */
     Route::view('/dashboard', 'guru.dashboard')->name('dashboard');
     Route::view('/jadwal', 'guru.jadwal')->name('jadwal');
     Route::view('/absensi', 'guru.absensi')->name('absensi');
     Route::view('/raport', 'guru.raport')->name('raport');
     Route::view('/profil', 'guru.profil')->name('profil');
 
-    /*
-    |----------------------------------
-    | NILAI
-    |----------------------------------
-    */
     Route::controller(GradeController::class)->group(function () {
         Route::get('/nilai', 'index')->name('nilai');
         Route::post('/nilai', 'store')->name('nilai.store');
     });
 
-    /*
-    |----------------------------------
-    | TUGAS (CORE FEATURE 🔥)
-    |----------------------------------
-    */
     Route::controller(AssignmentController::class)->group(function () {
         Route::get('/tugas', 'index')->name('tugas');
         Route::post('/tugas', 'store')->name('tugas.store');
-        Route::put('/tugas/{id}', 'update')->name('tugas.update'); // ✅ TAMBAHKAN INI
+        Route::put('/tugas/{id}', 'update')->name('tugas.update');
         Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
     });
 
-    /*
-    |----------------------------------
-    | PENGUMUMAN
-    |----------------------------------
-    */
     Route::controller(AnnouncementController::class)->group(function () {
         Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
         Route::post('/pengumuman', 'store')->name('pengumuman.store');
         Route::delete('/pengumuman/{id}', 'destroy')->name('pengumuman.destroy');
+    });
+
+    // Laporan siswa bermasalah (guru mapel)
+    Route::prefix('laporan-siswa')->name('laporan.')->group(function () {
+        Route::get('/',          [LaporanSiswaController::class, 'index'])->name('index');
+        Route::get('/buat',      [LaporanSiswaController::class, 'create'])->name('create');
+        Route::post('/',         [LaporanSiswaController::class, 'store'])->name('store');
+        Route::get('/{laporan}', [LaporanSiswaController::class, 'show'])->name('show');
+    });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| BK / KONSELOR — Deteksi Dini & Asesmen
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->prefix('bk')->name('bk.')->group(function () {
+
+    Route::prefix('deteksi-dini')->name('deteksi.')->group(function () {
+        Route::get('/',                                   [DeteksiDiniController::class, 'index'])->name('index');
+        Route::get('/siswa',                              [DeteksiDiniController::class, 'daftarSiswa'])->name('daftar-siswa');
+        Route::get('/siswa/{siswaId}',                    [DeteksiDiniController::class, 'detailSiswa'])->name('detail-siswa');
+        Route::get('/laporan',                            [DeteksiDiniController::class, 'daftarLaporan'])->name('laporan');
+        Route::patch('/laporan/{laporan}/proses',         [DeteksiDiniController::class, 'prosesLaporan'])->name('laporan.proses');
+        Route::get('/asesmen/{asesmen}',                  [DeteksiDiniController::class, 'detailAsesmen'])->name('asesmen.detail');
+        Route::patch('/asesmen/{asesmen}/catatan',        [DeteksiDiniController::class, 'catatanAsesmen'])->name('asesmen.catatan');
+        Route::post('/refresh-skor',                      [DeteksiDiniController::class, 'refreshSemuaSkor'])->name('refresh-skor');
     });
 });
 
@@ -149,7 +170,6 @@ Route::middleware('auth')->prefix('guru')->name('guru.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->prefix('api/chat')->name('chat.')->group(function () {
-
     Route::get('/fetch/{partnerId}', [ChatController::class, 'fetch'])->name('fetch');
     Route::post('/send', [ChatController::class, 'send'])->name('send');
     Route::get('/unread', [ChatController::class, 'unreadCount'])->name('unread');

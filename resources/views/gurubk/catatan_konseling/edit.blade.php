@@ -1,4 +1,4 @@
-{{-- resources/views/catatan_konseling/edit.blade.php --}}
+{{-- resources/views/gurubk/catatan_konseling/edit.blade.php --}}
 @extends('layouts.gurubk')
 
 @section('title', 'Edit Catatan Konseling')
@@ -10,7 +10,7 @@
 </div>
 
 <div class="bg-white border border-gray-200 rounded-xl p-6">
-    <form action="{{ route('catatan-konseling.update', $catatanKonseling) }}" method="POST">
+    <form action="{{ route('gurubk.catatan-konseling.update', $catatanKonseling) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -82,7 +82,7 @@
         </div>
 
         <div class="flex justify-end gap-2">
-            <a href="{{ route('catatan-konseling.index') }}"
+            <a href="{{ route('gurubk.catatan-konseling.index') }}"
                 class="px-4 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
                 Batal
             </a>

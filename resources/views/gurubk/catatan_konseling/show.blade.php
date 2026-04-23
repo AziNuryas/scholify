@@ -1,4 +1,4 @@
-{{-- resources/views/catatan_konseling/show.blade.php --}}
+{{-- resources/views/gurubk/catatan_konseling/show.blade.php --}}
 @extends('layouts.gurubk')
 
 @section('title', 'Detail Catatan Konseling')
@@ -12,11 +12,11 @@
         </p>
     </div>
     <div class="flex gap-2">
-        <a href="{{ route('catatan-konseling.edit', $catatanKonseling) }}"
+        <a href="{{ route('gurubk.catatan-konseling.edit', $catatanKonseling) }}"
             class="px-4 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
             Edit
         </a>
-        <a href="{{ route('catatan-konseling.index') }}"
+        <a href="{{ route('gurubk.catatan-konseling.index') }}"
             class="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700">
             Kembali
         </a>

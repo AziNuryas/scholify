@@ -1,37 +1,9 @@
-{{-- resources/views/gurubk/catatan_konseling/index.blade.php --}}
+{{-- resources/views/catatan_konseling/index.blade.php --}}
 @extends('layouts.gurubk')
 
 @section('title', 'Catatan Konseling')
 
 @section('content')
-
-{{-- Tom Select CSS --}}
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
-<style>
-    .ts-wrapper.single .ts-control {
-        width: 100%;
-        font-size: 0.875rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        box-shadow: none;
-        background: white;
-    }
-    .ts-wrapper.single.focus .ts-control {
-        border-color: #2dd4bf;
-        box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.3);
-        outline: none;
-    }
-    .ts-dropdown {
-        border-radius: 0.5rem;
-        border: 1px solid #e5e7eb;
-        font-size: 0.875rem;
-    }
-    .ts-wrapper .ts-control input {
-        font-size: 0.875rem !important;
-    }
-</style>
-
 <div class="mb-6">
     <h1 class="text-xl font-semibold text-gray-800">Catatan Konseling</h1>
     <p class="text-sm text-gray-500 mt-1">Rekam dan pantau sesi konseling siswa secara terstruktur.</p>
@@ -50,15 +22,15 @@
         Tambah catatan konseling baru
     </h2>
 
-    <form action="{{ route('catatan-konseling.store') }}" method="POST">
+    <form action="{{ route('gurubk.catatan-konseling.store') }}" method="POST">
         @csrf
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {{-- Siswa --}}
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">Nama siswa</label>
-                <select name="siswa_id" id="pilih-siswa"
-                    class="@error('siswa_id') border-red-400 @enderror">
+                <select name="siswa_id"
+                    class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 @error('siswa_id') border-red-400 @enderror">
                     <option value="">Pilih siswa...</option>
                     @foreach($siswaList as $siswa)
                         <option value="{{ $siswa->id }}" {{ old('siswa_id') == $siswa->id ? 'selected' : '' }}>
@@ -133,7 +105,7 @@
         </div>
 
         <div class="flex justify-end gap-2">
-            <a href="{{ route('catatan-konseling.index') }}"
+            <a href="{{ route('gurubk.catatan-konseling.index') }}"
                 class="px-4 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
                 Batal
             </a>
@@ -149,7 +121,7 @@
 <div class="bg-white border border-gray-200 rounded-xl p-6">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-sm font-semibold text-gray-700">Riwayat catatan konseling</h2>
-        <form method="GET" action="{{ route('catatan-konseling.index') }}" class="flex gap-2">
+        <form method="GET" action="{{ route('gurubk.catatan-konseling.index') }}" class="flex gap-2">
             <input type="text" name="cari" value="{{ request('cari') }}"
                 placeholder="Cari siswa..."
                 class="text-xs border border-gray-200 rounded-lg px-3 py-2 w-44 focus:outline-none focus:ring-2 focus:ring-teal-400"/>
@@ -206,11 +178,11 @@
                     </td>
                     <td class="py-3 px-3">
                         <div class="flex items-center gap-3">
-                            <a href="{{ route('catatan-konseling.show', $catatan) }}"
+                            <a href="{{ route('gurubk.catatan-konseling.show', $catatan) }}"
                                 class="text-xs text-teal-600 hover:underline">Detail</a>
-                            <a href="{{ route('catatan-konseling.edit', $catatan) }}"
+                            <a href="{{ route('gurubk.catatan-konseling.edit', $catatan) }}"
                                 class="text-xs text-gray-500 hover:underline">Edit</a>
-                            <form action="{{ route('catatan-konseling.destroy', $catatan) }}" method="POST"
+                            <form action="{{ route('gurubk.catatan-konseling.destroy', $catatan) }}" method="POST"
                                 onsubmit="return confirm('Hapus catatan ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-xs text-red-400 hover:underline">Hapus</button>
@@ -234,19 +206,4 @@
         <div class="mt-4">{{ $catatanList->links() }}</div>
     @endif
 </div>
-
-{{-- Tom Select JS --}}
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-<script>
-    new TomSelect('#pilih-siswa', {
-        placeholder: 'Cari nama siswa...',
-        allowEmptyOption: true,
-        render: {
-            no_results: function() {
-                return '<div class="no-results px-3 py-2 text-sm text-gray-400">Siswa tidak ditemukan</div>';
-            }
-        }
-    });
-</script>
-
 @endsection
