@@ -119,11 +119,13 @@
     }
 </style>
 
-<div class="p-5 max-w-7xl mx-auto">
-    <div class="space-y-6">
+{{-- PERUBAHAN 1: padding top dikurangi dari p-5 menjadi pt-2 px-5 pb-5 --}}
+<div class="pt-2 px-5 pb-5 max-w-7xl mx-auto">
+    {{-- PERUBAHAN 2: jarak antar elemen dikurangi dari space-y-6 menjadi space-y-4 --}}
+    <div class="space-y-4">
         
-        <!-- Header Section dengan Statistik Premium -->
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 animate-fadeIn">
+        {{-- PERUBAHAN 3: header digeser ke atas dengan -mt-1 --}}
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 animate-fadeIn -mt-1">
             <div>
                 <div class="flex items-center gap-2 mb-2">
                     <div class="w-1 h-8 bg-gradient-to-b from-[#4318FF] to-[#9F7AEA] rounded-full"></div>
