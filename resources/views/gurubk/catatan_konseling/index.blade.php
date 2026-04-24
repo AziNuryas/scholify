@@ -4,6 +4,48 @@
 @section('title', 'Catatan Konseling')
 
 @section('content')
+
+{{-- ── Tom Select CSS (langsung di sini, tidak butuh @stack('styles')) ── --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css"/>
+<style>
+    .ts-wrapper.single .ts-control,
+    .ts-control {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 0.5rem !important;
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.875rem !important;
+        color: #374151 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        min-height: unset !important;
+        cursor: pointer;
+    }
+    .ts-wrapper.single.focus .ts-control,
+    .ts-wrapper.focus .ts-control {
+        border-color: #2dd4bf !important;
+        box-shadow: 0 0 0 2px rgba(45,212,191,0.25) !important;
+        outline: none !important;
+    }
+    .ts-dropdown {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+        font-size: 0.875rem !important;
+        overflow: hidden;
+        z-index: 9999 !important;
+    }
+    .ts-dropdown .option {
+        padding: 0.5rem 0.75rem !important;
+        color: #374151 !important;
+    }
+    .ts-dropdown .option:hover,
+    .ts-dropdown .option.active {
+        background: #f0fdfa !important;
+        color: #0f766e !important;
+    }
+    .ts-wrapper .placeholder { color: #9ca3af !important; }
+</style>
+
 <div class="mb-6">
     <h1 class="text-xl font-semibold text-gray-800">Catatan Konseling</h1>
     <p class="text-sm text-gray-500 mt-1">Rekam dan pantau sesi konseling siswa secara terstruktur.</p>
@@ -26,19 +68,25 @@
         @csrf
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            {{-- Siswa --}}
+
+            {{-- ── Siswa (Tom Select — bisa diketik/dicari) ── --}}
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">Nama siswa</label>
-                <select name="siswa_id"
-                    class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 @error('siswa_id') border-red-400 @enderror">
-                    <option value="">Pilih siswa...</option>
+                <select
+                    id="siswa-select"
+                    name="siswa_id"
+                    placeholder="Ketik nama atau kelas untuk mencari..."
+                >
+                    <option value="">Ketik nama atau kelas untuk mencari...</option>
                     @foreach($siswaList as $siswa)
                         <option value="{{ $siswa->id }}" {{ old('siswa_id') == $siswa->id ? 'selected' : '' }}>
                             {{ $siswa->name }} — {{ $siswa->kelas }}
                         </option>
                     @endforeach
                 </select>
-                @error('siswa_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                @error('siswa_id')
+                    <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             {{-- Tanggal --}}
@@ -206,4 +254,22 @@
         <div class="mt-4">{{ $catatanList->links() }}</div>
     @endif
 </div>
+
+{{-- ── Tom Select JS (inline, tidak butuh @stack('scripts')) ── --}}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+    new TomSelect('#siswa-select', {
+        placeholder   : 'Ketik nama atau kelas untuk mencari...',
+        searchField   : ['text'],   // cari berdasarkan teks option
+        maxOptions    : 200,
+        create        : false,
+        allowEmptyOption: true,
+        render: {
+            no_results: function() {
+                return '<div class="no-results" style="padding:0.5rem 0.75rem;color:#9ca3af;font-size:0.875rem;">Siswa tidak ditemukan</div>';
+            }
+        }
+    });
+</script>
+
 @endsection
