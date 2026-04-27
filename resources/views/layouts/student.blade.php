@@ -12,9 +12,8 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome 6 (untuk backup jika diperlukan) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -32,12 +31,26 @@
             letter-spacing: -0.01em;
         }
 
-        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .font-outfit { 
+            font-family: 'Outfit', sans-serif; 
+        }
         
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #E0E5F2; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ced4e4; }
+        ::-webkit-scrollbar { 
+            width: 6px; 
+        }
+        
+        ::-webkit-scrollbar-track { 
+            background: transparent; 
+        }
+        
+        ::-webkit-scrollbar-thumb { 
+            background: #E0E5F2; 
+            border-radius: 10px; 
+        }
+        
+        ::-webkit-scrollbar-thumb:hover { 
+            background: #ced4e4; 
+        }
         
         .glass-header {
             background: rgba(244, 247, 254, 0.7);
@@ -54,7 +67,9 @@
             transform: translateX(4px);
         }
 
-        [x-cloak] { display: none !important; }
+        [x-cloak] { 
+            display: none !important; 
+        }
 
         @keyframes elasticBounce {
             0% { transform: translateY(100px) scale(0.8); opacity: 0; }
@@ -67,7 +82,6 @@
             animation: elasticBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
         }
         
-        /* Sidebar Active State */
         .sidebar-active {
             background: #4318FF;
             color: white;
@@ -75,14 +89,6 @@
             box-shadow: 0 8px 16px -4px rgba(67, 24, 255, 0.15);
         }
         
-        /* Logo image style */
-        .logo-image {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* Icon styling */
         .nav-icon {
             width: 20px;
             height: 20px;
@@ -91,9 +97,7 @@
 </head>
 <body class="antialiased flex h-screen overflow-hidden">
 
-    <!-- Sidebar dengan Logo Scholify -->
     <aside class="w-[290px] bg-white h-full flex flex-col transition-all duration-300 z-20 border-r border-[#E0E5F2]">
-        <!-- Logo Scholify -->
         <div class="h-28 flex-none flex items-center px-6 border-b border-[#F4F7FE]">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-indigo-200 bg-gradient-to-br from-[#4318FF] to-[#868CFF] flex items-center justify-center">
@@ -110,56 +114,57 @@
 
         <div class="flex-1 overflow-y-auto px-4 py-4">
             <nav class="space-y-1.5 font-outfit">
-                <!-- MENU UTAMA -->
                 <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Menu Utama</p>
                 
-                <a href="{{ route('student.dashboard') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.dashboard') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.dashboard') }}" 
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.dashboard') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i data-lucide="layout-dashboard" class="nav-icon"></i>
                     <span>Dashboard</span>
                 </a>
                 
-                <a href="{{ route('student.schedule') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.schedule') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.schedule') }}" 
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.schedule') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i data-lucide="calendar" class="nav-icon"></i>
                     <span>Jadwal Kelas</span>
                 </a>
                 
-                <a href="{{ route('student.absensi') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.absensi') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.absensi') }}" 
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.absensi') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i data-lucide="user-check" class="nav-icon"></i>
                     <span>Absensi</span>
                 </a>
                 
-                <a href="{{ route('student.grades') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.grades') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.grades') }}" 
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.grades') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i data-lucide="trending-up" class="nav-icon"></i>
                     <span>Nilai & Rapor</span>
                 </a>
                 
-                <a href="{{ route('student.assignments') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.assignments') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
+                <a href="{{ route('student.assignments') }}" 
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.assignments') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i data-lucide="clipboard-list" class="nav-icon"></i>
                     <span>Tugas</span>
                 </a>
 
-                <!-- Pengumuman -->
                 <a href="{{ route('student.announcements') }}" 
-                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl 
-                   {{ request()->routeIs('student.announcements') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.announcements') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i data-lucide="megaphone" class="nav-icon"></i>
                     <span>Pengumuman</span>
                 </a>
 
-                <!-- LAINNYA -->
                 <div class="my-6 border-t border-[#F4F7FE] mx-4"></div>
                 <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Lainnya</p>
                 
-                <a href="{{ route('student.profile') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.profile') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                <a href="{{ route('student.profile') }}" 
+                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.profile') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
                     <i data-lucide="user-circle" class="nav-icon"></i>
                     <span>Profil Saya</span>
                 </a>
             </nav>
         </div>
 
-        <!-- Tombol Logout -->
         <div class="p-6 flex-none border-t border-[#F4F7FE]">
-            <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
+            <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()" id="logout-form">
                 @csrf
                 <button type="submit" class="flex items-center justify-center gap-2 w-full text-[#A3AED0] hover:text-red-500 font-semibold py-2.5 transition-colors">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
@@ -179,7 +184,8 @@
             <div class="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-[#F4F7FE]">
                 <div class="relative hidden lg:flex items-center bg-[#F4F7FE] rounded-xl px-4 py-2 w-72">
                     <i data-lucide="search" class="w-5 h-5 text-[#A3AED0]"></i>
-                    <input type="text" placeholder="Cari tugas..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-[#2B3674] placeholder-[#A3AED0]">
+                    <input type="text" placeholder="Cari tugas, jadwal, atau pengumuman..." 
+                           class="bg-transparent border-none outline-none text-sm ml-2 w-full text-[#2B3674] placeholder-[#A3AED0]">
                 </div>
 
                 <button class="p-2.5 rounded-xl text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all relative">
@@ -188,16 +194,35 @@
                 </button>
 
                 <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-3 pl-3 border-l border-[#F4F7FE] hover:bg-[#F4F7FE]/50 p-1.5 rounded-2xl transition-all outline-none group">
+                    <button @click="open = !open" @click.away="open = false" 
+                            class="flex items-center gap-3 pl-3 border-l border-[#F4F7FE] hover:bg-[#F4F7FE]/50 p-1.5 rounded-2xl transition-all outline-none group">
                         <div class="text-right hidden sm:block">
-                            <p class="font-bold text-sm text-[#2B3674] group-hover:text-[#4318FF] transition-colors leading-tight">Ahmad Fauzi</p>
-                            <p class="text-[#A3AED0] text-[11px] font-medium uppercase tracking-tighter">XII RPL 1</p>
+                            <h1 class="font-outfit font-bold text-base text-[#2B3674]">
+                                {{ $student['name'] ?? 'Siswa' }}
+                            </h1>
+                            <p class="text-[#A3AED0] text-[11px] font-medium uppercase tracking-tighter">
+                                {{ $student['class'] ?? 'XII RPL 1' }}
+                            </p>
                         </div>
                         <div class="relative">
-                            <img src="https://ui-avatars.com/api/?name=Ahmad+Fauzi&background=4318FF&color=fff&rounded=true" alt="Profile" class="w-11 h-11 rounded-full object-cover shadow-sm ring-2 ring-white group-hover:ring-[#4318FF]/20 transition-all">
+                            @php
+                                $name = $student['name'] ?? 'Siswa';
+                                $words = explode(' ', trim($name));
+                                $initials = '';
+                                foreach($words as $word) {
+                                    if(!empty($word)) {
+                                        $initials .= strtoupper(substr($word, 0, 1));
+                                    }
+                                }
+                                $initials = substr($initials, 0, 3);
+                            @endphp
+                            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-[#4318FF] to-[#868CFF] flex items-center justify-center text-white font-bold text-lg shadow-sm ring-2 ring-white group-hover:ring-[#4318FF]/20 transition-all">
+                                {{ $initials ?: 'S' }}
+                            </div>
                             <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-[#A3AED0] transition-transform duration-300" :class="open ? 'rotate-180 text-[#4318FF]' : ''"></i>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-[#A3AED0] transition-transform duration-300" 
+                           :class="open ? 'rotate-180 text-[#4318FF]' : ''"></i>
                     </button>
 
                     <div x-show="open" 
@@ -207,21 +232,25 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-[-10px]"
-                         class="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.08)] border border-[#F4F7FE] py-2.5 z-50"
+                         class="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.08)] border border-[#F4F7FE] py-2 z-50"
                          x-cloak>
                         
-                        <div class="px-4 py-2 border-bottom border-[#F4F7FE] mb-1">
+                        <div class="px-4 py-2 border-b border-[#F4F7FE] mb-1">
                             <p class="text-[10px] font-bold text-[#A3AED0] uppercase tracking-widest">Akun Siswa</p>
+                            <p class="text-sm font-semibold text-[#2B3674] mt-1">{{ $student['name'] ?? 'Siswa' }}</p>
+                            <p class="text-xs text-[#A3AED0]">{{ $student['email'] ?? 'siswa@scholify.com' }}</p>
                         </div>
 
-                        <a href="{{ route('student.profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all font-semibold mx-2 rounded-xl">
+                        <a href="{{ route('student.profile') }}" 
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all font-semibold mx-2 rounded-xl">
                             <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
                                 <i data-lucide="user" class="w-4 h-4 text-[#4318FF]"></i>
                             </div>
                             Lihat Profil
                         </a>
 
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] transition-all font-medium mx-2 rounded-xl">
+                        <a href="#" 
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] transition-all font-medium mx-2 rounded-xl">
                             <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
                                 <i data-lucide="settings" class="w-4 h-4 text-[#A3AED0]"></i>
                             </div>
@@ -230,15 +259,14 @@
 
                         <div class="border-t border-[#F4F7FE] my-2 mx-4"></div>
                         
-                        <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
-                            @csrf
-                            <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-all font-bold w-[calc(100%-1rem)] mx-2 rounded-xl text-left">
-                                <div class="w-8 h-8 rounded-lg bg-red-100/50 flex items-center justify-center">
-                                    <i data-lucide="log-out" class="w-4 h-4"></i>
-                                </div>
-                                Keluar Aplikasi
-                            </button>
-                        </form>
+                        <button type="button" 
+                                onclick="confirmLogout()"
+                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-all font-bold w-[calc(100%-1rem)] mx-2 rounded-xl text-left">
+                            <div class="w-8 h-8 rounded-lg bg-red-100/50 flex items-center justify-center">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                            </div>
+                            Keluar Aplikasi
+                        </button>
                     </div>
                 </div>
             </div>
@@ -251,7 +279,6 @@
         </div>
     </main>
 
-    <!-- Popup Notification -->
     <div x-data="{ 
             showPopup: false,
             init() {
@@ -266,19 +293,19 @@
          }" 
          x-show="showPopup" 
          x-cloak
-         class="fixed bottom-8 right-8 z-50 w-[340px]">
+         class="fixed bottom-8 right-8 z-50 w-[360px]">
         
         <div :class="showPopup ? 'animate-bounce-in' : ''" 
-             class="bg-[#4318FF] rounded-[28px] relative overflow-hidden p-8 text-white shadow-[0_25px_60px_rgba(67,24,255,0.35)] border border-white/10">
+             class="bg-gradient-to-br from-[#4318FF] to-[#5B3CFF] rounded-[28px] relative overflow-hidden p-6 text-white shadow-[0_25px_60px_rgba(67,24,255,0.35)] border border-white/20">
             
-            <button @click="closeForNow()" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
-                <i data-lucide="x" class="w-6 h-6"></i>
+            <button @click="closeForNow()" class="absolute top-5 right-5 text-white/50 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
             <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-400/20 rounded-full blur-3xl"></div>
 
-            <div class="flex flex-col gap-6 relative z-10 text-center items-center">
+            <div class="flex flex-col gap-5 relative z-10 text-center items-center">
                 <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner ring-1 ring-white/20">
                     <i data-lucide="megaphone" class="w-8 h-8 text-yellow-300 animate-pulse"></i>
                 </div>
@@ -289,14 +316,15 @@
                 </div>
                 
                 <p class="text-sm text-white/80 leading-relaxed font-medium">
-                    Tinggal <span class="text-white font-bold underline decoration-yellow-400 decoration-4 underline-offset-4">14 hari lagi</span> sebelum ujian dimulai. Sudah sejauh mana persiapanmu?
+                    Tinggal <span class="text-white font-bold underline decoration-yellow-400 decoration-4 underline-offset-4">14 hari lagi</span> sebelum ujian dimulai. 
+                    Sudah sejauh mana persiapanmu?
                 </p>
 
-                <div class="flex flex-col w-full gap-3 pt-2">
-                    <button class="w-full py-4 bg-white text-[#4318FF] rounded-xl text-xs font-bold hover:bg-yellow-300 hover:text-[#2B3674] transition-all transform active:scale-95 shadow-xl shadow-black/10">
+                <div class="flex flex-col w-full gap-3">
+                    <button class="w-full py-3.5 bg-white text-[#4318FF] rounded-xl text-sm font-bold hover:bg-yellow-300 hover:text-[#2B3674] transition-all transform active:scale-95 shadow-lg shadow-black/20">
                         Buka Bank Soal
                     </button>
-                    <button @click="closeForNow()" class="w-full py-4 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all border border-white/10 active:scale-95 text-white/90">
+                    <button @click="closeForNow()" class="w-full py-3.5 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-all border border-white/20 active:scale-95 text-white/90">
                         Ingatkan Nanti
                     </button>
                 </div>
@@ -305,23 +333,43 @@
     </div>
 
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
         
-        // Konfirmasi logout dengan custom dialog
-        document.querySelectorAll('form[action*="logout"]').forEach(form => {
-            form.addEventListener('submit', function(e) {
+        function confirmLogout() {
+            const confirmed = confirm('⚠️ Apakah Anda yakin ingin keluar?\n\nSemua sesi akan berakhir dan Anda perlu login kembali.');
+            
+            if (confirmed) {
+                const form = document.getElementById('logout-form');
+                const btn = form.querySelector('button[type="submit"]');
+                
+                btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+                btn.disabled = true;
+                
+                form.submit();
+            }
+        }
+        
+        document.querySelectorAll('#logout-form button[type="submit"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                
-                const confirmed = confirm('⚠️ Apakah Anda yakin ingin keluar?\n\nSemua sesi akan berakhir dan Anda perlu login kembali.');
-                
-                if(confirmed) {
-                    const btn = this.querySelector('button');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-                    btn.disabled = true;
-                    this.submit();
+                confirmLogout();
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new MutationObserver(function() {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
                 }
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
             });
         });
     </script>

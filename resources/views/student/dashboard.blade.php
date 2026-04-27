@@ -90,7 +90,7 @@
                     <div class="w-1 h-6 bg-white/40 rounded-full"></div>
                     <p class="text-sm font-semibold text-white/80">{{ now()->isoFormat('dddd, D MMMM YYYY') }}</p>
                 </div>
-                <h1 class="font-outfit font-bold text-2xl md:text-3xl mb-2">Halo, <span class="text-yellow-300">Ahmad Fauzi!</span></h1>
+                <h1 class="font-outfit font-bold text-2xl md:text-3xl mb-2">Halo, <span class="text-yellow-300">{{ $student['name'] ?? 'Siswa' }}!</span></h1>
                 <p class="text-white/80 text-sm max-w-md">
                     Kamu punya <strong class="text-yellow-300 bg-white/20 px-2 py-0.5 rounded-md">{{ count($urgentAssignments ?? []) }} tugas</strong> yang harus diselesaikan dalam waktu dekat. Semangat belajarnya!
                 </p>
