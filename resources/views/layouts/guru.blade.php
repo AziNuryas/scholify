@@ -27,7 +27,6 @@
         
         .font-heading { font-family: 'Outfit', sans-serif; }
 
-        /* Efek Blur Latar Belakang */
         .mesh-orb {
             position: fixed;
             width: 500px;
@@ -61,7 +60,6 @@
             filter: blur(100px);
         }
 
-        /* Sidebar Active State */
         .sidebar-active {
             position: relative;
             background: linear-gradient(90deg, rgba(79, 70, 229, 0.12) 0%, rgba(79, 70, 229, 0) 100%);
@@ -80,7 +78,6 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* Sidebar item hover effect */
         .sidebar-item {
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -90,7 +87,6 @@
             transform: translateX(4px);
         }
 
-        /* Animasi untuk logout button */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-2px); }
@@ -98,96 +94,58 @@
         }
         
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .logout-btn {
-            transition: all 0.3s ease;
-        }
+        .logout-btn { transition: all 0.3s ease; }
         
         .logout-btn:hover {
             background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
             transform: scale(1.02);
         }
         
-        .logout-btn:hover i {
-            animation: shake 0.5s ease-in-out;
-        }
+        .logout-btn:hover i { animation: shake 0.5s ease-in-out; }
         
-        /* Dropdown animation */
-        .dropdown-menu {
-            animation: slideIn 0.2s ease-out;
-        }
+        .dropdown-menu { animation: slideIn 0.2s ease-out; }
         
-        /* Card hover effect */
-        .stat-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .stat-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
         }
         
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #E2E8F0;
-            border-radius: 10px;
-        }
-        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #E2E8F0; border-radius: 10px; }
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, var(--primary-indigo), var(--primary-purple));
             border-radius: 10px;
         }
-        
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, var(--primary-purple), var(--primary-indigo));
         }
         
-        /* Glassmorphism effect */
         .glass-card {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
-        /* Logo image style */
-        .logo-image {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-        }
+        .logo-image { object-fit: cover; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
 
-    <!-- Decorative Background Elements -->
     <div class="mesh-orb orb-1"></div>
     <div class="mesh-orb orb-2"></div>
     <div class="mesh-orb orb-3"></div>
 
     <div class="flex min-h-screen relative z-10">
-        <!-- Sidebar dengan Logo Scholify (Gambar) -->
-        <aside class="w-72 bg-white/60 backdrop-blur-xl border-r border-white/40 shadow-xl p-6 sticky top-0 h-screen">
-            <!-- Logo Scholify dengan Gambar -->
+        <aside class="w-72 bg-white/60 backdrop-blur-xl border-r border-white/40 shadow-xl p-6 sticky top-0 h-screen overflow-y-auto">
             <div class="flex items-center gap-3 mb-8">
-                <!-- Logo Gambar Scholify - Ganti dari ikon toga ke gambar -->
                 <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-indigo-200 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                    <img src="{{ asset('images/scholify-logo.png') }}" 
-                         alt="Scholify Logo" 
-                         class="w-full h-full object-cover">
+                    <img src="{{ asset('images/scholify-logo.png') }}" alt="Scholify Logo" class="w-full h-full object-cover">
                 </div>
                 <div class="flex flex-col">
                     <h1 class="text-2xl font-heading font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent leading-tight">
@@ -202,12 +160,13 @@
                 
                 @php
                     $menus = [
-                        ['route' => 'guru.dashboard', 'icon' => 'layout-dashboard', 'label' => 'Dashboard', 'badge' => null],
-                        ['route' => 'guru.jadwal', 'icon' => 'calendar', 'label' => 'Jadwal Kelas', 'badge' => null],
-                        ['route' => 'guru.absensi', 'icon' => 'user-check', 'label' => 'Absensi', 'badge' => null],
-                        ['route' => 'guru.nilai', 'icon' => 'edit-3', 'label' => 'Nilai & Rapor', 'badge' => null],
-                        ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas', 'badge' => ''],
-                        ['route' => 'guru.pengumuman', 'icon' => 'megaphone', 'label' => 'Pengumuman', 'badge' => null],
+                        ['route' => 'guru.dashboard',   'icon' => 'layout-dashboard', 'label' => 'Dashboard',      'badge' => null],
+                        ['route' => 'guru.jadwal',       'icon' => 'calendar',         'label' => 'Jadwal Kelas',   'badge' => null],
+                        ['route' => 'guru.absensi',      'icon' => 'user-check',       'label' => 'Absensi',        'badge' => null],
+                        ['route' => 'guru.nilai',        'icon' => 'edit-3',           'label' => 'Nilai & Rapor',  'badge' => null],
+                        ['route' => 'guru.tugas',        'icon' => 'clipboard-list',   'label' => 'Tugas',          'badge' => null],
+                        ['route' => 'guru.pengumuman',   'icon' => 'megaphone',        'label' => 'Pengumuman',     'badge' => null],
+                        ['route' => 'guru.laporan.index','icon' => 'flag',             'label' => 'Laporan Siswa',  'badge' => null],
                     ];
                 @endphp
 
@@ -233,13 +192,10 @@
                     <i data-lucide="user-circle" class="w-5 h-5"></i>
                     <span class="text-sm font-medium">Profil Saya</span>
                 </a>
-
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 p-8 overflow-y-auto">
-            <!-- Header -->
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <div class="flex items-center gap-2 mb-1">
@@ -249,7 +205,6 @@
                     <p class="text-slate-500 text-sm ml-3">@yield('page_subtitle', 'Kelola data akademik Anda dengan mudah.')</p>
                 </div>
 
-                <!-- Profile Dropdown dengan Menu Lengkap -->
                 <div class="relative group">
                     <div class="flex items-center gap-4 bg-white/70 backdrop-blur-sm p-1.5 pr-5 rounded-2xl shadow-lg border border-white/40 cursor-pointer hover:shadow-xl hover:border-indigo-200 transition-all duration-300">
                         <div class="relative">
@@ -265,9 +220,7 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform duration-300"></i>
                     </div>
 
-                    <!-- Dropdown Menu Premium -->
                     <div class="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden dropdown-menu">
-                        <!-- Header Dropdown -->
                         <div class="relative px-4 py-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 border-b border-indigo-100">
                             <div class="flex items-center gap-3">
                                 <div class="relative">
@@ -284,7 +237,6 @@
                             </div>
                         </div>
                         
-                        <!-- Menu Items - Profil dan Pengaturan -->
                         <div class="p-2">
                             <a href="{{ route('guru.profil') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 rounded-xl transition-all duration-200 group">
                                 <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
@@ -295,7 +247,6 @@
                             
                             <div class="border-t border-gray-100 my-2"></div>
                             
-                            <!-- Tombol Logout -->
                             <form method="POST" action="{{ route('logout') }}" class="logout-form">
                                 @csrf
                                 <button type="submit" class="logout-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 rounded-xl transition-all duration-300 group">
@@ -313,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- Content -->
             @yield('content')
         </main>
     </div>
@@ -321,41 +271,16 @@
     <script>
         lucide.createIcons();
         
-        // Konfirmasi logout dengan custom dialog
         document.querySelectorAll('.logout-form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
-                // Custom confirm dialog yang lebih modern
                 const confirmed = confirm('⚠️ Apakah Anda yakin ingin keluar?\n\nSemua sesi akan berakhir dan Anda perlu login kembali.');
-                
                 if(confirmed) {
-                    // Tampilkan loading indicator
                     const btn = this.querySelector('button');
-                    const originalText = btn.innerHTML;
                     btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
                     btn.disabled = true;
-                    
-                    // Submit form
                     this.submit();
                 }
-            });
-        });
-        
-        // Tooltip untuk badge (opsional)
-        const badges = document.querySelectorAll('[data-tooltip]');
-        badges.forEach(badge => {
-            badge.addEventListener('mouseenter', (e) => {
-                const tooltip = document.createElement('div');
-                tooltip.textContent = badge.dataset.tooltip;
-                tooltip.className = 'absolute bg-gray-900 text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-50';
-                tooltip.style.top = (e.target.offsetTop - 30) + 'px';
-                tooltip.style.left = (e.target.offsetLeft) + 'px';
-                document.body.appendChild(tooltip);
-                
-                badge.addEventListener('mouseleave', () => {
-                    tooltip.remove();
-                });
             });
         });
     </script>

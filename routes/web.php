@@ -101,8 +101,16 @@ Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function ()
 
         Route::get('/discipline', 'discipline')->name('discipline');
         Route::post('/discipline', 'storeDiscipline')->name('discipline.store');
+
         // Catatan Konseling
         Route::resource('catatan-konseling', CatatanKonselingController::class);
+
+        // Deteksi Dini & Asesmen
+        Route::get('/deteksi-asesmen', 'deteksiAsesmen')->name('deteksi-asesmen.index');
+
+        // Laporan dari Guru (BK menindaklanjuti)
+        Route::get('/laporan', 'laporanIndex')->name('laporan.index');
+        Route::patch('/laporan/{laporan}/proses', 'laporanProses')->name('laporan.proses');
     });
 });
 
