@@ -50,8 +50,12 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         Route::get('/counseling', 'counseling')->name('counseling');
         Route::post('/counseling', 'sendCounselingMessage')->name('counseling.send');
 
+        // PROFILE - menggunakan POST (bisa juga ditambahkan PUT jika perlu)
         Route::get('/profile', 'profile')->name('profile');
         Route::post('/profile', 'updateProfile')->name('profile.update');
+        
+        // Tambahkan route PUT untuk mendukung method PUT jika diperlukan
+        Route::put('/profile', 'updateProfile')->name('profile.update.put');
 
         Route::get('/appointments', 'appointments')->name('appointments');
         Route::post('/appointments', 'storeAppointment')->name('appointments.store');

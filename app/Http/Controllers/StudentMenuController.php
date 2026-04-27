@@ -8,8 +8,9 @@ use App\Models\Schedule;
 use App\Models\Assignment;
 use App\Models\User;
 use App\Models\Chat;
-use App\Models\Absensi; // ✅ TAMBAHKAN INI
+use App\Models\Absensi;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StudentMenuController extends Controller
 {
@@ -100,11 +101,8 @@ class StudentMenuController extends Controller
         return view('student.grades', compact('student', 'grades'));
     }
 
-    // ================= ✅ ABSENSI SISWA =================
+    // ================= ABSENSI SISWA =================
 
-    /**
-     * Menampilkan halaman absensi siswa
-     */
     public function absensi()
     {
         $studentData = $this->getStudent();
@@ -116,12 +114,10 @@ class StudentMenuController extends Controller
         
         if ($studentData && $studentData->id) {
             try {
-                // Ambil data absensi siswa dengan pagination
                 $absensi = Absensi::where('siswa_id', $studentData->id)
                     ->orderBy('tanggal', 'desc')
                     ->paginate(10);
                 
-                // Statistik kehadiran
                 $statistik = [
                     'hadir' => Absensi::where('siswa_id', $studentData->id)->where('status', 'hadir')->count(),
                     'izin' => Absensi::where('siswa_id', $studentData->id)->where('status', 'izin')->count(),
@@ -129,13 +125,11 @@ class StudentMenuController extends Controller
                     'alpha' => Absensi::where('siswa_id', $studentData->id)->where('status', 'alpha')->count(),
                 ];
                 
-                // Cek apakah sudah absen hari ini
                 $todayAbsen = Absensi::where('siswa_id', $studentData->id)
                     ->where('tanggal', date('Y-m-d'))
                     ->first();
                     
             } catch (\Exception $e) {
-                // Jika tabel belum ada, tampilkan data kosong
                 $absensi = collect([]);
             }
         }
@@ -143,9 +137,6 @@ class StudentMenuController extends Controller
         return view('student.absensi', compact('student', 'studentData', 'absensi', 'statistik', 'todayAbsen'));
     }
 
-    /**
-     * Menyimpan data absensi siswa
-     */
     public function storeAbsensi(Request $request)
     {
         $request->validate([
@@ -161,7 +152,6 @@ class StudentMenuController extends Controller
         }
         
         try {
-            // Cek apakah sudah absen pada tanggal tersebut
             $existing = Absensi::where('siswa_id', $studentData->id)
                 ->where('tanggal', $request->tanggal)
                 ->first();
@@ -170,7 +160,6 @@ class StudentMenuController extends Controller
                 return back()->with('error', 'Anda sudah melakukan absensi untuk tanggal ' . date('d/m/Y', strtotime($request->tanggal)) . '!');
             }
             
-            // Buat absensi baru
             Absensi::create([
                 'siswa_id' => $studentData->id,
                 'kelas_id' => $studentData->class_id,
@@ -231,37 +220,66 @@ class StudentMenuController extends Controller
     {
         $studentData = $this->getStudent();
         $student = $this->formatStudent($studentData);
+        $user = auth()->user();
 
-        return view('student.profile', compact('student', 'studentData'));
+        return view('student.profile', compact('student', 'studentData', 'user'));
     }
 
     public function updateProfile(Request $request)
     {
         $studentModel = $this->getStudent();
+        $user = auth()->user();
 
         if (!$studentModel) {
             return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
+        // Validasi
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'nisn' => 'nullable|string|max:20',
+            'birth_place' => 'nullable|string|max:100',
+            'birth_date' => 'nullable|date',
+            'address' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        // Update user name
+        if ($request->name) {
+            $user->name = $request->name;
+            $user->save();
+        }
+
+        // Handle avatar upload
         if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
+            // Hapus avatar lama jika ada
+            if ($studentModel->avatar) {
+                $oldPath = str_replace('/storage/', '', $studentModel->avatar);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+            
+            // Upload avatar baru
+            $file = $request->file('avatar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('avatars', $filename, 'public');
             $studentModel->avatar = '/storage/' . $path;
         }
 
-        $studentModel->first_name = $request->name ?? $studentModel->first_name;
-
-        try {
-            $studentModel->name = $request->name ?? $studentModel->name;
-        } catch (\Exception $e) {}
-
+        // Update student data
+        $studentModel->name = $request->name;
+        $studentModel->first_name = $request->name;
         $studentModel->nisn = $request->nisn;
         $studentModel->phone = $request->phone;
         $studentModel->birth_place = $request->birth_place;
+        $studentModel->birth_date = $request->birth_date;
         $studentModel->address = $request->address;
 
         $studentModel->save();
 
-        return back()->with('success', 'Profil berhasil diupdate');
+        return redirect()->route('student.profile')->with('success', '✅ Profil berhasil diperbarui!');
     }
 
     // ================= APPOINTMENT =================

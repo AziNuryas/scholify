@@ -190,7 +190,9 @@
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.away="open = false" class="flex items-center gap-3 pl-3 border-l border-[#F4F7FE] hover:bg-[#F4F7FE]/50 p-1.5 rounded-2xl transition-all outline-none group">
                         <div class="text-right hidden sm:block">
-                            <p class="font-bold text-sm text-[#2B3674] group-hover:text-[#4318FF] transition-colors leading-tight">Ahmad Fauzi</p>
+                            <p class="font-bold text-sm text-[#2B3674] ...">
+                                {{ auth()->user()->name }}
+                            </p>
                             <p class="text-[#A3AED0] text-[11px] font-medium uppercase tracking-tighter">XII RPL 1</p>
                         </div>
                         <div class="relative">
