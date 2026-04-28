@@ -31,7 +31,7 @@ class AsesmenController extends Controller
             ->get()
             ->keyBy('jenis_asesmen');
 
-        return view('siswa.asesmen.index', compact('jenisAsesmen', 'statusAsesmen', 'tahunAjaran', 'semester'));
+        return view('student.asesmen.index', compact('jenisAsesmen', 'statusAsesmen', 'tahunAjaran', 'semester'));
     }
 
     public function isi(string $jenis)
@@ -56,13 +56,13 @@ class AsesmenController extends Controller
 
         if ($asesmen->status === 'selesai') {
             return redirect()
-                ->route('siswa.asesmen.hasil', $asesmen->id)
+                ->route('student.asesmen.hasil', $asesmen->id)
                 ->with('info', 'Kamu sudah menyelesaikan asesmen ini. Berikut hasilnya.');
         }
 
         $pertanyaan = $this->getPertanyaan($jenis);
 
-        return view("siswa.asesmen.form_{$jenis}", compact('asesmen', 'pertanyaan'));
+        return view("student.asesmen.form_{$jenis}", compact('asesmen', 'pertanyaan'));
     }
 
     public function simpan(Request $request, AsesmenSiswa $asesmen)
@@ -93,7 +93,7 @@ class AsesmenController extends Controller
             );
 
             return redirect()
-                ->route('siswa.asesmen.hasil', $asesmen->id)
+                ->route('student.asesmen.hasil', $asesmen->id)
                 ->with('success', 'Asesmen selesai! Lihat hasil analisismu di bawah.');
         }
 
@@ -105,7 +105,7 @@ class AsesmenController extends Controller
         abort_unless($asesmen->siswa_id === Auth::id(), 403);
         abort_unless($asesmen->status === 'selesai', 403);
 
-        return view('siswa.asesmen.hasil', compact('asesmen'));
+        return view('student.asesmen.hasil', compact('asesmen'));
     }
 
     private function getPertanyaan(string $jenis): array

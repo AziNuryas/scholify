@@ -152,6 +152,11 @@
                     <i data-lucide="user-circle" class="nav-icon"></i>
                     <span>Profil Saya</span>
                 </a>
+
+                <a href="{{ route('student.asesmen.index') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.asesmen.index') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                     <i data-lucide="brain" class="nav-icon"></i>
+                     <span>Asesmen Mandiri</span>
+                </a>
             </nav>
         </div>
 
