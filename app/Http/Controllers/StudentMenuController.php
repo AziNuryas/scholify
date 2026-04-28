@@ -16,10 +16,14 @@ class StudentMenuController extends Controller
 {
     private function getStudent()
     {
-        if (auth()->check() && auth()->user()->role === 'siswa') {
-            return Student::with('schoolClass')
-                ->where('user_id', auth()->user()->id)
+        if (auth()->check()) {
+            $student = Student::with('schoolClass')
+                ->where('user_id', auth()->id())
                 ->first();
+                
+            if ($student) {
+                return $student;
+            }
         }
 
         return Student::with('schoolClass')->first();
@@ -68,14 +72,81 @@ class StudentMenuController extends Controller
 
         if ($classId) {
             try {
-                $assignments = Assignment::with('subject')
-                    ->where('class_id', $classId)
-                    ->orderBy('due_date')
-                    ->get();
-            } catch (\Exception $e) {}
+                $studentId = $studentData->id;
+                
+                $assignments = Assignment::with(['subject', 'submissions' => function($query) use ($studentId) {
+                    $query->where('student_id', $studentId);
+                }])
+                ->where('class_id', $classId)
+                ->latest()
+                ->get();
+                
+                // Proses status tugas
+                foreach ($assignments as $assignment) {
+                    $submission = $assignment->submissions->first();
+                    
+                    if ($submission && $submission->status == 'submitted') {
+                        $assignment->status = 'submitted';
+                        $assignment->is_late = false;
+                    } else if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
+                        $assignment->status = 'late';
+                        $assignment->is_late = true;
+                    } else {
+                        $assignment->status = 'pending';
+                        $assignment->is_late = false;
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Assignment fetch error: ' . $e->getMessage());
+            }
         }
 
         return view('student.assignments', compact('student', 'assignments'));
+    }
+
+    public function submitAssignment(Request $request)
+    {
+        $request->validate([
+            'assignment_id' => 'required|exists:assignments,id',
+            'submission_link' => 'nullable|url',
+            'notes' => 'nullable|string',
+        ]);
+        
+        $studentData = $this->getStudent();
+        if (!$studentData || !$studentData->id) {
+            return response()->json(['success' => false, 'message' => 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.']);
+        }
+        
+        try {
+            $assignment = Assignment::findOrFail($request->assignment_id);
+            
+            // Cek apakah sudah submit
+            $existing = \App\Models\Submission::where('assignment_id', $assignment->id)
+                ->where('student_id', $studentData->id)
+                ->first();
+                
+            if ($existing) {
+                return response()->json(['success' => false, 'message' => 'Anda sudah mengumpulkan tugas ini']);
+            }
+            
+            $status = 'submitted';
+            if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
+                $status = 'late';
+            }
+            
+            \App\Models\Submission::create([
+                'assignment_id' => $assignment->id,
+                'student_id' => $studentData->id,
+                'file_url' => $request->submission_link,
+                'notes' => $request->notes,
+                'status' => $status,
+                'score' => null, // Belum dinilai
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Tugas berhasil dikumpulkan']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal mengumpulkan tugas: ' . $e->getMessage()]);
+        }
     }
 
     public function grades()
@@ -296,7 +367,9 @@ class StudentMenuController extends Controller
                 ->get()
             : collect([]);
 
-        $bkUsers = User::where('role', 'guru_bk')->get();
+        $bkUsers = \App\Models\Teacher::whereHas('user', function($q) {
+            $q->where('role', 'guru_bk');
+        })->get();
 
         return view('student.appointments', compact('student', 'appointments', 'bkUsers'));
     }
@@ -341,27 +414,52 @@ class StudentMenuController extends Controller
         return view('student.discipline', compact('student', 'records'));
     }
 
-    // ================= PENGUMUMAN =================
+    // ================= NOTIFIKASI =================
 
-    public function announcements()
+    public function notifications()
     {
         $studentData = $this->getStudent();
         $student = $this->formatStudent($studentData);
+        
+        $userId = auth()->id();
+        $notifications = \App\Models\Notification::where('user_id', $userId)
+            ->latest()
+            ->paginate(15);
+            
+        return view('student.notifications', compact('student', 'notifications'));
+    }
 
-        try {
-            $announcements = DB::table('announcements')
-                ->latest()
-                ->get();
-        } catch (\Exception $e) {
-            $announcements = collect([
-                (object)[
-                    'title' => 'Ujian Semester',
-                    'content' => 'Ujian dimulai 14 hari lagi',
-                    'created_at' => now()
-                ]
-            ]);
+    public function fetchNotifications()
+    {
+        $userId = auth()->id();
+        $unreadCount = \App\Models\Notification::where('user_id', $userId)
+            ->where('is_read', false)
+            ->count();
+            
+        $latest = \App\Models\Notification::where('user_id', $userId)
+            ->latest()
+            ->take(5)
+            ->get();
+            
+        return response()->json([
+            'success' => true,
+            'unread_count' => $unreadCount,
+            'notifications' => $latest
+        ]);
+    }
+
+    public function markNotificationAsRead($id)
+    {
+        $notif = \App\Models\Notification::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+            
+        if ($notif) {
+            $notif->is_read = true;
+            $notif->save();
+            return response()->json(['success' => true]);
         }
-
-        return view('student.announcements', compact('student', 'announcements'));
+        
+        return response()->json(['success' => false], 404);
     }
 }

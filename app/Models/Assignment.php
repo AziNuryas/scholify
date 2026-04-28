@@ -51,6 +51,11 @@ class Assignment extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class, 'assignment_id');
+    }
+
     // Accessor untuk status text
     public function getStatusTextAttribute(): string
     {

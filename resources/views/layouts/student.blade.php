@@ -138,12 +138,10 @@
                     <span>Tugas</span>
                 </a>
 
-                <!-- Pengumuman -->
-                <a href="{{ route('student.announcements') }}" 
-                   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl 
-                   {{ request()->routeIs('student.announcements') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
-                    <i data-lucide="megaphone" class="nav-icon"></i>
-                    <span>Pengumuman</span>
+                <!-- PENGUMUMAN / NOTIFIKASI -->
+                <a href="{{ route('student.notifications') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.notifications') ? 'bg-[#F4F7FE] text-[#4318FF] font-semibold shadow-sm' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="bell" class="nav-icon"></i>
+                    <span>Notifikasi</span>
                 </a>
 
                 <!-- LAINNYA -->
@@ -182,10 +180,50 @@
                     <input type="text" placeholder="Cari tugas..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-[#2B3674] placeholder-[#A3AED0]">
                 </div>
 
-                <button class="p-2.5 rounded-xl text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all relative">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    <span class="absolute top-2.5 right-3 w-2 h-2 rounded-full bg-red-500 border-2 border-white"></span>
-                </button>
+                <!-- Notification Bell -->
+                <div x-data="{ 
+                        unread: 0, 
+                        showDropdown: false,
+                        notifications: [],
+                        fetchNotifs() {
+                            fetch('{{ route('student.notifications.fetch') }}')
+                                .then(res => res.json())
+                                .then(data => {
+                                    if(data.success) {
+                                        this.unread = data.unread_count;
+                                        this.notifications = data.notifications;
+                                    }
+                                });
+                        }
+                     }" 
+                     x-init="fetchNotifs(); setInterval(() => fetchNotifs(), 15000)"
+                     class="relative">
+                     
+                    <button @click="showDropdown = !showDropdown" class="p-2.5 rounded-xl text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all relative outline-none">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span x-show="unread > 0" x-text="unread" class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" x-cloak></span>
+                    </button>
+                    
+                    <!-- Dropdown Notifikasi -->
+                    <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute right-0 mt-2 w-80 bg-white rounded-2xl p-4 z-50 shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100" x-cloak>
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                            <h4 class="font-bold text-[#2B3674]">Notifikasi</h4>
+                            <a href="{{ route('student.notifications') }}" class="text-xs text-[#4318FF] font-semibold hover:underline">Lihat Semua</a>
+                        </div>
+                        <div class="space-y-2 max-h-[300px] overflow-y-auto custom-scroll pr-1">
+                            <template x-for="notif in notifications" :key="notif.id">
+                                <a :href="notif.link || '{{ route('student.notifications') }}'" class="block p-3 rounded-xl hover:bg-gray-50 transition border border-transparent hover:border-gray-100">
+                                    <p class="font-bold text-sm text-[#2B3674]" x-text="notif.title"></p>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2" x-text="notif.message"></p>
+                                    <p class="text-[10px] text-[#4318FF] mt-2 font-semibold" x-text="new Date(notif.created_at).toLocaleDateString('id-ID')"></p>
+                                </a>
+                            </template>
+                            <div x-show="notifications.length === 0" class="text-center py-4">
+                                <p class="text-sm text-gray-400">Belum ada notifikasi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.away="open = false" class="flex items-center gap-3 pl-3 border-l border-[#F4F7FE] hover:bg-[#F4F7FE]/50 p-1.5 rounded-2xl transition-all outline-none group">

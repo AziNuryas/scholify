@@ -64,11 +64,13 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
 
         Route::get('/absensi', 'absensi')->name('absensi');
         Route::post('/absensi/store', 'storeAbsensi')->name('absensi.store');
+        
+        // Notifications
+        Route::get('/notifications', 'notifications')->name('notifications');
+        Route::get('/notifications/fetch', 'fetchNotifications')->name('notifications.fetch');
+        Route::post('/notifications/{id}/read', 'markNotificationAsRead')->name('notifications.read');
     });
 
-    // Pengumuman siswa
-    Route::get('/announcements', [AnnouncementController::class, 'studentIndex'])
-        ->name('announcements');
 
     // Asesmen mandiri siswa
     Route::prefix('asesmen')->name('asesmen.')->group(function () {

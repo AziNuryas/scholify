@@ -81,7 +81,10 @@ class AssignmentController extends Controller
         }
 
         // Cek apakah deadline sudah lewat
-        $dueDate = $request->due_date ? Carbon::parse($request->due_date) : null;
+        $dueDate = null;
+        if ($request->filled('due_date')) {
+            $dueDate = Carbon::parse($request->input('due_date'));
+        }
         $isCompleted = false;
         $completedAt = null;
         
@@ -98,7 +101,7 @@ class AssignmentController extends Controller
             'description' => $request->description,
             'type' => $request->type,
             'file' => $filePath,
-            'due_date' => $request->due_date,
+            'due_date' => $request->input('due_date'),
             'is_completed' => $isCompleted,
             'completed_at' => $completedAt,
         ]);
@@ -128,7 +131,13 @@ class AssignmentController extends Controller
         // Jika request untuk toggle complete (tandai selesai/belum selesai)
         if ($request->has('toggle_complete')) {
             $assignment->is_completed = !$assignment->is_completed;
-            $assignment->completed_at = $assignment->is_completed ? now() : null;
+            
+            if ($assignment->is_completed) {
+                $assignment->completed_at = now();
+            } else {
+                $assignment->completed_at = null;
+            }
+            
             $assignment->save();
 
             $message = $assignment->is_completed 
@@ -149,7 +158,10 @@ class AssignmentController extends Controller
         ]);
 
         // Cek deadline baru apakah sudah lewat
-        $dueDate = $request->due_date ? Carbon::parse($request->due_date) : null;
+        $dueDate = null;
+        if ($request->filled('due_date')) {
+            $dueDate = Carbon::parse($request->input('due_date'));
+        }
         $isCompleted = $assignment->is_completed;
         
         if (!$isCompleted && $dueDate && $dueDate->isPast() && !$dueDate->isToday()) {
@@ -165,7 +177,7 @@ class AssignmentController extends Controller
             'class_id' => $request->class_id,
             'subject_id' => $request->subject_id,
             'type' => $request->type,
-            'due_date' => $request->due_date,
+            'due_date' => $request->input('due_date'),
             'is_completed' => $isCompleted,
             'completed_at' => $completedAt,
         ]);

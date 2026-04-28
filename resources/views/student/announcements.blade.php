@@ -137,14 +137,14 @@
                                 <input type="text" 
                                        id="searchInput"
                                        placeholder="Cari judul atau isi..."
-                                       class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF]/20 text-sm">
+                                       class="w-full pl-9 pr-3 py-2 neu-inset border border-gray-200 rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF]/20 text-sm">
                             </div>
                         </div>
 
                         <!-- Filter Kelas -->
                         <div>
                             <label class="block text-xs font-semibold text-[#A3AED0] mb-1 uppercase tracking-wide">Kelas</label>
-                            <select id="classFilter" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF]/20 text-sm">
+                            <select id="classFilter" class="w-full px-3 py-2 neu-inset border border-gray-200 rounded-xl focus:outline-none focus:border-[#4318FF] focus:ring-1 focus:ring-[#4318FF]/20 text-sm">
                                 <option value="all">Semua Kelas</option>
                                 @foreach($classes ?? [] as $class)
                                     <option value="{{ $class->name }}">{{ $class->name }}</option>
@@ -208,7 +208,7 @@
 
                     <!-- Empty State -->
                     <div id="emptyState" class="hidden p-8 text-center">
-                        <div class="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                        <div class="w-16 h-16 mx-auto neu-inset rounded-full flex items-center justify-center mb-3">
                             <svg class="w-8 h-8 text-[#A3AED0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                             </svg>
@@ -218,7 +218,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="px-5 py-3 border-t border-gray-100 bg-gray-50/30 flex justify-between items-center">
+                    <div class="px-5 py-3 border-t border-gray-100 neu-inset/30 flex justify-between items-center">
                         <div id="paginationInfo" class="text-xs text-[#A3AED0]"></div>
                         <div id="paginationButtons" class="flex gap-1"></div>
                     </div>
@@ -251,7 +251,7 @@
             <div id="modalFile" class="mt-2"></div>
         </div>
         
-        <div class="px-5 py-3 border-t border-gray-100 bg-gray-50/30 flex justify-end">
+        <div class="px-5 py-3 border-t border-gray-100 neu-inset/30 flex justify-end">
             <button onclick="closeModal()" class="px-4 py-1.5 bg-[#4318FF] hover:bg-[#3520d1] text-white rounded-lg text-sm font-semibold transition-all">
                 Tutup
             </button>
