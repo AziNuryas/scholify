@@ -6,6 +6,10 @@
 @section('content')
 
 <div class="mb-6">
+    <a href="{{ route('gurubk.deteksi-asesmen.index') }}"
+        class="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-teal-600 mb-4 transition">
+        ← Kembali ke Deteksi Dini & Asesmen
+    </a>
     <h1 class="text-xl font-semibold text-gray-800">Laporan dari Guru</h1>
     <p class="text-sm text-gray-500 mt-1">Tinjau dan tindak lanjuti laporan siswa bermasalah dari guru mapel.</p>
 </div>
@@ -115,11 +119,9 @@
                     <td colspan="7" class="px-5 py-5 bg-teal-50 border-b border-teal-100">
                         <div class="max-w-2xl">
                             <h3 class="text-sm font-semibold text-gray-700 mb-3">
-                                Tindak Lanjut —
-                                <span class="text-teal-700">{{ $item->judul }}</span>
+                                Tindak Lanjut — <span class="text-teal-700">{{ $item->judul }}</span>
                             </h3>
 
-                            {{-- Detail laporan --}}
                             <div class="bg-white rounded-lg p-4 mb-4 border border-gray-100 text-sm text-gray-600 space-y-1">
                                 <p><span class="font-medium text-gray-700">Siswa:</span>
                                     {{ $item->siswa->name ?? '-' }}
@@ -128,8 +130,7 @@
                                 <p><span class="font-medium text-gray-700">Dilaporkan oleh:</span>
                                     {{ $item->guru->name ?? '-' }}
                                 </p>
-                                <p class="pt-1 text-gray-600">{{ $item->deskripsi }}</p>
-
+                                <p class="pt-1">{{ $item->deskripsi }}</p>
                                 @if($item->tindak_lanjut)
                                     <div class="pt-2 mt-2 border-t border-gray-100">
                                         <p class="text-xs font-medium text-gray-500">Tindak lanjut sebelumnya:</p>

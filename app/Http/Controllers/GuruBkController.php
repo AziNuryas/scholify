@@ -223,7 +223,7 @@ class GuruBkController extends Controller
 
     // ── Deteksi Dini & Asesmen ────────────────────────────────────────────────
 
-    public function deteksiAsesmen()
+    public function deteksiAsesmen(Request $request)
     {
         $tahunAjaran = config('bk.tahun_ajaran_aktif');
         $semester    = config('bk.semester_aktif');
@@ -254,8 +254,23 @@ class GuruBkController extends Controller
             ->take(10)
             ->get();
 
+        // Data untuk tab Asesmen Siswa
+        $asesmenQuery = AsesmenSiswa::with('siswa')
+            ->where('status', 'selesai')
+            ->where('tahun_ajaran', $tahunAjaran)
+            ->where('semester', $semester);
+
+        if ($request->filled('jenis')) {
+            $asesmenQuery->where('jenis_asesmen', $request->jenis);
+        }
+        if ($request->filled('cari')) {
+            $asesmenQuery->whereHas('siswa', fn($q) => $q->where('name', 'like', "%{$request->cari}%"));
+        }
+
+        $asesmenList = $asesmenQuery->latest()->paginate(20, ['*'], 'asesmen_page')->withQueryString();
+
         return view('gurubk.deteksi_asesmen.index', compact(
-            'statistik', 'siswaBerisiko', 'laporanBaru', 'tahunAjaran', 'semester'
+            'statistik', 'siswaBerisiko', 'laporanBaru', 'tahunAjaran', 'semester', 'asesmenList'
         ));
     }
 
@@ -291,7 +306,6 @@ class GuruBkController extends Controller
             'ditangani_at'   => now(),
         ]);
 
-        // Update skor risiko — siswa_id = students.id, butuh user_id
         $student = Student::find($laporan->siswa_id);
         if ($student && $student->user_id) {
             (new DeteksiDiniService)->hitungSkorRisiko(
