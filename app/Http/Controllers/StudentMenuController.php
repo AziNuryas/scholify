@@ -307,23 +307,13 @@ class StudentMenuController extends Controller
 
         // Validasi
         $request->validate([
-            'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'nisn' => 'nullable|string|max:20',
-            'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
             'address' => 'nullable|string',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        // Update user name
-        if ($request->name) {
-            $user->name = $request->name;
-            $user->save();
-        }
-
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
             // Hapus avatar lama jika ada
             if ($studentModel->avatar) {
                 $oldPath = str_replace('/storage/', '', $studentModel->avatar);
@@ -333,20 +323,19 @@ class StudentMenuController extends Controller
             }
             
             // Upload avatar baru
-            $file = $request->file('avatar');
+            $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('avatars', $filename, 'public');
-            $studentModel->avatar = '/storage/' . $path;
+            $studentModel->avatar = $path;
         }
 
         // Update student data
-        $studentModel->name = $request->name;
-        $studentModel->first_name = $request->name;
-        $studentModel->nisn = $request->nisn;
-        $studentModel->phone = $request->phone;
-        $studentModel->birth_place = $request->birth_place;
-        $studentModel->birth_date = $request->birth_date;
-        $studentModel->address = $request->address;
+        if ($request->has('phone')) {
+            $studentModel->phone = $request->phone;
+        }
+        if ($request->has('address')) {
+            $studentModel->address = $request->address;
+        }
 
         $studentModel->save();
 
