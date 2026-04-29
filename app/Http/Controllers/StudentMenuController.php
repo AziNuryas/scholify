@@ -8,39 +8,56 @@ use App\Models\Schedule;
 use App\Models\Assignment;
 use App\Models\User;
 use App\Models\Chat;
+use App\Models\Absensi;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StudentMenuController extends Controller
 {
     private function getStudent()
     {
-        // Ambil data siswa yang sedang login
-        if (auth()->check() && auth()->user()->role === 'siswa') {
-            return Student::with('schoolClass')->where('user_id', auth()->user()->id)->first();
+        if (auth()->check()) {
+            $student = Student::with('schoolClass')
+                ->where('user_id', auth()->id())
+                ->first();
+                
+            if ($student) {
+                return $student;
+            }
         }
+
         return Student::with('schoolClass')->first();
     }
 
+    private function formatStudent($studentData)
+    {
+        return collect($studentData ? $studentData->toArray() : [
+            'name' => 'Siswa',
+            'avatar' => null
+        ]);
+    }
+
+    // ================= DASHBOARD MENU =================
+
     public function schedule()
     {
-        $student = collect($this->getStudent() ? $this->getStudent()->toArray() : ['name' => 'Siswa', 'avatar' => null]);
-        $classId = $this->getStudent()->class_id ?? null;
-        
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+        $classId = $studentData->class_id ?? null;
+
         $schedules = collect([]);
+
         if ($classId) {
             try {
-                // Ambil semua jadwal dalam kelas anak ini, dan urutkan berdasar hari
                 $schedules = Schedule::with(['subject', 'teacher'])
                     ->where('class_id', $classId)
-                    ->orderBy('day_of_week', 'asc') // Asumsi kolom hari 1=Senin, dll.
-                    ->orderBy('start_time', 'asc')
+                    ->orderBy('day_of_week')
+                    ->orderBy('start_time')
                     ->get();
             } catch (\Exception $e) {}
         }
-        
-        // Agar bisa ditata per hari di UI (Timeline)
-        $schedulesGrouped = $schedules->groupBy(function($item) {
-            return $item->day_of_week ?? 'Senin'; 
-        });
+
+        $schedulesGrouped = $schedules->groupBy(fn($item) => $item->day_of_week ?? 'Senin');
 
         return view('student.schedule', compact('student', 'schedulesGrouped'));
     }
@@ -48,67 +65,206 @@ class StudentMenuController extends Controller
     public function assignments()
     {
         $studentData = $this->getStudent();
-        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
+        $student = $this->formatStudent($studentData);
         $classId = $studentData->class_id ?? null;
 
         $assignments = collect([]);
+
         if ($classId) {
             try {
-                $assignments = Assignment::with('subject')
-                    ->where('class_id', $classId)
-                    ->orderBy('due_date', 'asc')
-                    ->get();
-            } catch (\Exception $e) {}
+                $studentId = $studentData->id;
+                
+                $assignments = Assignment::with(['subject', 'submissions' => function($query) use ($studentId) {
+                    $query->where('student_id', $studentId);
+                }])
+                ->where('class_id', $classId)
+                ->latest()
+                ->get();
+                
+                // Proses status tugas
+                foreach ($assignments as $assignment) {
+                    $submission = $assignment->submissions->first();
+                    
+                    if ($submission && $submission->status == 'submitted') {
+                        $assignment->status = 'submitted';
+                        $assignment->is_late = false;
+                    } else if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
+                        $assignment->status = 'late';
+                        $assignment->is_late = true;
+                    } else {
+                        $assignment->status = 'pending';
+                        $assignment->is_late = false;
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Assignment fetch error: ' . $e->getMessage());
+            }
         }
 
         return view('student.assignments', compact('student', 'assignments'));
     }
 
+    public function submitAssignment(Request $request)
+    {
+        $request->validate([
+            'assignment_id' => 'required|exists:assignments,id',
+            'submission_link' => 'nullable|url',
+            'notes' => 'nullable|string',
+        ]);
+        
+        $studentData = $this->getStudent();
+        if (!$studentData || !$studentData->id) {
+            return response()->json(['success' => false, 'message' => 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.']);
+        }
+        
+        try {
+            $assignment = Assignment::findOrFail($request->assignment_id);
+            
+            // Cek apakah sudah submit
+            $existing = \App\Models\Submission::where('assignment_id', $assignment->id)
+                ->where('student_id', $studentData->id)
+                ->first();
+                
+            if ($existing) {
+                return response()->json(['success' => false, 'message' => 'Anda sudah mengumpulkan tugas ini']);
+            }
+            
+            $status = 'submitted';
+            if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
+                $status = 'late';
+            }
+            
+            \App\Models\Submission::create([
+                'assignment_id' => $assignment->id,
+                'student_id' => $studentData->id,
+                'file_url' => $request->submission_link,
+                'notes' => $request->notes,
+                'status' => $status,
+                'score' => null, // Belum dinilai
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Tugas berhasil dikumpulkan']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal mengumpulkan tugas: ' . $e->getMessage()]);
+        }
+    }
+
     public function grades()
     {
         $studentData = $this->getStudent();
-        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
+        $student = $this->formatStudent($studentData);
         $studentId = $studentData->id ?? null;
 
         $grades = collect([]);
+
         if ($studentId) {
             try {
-                // Dianggap memakai nama tabel 'grades' langsung dari DB Facade agar safety jika model Grade belum ada
-                $d = \Illuminate\Support\Facades\DB::table('grades')
-                    ->join('subjects', 'grades.subject_id', '=', 'subjects.id')
-                    ->select('grades.*', 'subjects.name as subject_name')
-                    ->where('student_id', $studentId)
-                    ->get();
-                $grades = collect($d);
-            } catch (\Exception $e) {
-                // Fallback kosong jika tabel belum siap
-                $grades = collect([]);
-            }
+                $grades = collect(
+                    DB::table('grades')
+                        ->join('subjects', 'grades.subject_id', '=', 'subjects.id')
+                        ->select('grades.*', 'subjects.name as subject_name')
+                        ->where('student_id', $studentId)
+                        ->get()
+                );
+            } catch (\Exception $e) {}
         }
 
         return view('student.grades', compact('student', 'grades'));
     }
 
+    // ================= ABSENSI SISWA =================
+
+    public function absensi()
+    {
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+        
+        $absensi = collect([]);
+        $statistik = ['hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alpha' => 0];
+        $todayAbsen = null;
+        
+        if ($studentData && $studentData->id) {
+            try {
+                $absensi = Absensi::where('siswa_id', $studentData->id)
+                    ->orderBy('tanggal', 'desc')
+                    ->paginate(10);
+                
+                $statistik = [
+                    'hadir' => Absensi::where('siswa_id', $studentData->id)->where('status', 'hadir')->count(),
+                    'izin' => Absensi::where('siswa_id', $studentData->id)->where('status', 'izin')->count(),
+                    'sakit' => Absensi::where('siswa_id', $studentData->id)->where('status', 'sakit')->count(),
+                    'alpha' => Absensi::where('siswa_id', $studentData->id)->where('status', 'alpha')->count(),
+                ];
+                
+                $todayAbsen = Absensi::where('siswa_id', $studentData->id)
+                    ->where('tanggal', date('Y-m-d'))
+                    ->first();
+                    
+            } catch (\Exception $e) {
+                $absensi = collect([]);
+            }
+        }
+        
+        return view('student.absensi', compact('student', 'studentData', 'absensi', 'statistik', 'todayAbsen'));
+    }
+
+    public function storeAbsensi(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:hadir,izin,sakit,alpha',
+            'tanggal' => 'required|date',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+        
+        $studentData = $this->getStudent();
+        
+        if (!$studentData || !$studentData->id) {
+            return back()->with('error', 'Data siswa tidak ditemukan! Silakan hubungi admin.');
+        }
+        
+        try {
+            $existing = Absensi::where('siswa_id', $studentData->id)
+                ->where('tanggal', $request->tanggal)
+                ->first();
+                
+            if ($existing) {
+                return back()->with('error', 'Anda sudah melakukan absensi untuk tanggal ' . date('d/m/Y', strtotime($request->tanggal)) . '!');
+            }
+            
+            Absensi::create([
+                'siswa_id' => $studentData->id,
+                'kelas_id' => $studentData->class_id,
+                'tanggal' => $request->tanggal,
+                'status' => $request->status,
+                'keterangan' => $request->keterangan,
+            ]);
+            
+            return back()->with('success', '✅ Absensi berhasil direkam! Terima kasih.');
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menyimpan absensi: ' . $e->getMessage());
+        }
+    }
+
+    // ================= KONSULTASI =================
+
     public function counseling()
     {
         $studentData = $this->getStudent();
-        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
+        $student = $this->formatStudent($studentData);
 
-        // Ambil histori chat asli antara siswa ini dan guru BK (siapapun guru BK-nya)
-        $counselingHistory = \App\Models\Chat::where(function($q) use ($studentData) {
+        $counselingHistory = Chat::where(function ($q) use ($studentData) {
                 $q->where('sender_id', $studentData->user_id)
                   ->orWhere('receiver_id', $studentData->user_id);
             })
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at')
             ->get();
 
-        // Mark as read pesan yang masuk dari Guru BK ke siswa ini
-        \App\Models\Chat::where('receiver_id', auth()->id())
+        Chat::where('receiver_id', auth()->id())
             ->where('is_read', false)
             ->update(['is_read' => true]);
 
-        // Cari Guru BK (default)
-        $bkUser = \App\Models\User::where('role', 'guru_bk')->first();
+        $bkUser = User::where('role', 'guru_bk')->first();
 
         return view('student.counseling', compact('student', 'counselingHistory', 'bkUser'));
     }
@@ -117,76 +273,103 @@ class StudentMenuController extends Controller
     {
         $request->validate(['message' => 'required']);
 
-        // Ambil guru BK pertama sebagai penerima default (simulasi)
         $bkUser = User::where('role', 'guru_bk')->first();
 
-        \App\Models\Chat::create([
+        Chat::create([
             'sender_id' => auth()->id(),
-            'receiver_id' => $bkUser->id ?? auth()->id(), // fallback ke diri sendiri jika BK belum ada
+            'receiver_id' => $bkUser->id ?? auth()->id(),
             'message' => $request->message,
             'is_read' => false
         ]);
 
-        return back()->with('success', 'Pesan berhasil dikirim ke Guru BK!');
+        return back()->with('success', 'Pesan berhasil dikirim!');
     }
+
+    // ================= PROFIL =================
 
     public function profile()
     {
         $studentData = $this->getStudent();
-        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
-        
-        return view('student.profile', compact('student', 'studentData'));
+        $student = $this->formatStudent($studentData);
+        $user = auth()->user();
+
+        return view('student.profile', compact('student', 'studentData', 'user'));
     }
 
     public function updateProfile(Request $request)
     {
-        // 1. Ambil model student-nya
         $studentModel = $this->getStudent();
-        
+        $user = auth()->user();
+
         if (!$studentModel) {
-            return back()->with('error', 'Data siswa tidak ditemukan di sistem.');
+            return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // 2. Jika ada file avatar/Poto Profil yang diupload
+        // Validasi
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'nisn' => 'nullable|string|max:20',
+            'birth_place' => 'nullable|string|max:100',
+            'birth_date' => 'nullable|date',
+            'address' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        // Update user name
+        if ($request->name) {
+            $user->name = $request->name;
+            $user->save();
+        }
+
+        // Handle avatar upload
         if ($request->hasFile('avatar')) {
+            // Hapus avatar lama jika ada
+            if ($studentModel->avatar) {
+                $oldPath = str_replace('/storage/', '', $studentModel->avatar);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+            
+            // Upload avatar baru
             $file = $request->file('avatar');
-            // Simpan gambar ke storage/app/public/avatars (perlu run artisan storage:link)
-            $path = $file->store('avatars', 'public');
-            // Update URL ke database
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('avatars', $filename, 'public');
             $studentModel->avatar = '/storage/' . $path;
         }
 
-        // 3. Update field lainnya
-        // Memakai null coalescing agar kalau dari form kosong, tetep tersimpan aman
-        $studentModel->first_name = $request->input('name') ?? $studentModel->first_name; 
-        
-        // Coba perbarui nama fallback kalau DB pakainya kolom 'name'
-        try {
-            $studentModel->name = $request->input('name') ?? $studentModel->name;
-        } catch (\Exception $e) {}
+        // Update student data
+        $studentModel->name = $request->name;
+        $studentModel->first_name = $request->name;
+        $studentModel->nisn = $request->nisn;
+        $studentModel->phone = $request->phone;
+        $studentModel->birth_place = $request->birth_place;
+        $studentModel->birth_date = $request->birth_date;
+        $studentModel->address = $request->address;
 
-        $studentModel->nisn = $request->input('nisn');
-        $studentModel->phone = $request->input('phone');
-        $studentModel->birth_place = $request->input('birth_place');
-        $studentModel->address = $request->input('address');
-
-        // 4. Simpan perubahan ke Database
         $studentModel->save();
 
-        return back()->with('success', 'Profil dan Foto berhasil diupdate!');
+        return redirect()->route('student.profile')->with('success', '✅ Profil berhasil diperbarui!');
     }
+
+    // ================= APPOINTMENT =================
 
     public function appointments()
     {
         $studentData = $this->getStudent();
-        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
-        
-        $appointments = collect([]);
-        if ($studentData) {
-            $appointments = \App\Models\Appointment::with('teacher')->where('student_id', $studentData->id)->orderBy('created_at', 'desc')->get();
-        }
-        
-        $bkUsers = \App\Models\User::where('role', 'guru_bk')->get();
+        $student = $this->formatStudent($studentData);
+
+        $appointments = $studentData
+            ? \App\Models\Appointment::with('teacher')
+                ->where('student_id', $studentData->id)
+                ->latest()
+                ->get()
+            : collect([]);
+
+        $bkUsers = \App\Models\Teacher::whereHas('user', function($q) {
+            $q->where('role', 'guru_bk');
+        })->get();
 
         return view('student.appointments', compact('student', 'appointments', 'bkUsers'));
     }
@@ -197,39 +380,86 @@ class StudentMenuController extends Controller
             'teacher_id' => 'required',
             'date' => 'required|date',
             'time' => 'required',
-            'notes' => 'required|string'
+            'notes' => 'required'
         ]);
 
         $studentData = $this->getStudent();
-        if (!$studentData) {
-            return back()->with('error', 'Data siswa tidak ditemukan. Pastikan kamu login sebagai siswa.');
-        }
 
-        try {
-            \App\Models\Appointment::create([
-                'student_id' => $studentData->id,
-                'teacher_id' => $request->teacher_id,
-                'date' => $request->date,
-                'time' => $request->time,
-                'notes' => $request->notes,
-                'status' => 'pending'
-            ]);
-            return back()->with('success', 'Jadwal temu berhasil diajukan! Menunggu persetujuan dari Guru BK.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal membuat jadwal temu: ' . $e->getMessage());
-        }
+        \App\Models\Appointment::create([
+            'student_id' => $studentData->id,
+            'teacher_id' => $request->teacher_id,
+            'date' => $request->date,
+            'time' => $request->time,
+            'notes' => $request->notes,
+            'status' => 'pending'
+        ]);
+
+        return back()->with('success', 'Berhasil membuat jadwal');
     }
+
+    // ================= DISIPLIN =================
 
     public function discipline()
     {
         $studentData = $this->getStudent();
-        $student = collect($studentData ? $studentData->toArray() : ['name' => 'Siswa', 'avatar' => null]);
-        
-        $records = collect([]);
-        if ($studentData) {
-            $records = \App\Models\DisciplinaryRecord::with('teacher')->where('student_id', $studentData->id)->orderBy('created_at', 'desc')->get();
-        }
+        $student = $this->formatStudent($studentData);
+
+        $records = $studentData
+            ? \App\Models\DisciplinaryRecord::with('teacher')
+                ->where('student_id', $studentData->id)
+                ->latest()
+                ->get()
+            : collect([]);
 
         return view('student.discipline', compact('student', 'records'));
+    }
+
+    // ================= NOTIFIKASI =================
+
+    public function notifications()
+    {
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+        
+        $userId = auth()->id();
+        $notifications = \App\Models\Notification::where('user_id', $userId)
+            ->latest()
+            ->paginate(15);
+            
+        return view('student.notifications', compact('student', 'notifications'));
+    }
+
+    public function fetchNotifications()
+    {
+        $userId = auth()->id();
+        $unreadCount = \App\Models\Notification::where('user_id', $userId)
+            ->where('is_read', false)
+            ->count();
+            
+        $latest = \App\Models\Notification::where('user_id', $userId)
+            ->latest()
+            ->take(5)
+            ->get();
+            
+        return response()->json([
+            'success' => true,
+            'unread_count' => $unreadCount,
+            'notifications' => $latest
+        ]);
+    }
+
+    public function markNotificationAsRead($id)
+    {
+        $notif = \App\Models\Notification::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+            
+        if ($notif) {
+            $notif->is_read = true;
+            $notif->save();
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false], 404);
     }
 }

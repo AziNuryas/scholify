@@ -70,7 +70,7 @@
         <div class="mt-8 text-center border-t border-gray-100 pt-6">
             <div class="text-xs text-gray-600 bg-blue-50 p-4 rounded-xl text-left inline-block w-full border border-blue-100 shadow-sm">
                 <p class="font-bold mb-2 text-schoolify"><i class="fas fa-info-circle mr-1"></i> Mode Demo Aktif (Gunakan akun ini):</p>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-2 mb-2">
                     <div class="bg-white p-2 rounded border border-gray-100">
                         <span class="font-bold text-gray-700 text-[10px] uppercase shadow-sm px-1.5 py-0.5 bg-gray-100 rounded mr-1">ADMIN</span>
                         <br>admin@school.com<br><span class="text-gray-400">admin123</span>
@@ -80,9 +80,21 @@
                         <br>siswa@school.com<br><span class="text-gray-400">siswa123</span>
                     </div>
                 </div>
-                <div class="mt-2 text-left">
-                    <p class="text-[10px] font-bold text-teal-600 mb-1">GURU BK (MODUL BARU):</p>
-                    <div class="bg-white p-2 rounded border border-teal-100 bg-teal-50/20">
+
+                {{-- Guru Mapel --}}
+                <div class="mb-2">
+                    <p class="text-[10px] font-bold text-indigo-600 mb-1">GURU MAPEL:</p>
+                    <div class="bg-white p-2 rounded border border-indigo-100 bg-indigo-50/20">
+                        <span class="font-bold text-indigo-600 text-[10px] uppercase px-1.5 py-0.5 bg-indigo-100 rounded mr-1">GURU</span>
+                        guru@school.com | <span class="text-gray-400">guru123</span>
+                    </div>
+                </div>
+
+                {{-- Guru BK --}}
+                <div>
+                    <p class="text-[10px] font-bold text-teal-600 mb-1">GURU BK:</p>
+                    <div class="bg-white p-2 rounded border border-teal-100">
+                        <span class="font-bold text-teal-700 text-[10px] uppercase px-1.5 py-0.5 bg-teal-100 rounded mr-1">BK</span>
                         azibk@gmail.com | <span class="text-gray-400">bk123</span>
                     </div>
                 </div>

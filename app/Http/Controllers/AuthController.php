@@ -25,12 +25,13 @@ class AuthController extends Controller
     /**
      * Redirect berdasarkan role user
      */
-    private function redirectBasedOnRole($user): RedirectResponse
+    private function redirectBasedOnRole(User $user): RedirectResponse
     {
         return match ($user->role) {
             'admin' => redirect()->route('admin.dashboard'),
             'siswa' => redirect()->route('student.dashboard'),
             'guru_bk' => redirect()->route('gurubk.dashboard'),
+            'guru' => redirect()->route('guru.dashboard'),
             default => redirect('/'),
         };
     }

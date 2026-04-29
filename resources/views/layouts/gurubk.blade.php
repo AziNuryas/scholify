@@ -78,6 +78,14 @@
                     <i class='bx bx-calendar text-xl'></i>
                     <span class="font-semibold">Jadwal Temu</span>
                 </a>
+                <a href="{{ route('gurubk.catatan-konseling.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('gurubk.catatan-konseling.index') ? 'bg-teal-600 text-white shadow-md shadow-teal-100 transition-transform hover:-translate-y-0.5' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors' }}">
+                    <i class='bx bx-book-open text-xl'></i>
+                    <span class="font-semibold">Catatan Konseling</span>
+                </a>
+                <a href="{{ route('gurubk.deteksi-asesmen.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('gurubk.deteksi-asesmen.index') ? 'bg-teal-600 text-white shadow-md shadow-teal-100 transition-transform hover:-translate-y-0.5' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors' }}">
+                    <i class='bx bx-book-open text-xl'></i>
+                    <span class="font-semibold">Deteksi Dini & Asesmen</span>
+                </a>
             </nav>
         </div>
 

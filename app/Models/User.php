@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -26,7 +26,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'nisn',          // untuk siswa (jika disimpan di users)
+        'nisn',          // untuk siswa
         'nip',           // untuk guru
         'gender',        // L / P
         'birth_place',   // tempat lahir
@@ -61,6 +61,12 @@ class User extends Authenticatable
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Relasi ke data siswa (jika role = siswa)
      */
@@ -82,32 +88,92 @@ class User extends Authenticatable
      */
     public function class(): BelongsTo
     {
-        return $this->belongsTo(Classes::class, 'class_id');
+        return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
     /**
-     * Relasi ke kelas yang diwalikan (untuk guru BK)
+     * Relasi ke kelas yang diwalikan (untuk guru BK/wali kelas)
      */
     public function homeroomClass(): HasOne
     {
-        return $this->hasOne(Classes::class, 'homeroom_teacher_id');
+        return $this->hasOne(SchoolClass::class, 'homeroom_teacher_id');
     }
 
     /**
-     * Relasi ke chat
+     * Relasi ke chat yang dikirim user
+     */
+    public function sentChats(): HasMany
+    {
+        return $this->hasMany(Chat::class, 'sender_id');
+    }
+
+    /**
+     * Relasi ke chat yang diterima user
+     */
+    public function receivedChats(): HasMany
+    {
+        return $this->hasMany(Chat::class, 'receiver_id');
+    }
+
+    /**
+     * Semua chat user (gabungan sent & received)
      */
     public function chats(): HasMany
     {
-        return $this->hasMany(Chat::class, 'sender_id')->orWhere('receiver_id', $this->id);
+        return $this->sentChats()->union($this->receivedChats());
     }
+
+    /**
+     * Pengumuman yang dibuat oleh user (guru)
+     */
+    public function announcements(): HasMany
+    {
+        return $this->hasMany(Announcement::class, 'teacher_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SCOPES
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Scope untuk filter berdasarkan role
      */
-    public function scopeByRole($query, $role)
+    public function scopeByRole(Builder $query, string $role): Builder
     {
         return $query->where('role', $role);
     }
+
+    /**
+     * Scope untuk filter siswa
+     */
+    public function scopeSiswa(Builder $query): Builder
+    {
+        return $query->where('role', 'siswa');
+    }
+
+    /**
+     * Scope untuk filter guru (BK & Mapel)
+     */
+    public function scopeGuru(Builder $query): Builder
+    {
+        return $query->whereIn('role', ['guru', 'guru_bk']);
+    }
+
+    /**
+     * Scope untuk filter admin
+     */
+    public function scopeAdmin(Builder $query): Builder
+    {
+        return $query->where('role', 'admin');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER METHODS
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Cek apakah user adalah admin
@@ -161,5 +227,29 @@ class User extends Authenticatable
             'siswa' => 'Siswa',
             default => $this->role,
         };
+    }
+
+    /**
+     * Cek apakah user memiliki akses ke fitur chat
+     */
+    public function canChat(): bool
+    {
+        return in_array($this->role, ['siswa', 'guru_bk']);
+    }
+
+    /**
+     * Cek apakah user bisa membuat pengumuman
+     */
+    public function canCreateAnnouncement(): bool
+    {
+        return in_array($this->role, ['admin', 'guru', 'guru_bk']);
+    }
+
+    /**
+     * Mendapatkan nama kelas (untuk siswa)
+     */
+    public function getClassNameAttribute(): ?string
+    {
+        return $this->class ? $this->class->name : null;
     }
 }

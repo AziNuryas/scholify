@@ -6,151 +6,369 @@
     <title>@yield('title', 'Schoolify - Student Space')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <!-- Tailwind CDN (Tidak Perlu Vite/NPM Run Dev lagi) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Premium Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- Font Awesome 6 (untuk backup jika diperlukan) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        :root {
+            --brand-primary: #4318FF;
+            --brand-secondary: #2B3674;
+            --text-muted: #A3AED0;
+            --bg-main: #F4F7FE;
+        }
+
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #F4F7FE; /* Premium soft background */
-            color: #2B3674; 
+            background-color: var(--bg-main); 
+            color: var(--brand-secondary); 
+            letter-spacing: -0.01em;
         }
+
         .font-outfit { font-family: 'Outfit', sans-serif; }
         
-        /* Custom Scrollbar for a premium feel */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #E0E5F2; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #A3AED0; }
+        ::-webkit-scrollbar-thumb:hover { background: #ced4e4; }
         
-        /* Glass card effect */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 18px 40px rgba(112, 144, 176, 0.12);
+        .glass-header {
+            background: rgba(244, 247, 254, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(224, 229, 242, 0.5);
+        }
+
+        .nav-link {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-link:hover:not(.active) {
+            transform: translateX(4px);
+        }
+
+        [x-cloak] { display: none !important; }
+
+        @keyframes elasticBounce {
+            0% { transform: translateY(100px) scale(0.8); opacity: 0; }
+            60% { transform: translateY(-15px) scale(1.05); opacity: 1; }
+            80% { transform: translateY(5px) scale(0.98); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .animate-bounce-in {
+            animation: elasticBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+        
+        /* Sidebar Active State */
+        .sidebar-active {
+            background: #4318FF;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 16px -4px rgba(67, 24, 255, 0.15);
+        }
+        
+        /* Logo image style */
+        .logo-image {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Icon styling */
+        .nav-icon {
+            width: 20px;
+            height: 20px;
         }
     </style>
 </head>
-<body class="antialiased flex h-screen overflow-hidden text-[#2B3674]">
+<body class="antialiased flex h-screen overflow-hidden">
 
-    <!-- Sidebar -->
-    <aside class="w-[280px] bg-white h-full shadow-sm flex flex-col justify-between transition-all duration-300 z-20">
-        <div>
-            <!-- Logo -->
-            <div class="h-24 flex items-center px-8 border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4318FF] to-[#868CFF] flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">
-                        S
-                    </div>
-                    <span class="font-outfit font-extrabold text-2xl tracking-tight text-[#2B3674]">Schoolify<span class="text-[#4318FF]">.</span></span>
+    <!-- Sidebar dengan Logo Scholify -->
+    <aside class="w-[290px] bg-white h-full flex flex-col transition-all duration-300 z-20 border-r border-[#E0E5F2]">
+        <!-- Logo Scholify -->
+        <div class="h-28 flex-none flex items-center px-6 border-b border-[#F4F7FE]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-indigo-200 bg-gradient-to-br from-[#4318FF] to-[#868CFF] flex items-center justify-center">
+                    <img src="{{ asset('images/scholify-logo.png') }}" 
+                         alt="Scholify Logo" 
+                         class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-outfit font-extrabold text-2xl tracking-tight text-[#2B3674] leading-tight">Scholify</span>
+                    <span class="text-xs font-semibold text-[#A3AED0] tracking-wide mt-0.5">BELAJAR · TERHUBUNG · BERKEMBANG</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Navigation Links -->
-            <nav class="p-4 space-y-2 mt-4 font-outfit">
-                <a href="{{ route('student.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.dashboard') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }}">
-                    <i class='bx bxs-dashboard text-xl'></i>
+        <div class="flex-1 overflow-y-auto px-4 py-4">
+            <nav class="space-y-1.5 font-outfit">
+                <!-- MENU UTAMA -->
+                <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Menu Utama</p>
+                
+                <a href="{{ route('student.dashboard') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.dashboard') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="layout-dashboard" class="nav-icon"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ route('student.schedule') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.schedule') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }}">
-                    <i class='bx bx-calendar text-xl'></i>
+                
+                <a href="{{ route('student.schedule') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.schedule') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="calendar" class="nav-icon"></i>
                     <span>Jadwal Kelas</span>
                 </a>
-                <a href="{{ route('student.assignments') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.assignments') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }} relative">
-                    <i class='bx bx-book-content text-xl'></i>
+                
+                <a href="{{ route('student.absensi') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.absensi') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="user-check" class="nav-icon"></i>
+                    <span>Absensi</span>
+                </a>
+                
+                <a href="{{ route('student.grades') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.grades') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="trending-up" class="nav-icon"></i>
+                    <span>Nilai & Rapor</span>
+                </a>
+                
+                <a href="{{ route('student.assignments') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.assignments') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }} relative">
+                    <i data-lucide="clipboard-list" class="nav-icon"></i>
                     <span>Tugas</span>
                 </a>
-                <a href="{{ route('student.grades') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.grades') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }}">
-                    <i class='bx bx-bar-chart-alt-2 text-xl'></i>
-                    <span>Nilai</span>
+
+                <!-- PENGUMUMAN / NOTIFIKASI -->
+                <a href="{{ route('student.notifications') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.notifications') ? 'bg-[#F4F7FE] text-[#4318FF] font-semibold shadow-sm' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="bell" class="nav-icon"></i>
+                    <span>Notifikasi</span>
                 </a>
-                <a href="{{ route('student.counseling') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.counseling') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }} relative">
-                    <i class='bx bx-support text-xl'></i>
-                    <span>Konsultasi BK</span>
-                    @php $unread = \App\Models\Chat::where('receiver_id', auth()->id())->where('is_read', false)->count(); @endphp
-                    @if($unread > 0)
-                    <span class="absolute right-4 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm uppercase">{{ $unread }}</span>
-                    @endif
+
+                <!-- LAINNYA -->
+                <div class="my-6 border-t border-[#F4F7FE] mx-4"></div>
+                <p class="px-4 text-[11px] font-bold text-[#A3AED0] uppercase tracking-widest mb-3">Lainnya</p>
+                
+                <a href="{{ route('student.profile') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.profile') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                    <i data-lucide="user-circle" class="nav-icon"></i>
+                    <span>Profil Saya</span>
                 </a>
-                <a href="{{ route('student.appointments') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.appointments') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }}">
-                    <i class='bx bx-calendar text-xl'></i>
-                    <span>Jadwal Temu</span>
-                </a>
-                <a href="{{ route('student.discipline') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.discipline') ? 'bg-[#4318FF] text-white font-semibold shadow-md shadow-indigo-100 transition-transform hover:-translate-y-0.5' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-gray-50 font-medium transition-colors' }}">
-                    <i class='bx bx-error-circle text-xl'></i>
-                    <span>Catatan Disiplin</span>
+
+                <a href="{{ route('student.asesmen.index') }}" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('student.asesmen.index') ? 'sidebar-active' : 'text-[#A3AED0] hover:text-[#2B3674] hover:bg-[#F4F7FE] font-medium' }}">
+                     <i data-lucide="brain" class="nav-icon"></i>
+                     <span>Asesmen Mandiri</span>
                 </a>
             </nav>
         </div>
 
-        <!-- Upgrade/Promo Card (Common in modern dashboards) -->
-        <div class="p-6">
-            <div class="glass-card rounded-2xl p-5 text-center relative overflow-hidden bg-gradient-to-br from-[#868CFF] to-[#4318FF] text-white shadow-xl shadow-indigo-200 border-none">
-                <div class="absolute -top-6 -right-6 w-20 h-20 bg-white opacity-10 rounded-full blur-xl"></div>
-                <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-white opacity-10 rounded-full blur-xl"></div>
-                <h4 class="font-outfit font-bold text-lg mb-1 relative z-10">Ujian Semester</h4>
-                <p class="text-xs text-indigo-100 mb-4 relative z-10">Tinggal 14 hari lagi, persiapkan dirimu dari sekarang!</p>
-                <button class="w-full py-2 bg-white text-[#4318FF] rounded-lg text-sm font-semibold hover:bg-gray-50 transition relative z-10">Lihat Kisi-kisi</button>
-            </div>
-        </div>
-
-        <!-- Logout Button -->
-        <div class="p-6 mt-auto border-t border-gray-100">
-            <form action="{{ route('logout') }}" method="POST">
+        <!-- Tombol Logout -->
+        <div class="p-6 flex-none border-t border-[#F4F7FE]">
+            <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                 @csrf
-                <button type="submit" class="flex items-center justify-center gap-2 w-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 font-bold py-3 rounded-xl transition cursor-pointer">
-                    <i class='bx bx-log-out text-lg'></i>
-                    <span>Keluar / Logout</span>
+                <button type="submit" class="flex items-center justify-center gap-2 w-full text-[#A3AED0] hover:text-red-500 font-semibold py-2.5 transition-colors">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    <span>Keluar dari Akun</span>
                 </button>
             </form>
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 flex flex-col h-full relative overflow-hidden">
-        <!-- Top Header -->
-        <header class="h-24 px-8 flex items-center justify-between glass-card border-b-0 border-x-0 border-t-0 bg-white/40 sticky top-0 z-10">
+        <header class="h-24 px-10 flex-none flex items-center justify-between glass-header sticky top-0 z-10">
             <div>
-                <p class="text-sm text-[#A3AED0] font-medium mb-1">Welcome back,</p>
-                <h2 class="font-outfit font-bold text-2xl text-[#2B3674]">Ruang Belajar</h2>
+                <p class="text-[13px] text-[#A3AED0] font-semibold tracking-wide uppercase">Student Workspace</p>
+                <h2 class="font-outfit font-extrabold text-2xl text-[#2B3674]">Halo, Selamat Belajar! 👋</h2>
             </div>
 
-            <div class="flex items-center gap-6 glass-card px-4 py-2 rounded-full border border-white">
-                <!-- Search Bar -->
-                <div class="relative hidden py-1 md:flex items-center bg-[#F4F7FE] rounded-full px-4 w-64">
-                    <i class='bx bx-search text-[#A3AED0] text-lg'></i>
-                    <input type="text" placeholder="Cari materi..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-[#2B3674] placeholder-[#A3AED0]">
+            <div class="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-[#F4F7FE]">
+                <div class="relative hidden lg:flex items-center bg-[#F4F7FE] rounded-xl px-4 py-2 w-72">
+                    <i data-lucide="search" class="w-5 h-5 text-[#A3AED0]"></i>
+                    <input type="text" placeholder="Cari tugas..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-[#2B3674] placeholder-[#A3AED0]">
                 </div>
 
-                <!-- Notifications -->
-                <button class="relative text-[#A3AED0] hover:text-[#4318FF] transition">
-                    <i class='bx bxs-bell text-2xl'></i>
-                    <span class="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white"></span>
-                </button>
-
-                <!-- Profile Dropdown -->
-                <a href="{{ route('student.profile') }}" class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition block">
-                    <img src="{{ $student['avatar'] ?? 'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff' }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
-                    <div class="hidden sm:block text-sm">
-                        <p class="font-bold text-[#2B3674]">{{ $student['name'] ?? 'Siswa' }}</p>
-                        <p class="text-[#A3AED0] text-xs font-medium">{{ request()->routeIs('student.profile') ? 'Lihat Profil >' : ($student['class'] ?? 'Kelas') }}</p>
+                <!-- Notification Bell -->
+                <div x-data="{ 
+                        unread: 0, 
+                        showDropdown: false,
+                        notifications: [],
+                        fetchNotifs() {
+                            fetch('{{ route('student.notifications.fetch') }}')
+                                .then(res => res.json())
+                                .then(data => {
+                                    if(data.success) {
+                                        this.unread = data.unread_count;
+                                        this.notifications = data.notifications;
+                                    }
+                                });
+                        }
+                     }" 
+                     x-init="fetchNotifs(); setInterval(() => fetchNotifs(), 15000)"
+                     class="relative">
+                     
+                    <button @click="showDropdown = !showDropdown" class="p-2.5 rounded-xl text-[#A3AED0] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all relative outline-none">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span x-show="unread > 0" x-text="unread" class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" x-cloak></span>
+                    </button>
+                    
+                    <!-- Dropdown Notifikasi -->
+                    <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute right-0 mt-2 w-80 bg-white rounded-2xl p-4 z-50 shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100" x-cloak>
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                            <h4 class="font-bold text-[#2B3674]">Notifikasi</h4>
+                            <a href="{{ route('student.notifications') }}" class="text-xs text-[#4318FF] font-semibold hover:underline">Lihat Semua</a>
+                        </div>
+                        <div class="space-y-2 max-h-[300px] overflow-y-auto custom-scroll pr-1">
+                            <template x-for="notif in notifications" :key="notif.id">
+                                <a :href="notif.link || '{{ route('student.notifications') }}'" class="block p-3 rounded-xl hover:bg-gray-50 transition border border-transparent hover:border-gray-100">
+                                    <p class="font-bold text-sm text-[#2B3674]" x-text="notif.title"></p>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2" x-text="notif.message"></p>
+                                    <p class="text-[10px] text-[#4318FF] mt-2 font-semibold" x-text="new Date(notif.created_at).toLocaleDateString('id-ID')"></p>
+                                </a>
+                            </template>
+                            <div x-show="notifications.length === 0" class="text-center py-4">
+                                <p class="text-sm text-gray-400">Belum ada notifikasi.</p>
+                            </div>
+                        </div>
                     </div>
-                </a>
+                </div>
+
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-3 pl-3 border-l border-[#F4F7FE] hover:bg-[#F4F7FE]/50 p-1.5 rounded-2xl transition-all outline-none group">
+                        <div class="text-right hidden sm:block">
+                            <p class="font-bold text-sm text-[#2B3674] ...">
+                                {{ auth()->user()->name }}
+                            </p>
+                            <p class="text-[#A3AED0] text-[11px] font-medium uppercase tracking-tighter">XII RPL 1</p>
+                        </div>
+                        <div class="relative">
+                            <img src="https://ui-avatars.com/api/?name=Ahmad+Fauzi&background=4318FF&color=fff&rounded=true" alt="Profile" class="w-11 h-11 rounded-full object-cover shadow-sm ring-2 ring-white group-hover:ring-[#4318FF]/20 transition-all">
+                            <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-[#A3AED0] transition-transform duration-300" :class="open ? 'rotate-180 text-[#4318FF]' : ''"></i>
+                    </button>
+
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-95 translate-y-[-10px]"
+                         class="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.08)] border border-[#F4F7FE] py-2.5 z-50"
+                         x-cloak>
+                        
+                        <div class="px-4 py-2 border-bottom border-[#F4F7FE] mb-1">
+                            <p class="text-[10px] font-bold text-[#A3AED0] uppercase tracking-widest">Akun Siswa</p>
+                        </div>
+
+                        <a href="{{ route('student.profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] hover:text-[#4318FF] transition-all font-semibold mx-2 rounded-xl">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                                <i data-lucide="user" class="w-4 h-4 text-[#4318FF]"></i>
+                            </div>
+                            Lihat Profil
+                        </a>
+
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2B3674] hover:bg-[#F4F7FE] transition-all font-medium mx-2 rounded-xl">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                                <i data-lucide="settings" class="w-4 h-4 text-[#A3AED0]"></i>
+                            </div>
+                            Pengaturan
+                        </a>
+
+                        <div class="border-t border-[#F4F7FE] my-2 mx-4"></div>
+                        
+                        <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
+                            @csrf
+                            <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-all font-bold w-[calc(100%-1rem)] mx-2 rounded-xl text-left">
+                                <div class="w-8 h-8 rounded-lg bg-red-100/50 flex items-center justify-center">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                </div>
+                                Keluar Aplikasi
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <!-- Content Area -->
-        <div class="flex-1 overflow-y-auto p-8">
-            @yield('content')
+        <div class="flex-1 overflow-y-auto p-10">
+            <div class="max-w-7xl mx-auto">
+                @yield('content')
+            </div>
         </div>
     </main>
 
+    <!-- Popup Notification -->
+    <div x-data="{ 
+            showPopup: false,
+            init() {
+                if (!sessionStorage.getItem('dismissExamNotice')) {
+                    setTimeout(() => { this.showPopup = true }, 1000); 
+                }
+            },
+            closeForNow() {
+                this.showPopup = false;
+                sessionStorage.setItem('dismissExamNotice', 'true');
+            }
+         }" 
+         x-show="showPopup" 
+         x-cloak
+         class="fixed bottom-8 right-8 z-50 w-[340px]">
+        
+        <div :class="showPopup ? 'animate-bounce-in' : ''" 
+             class="bg-[#4318FF] rounded-[28px] relative overflow-hidden p-8 text-white shadow-[0_25px_60px_rgba(67,24,255,0.35)] border border-white/10">
+            
+            <button @click="closeForNow()" class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+            <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-400/20 rounded-full blur-3xl"></div>
+
+            <div class="flex flex-col gap-6 relative z-10 text-center items-center">
+                <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner ring-1 ring-white/20">
+                    <i data-lucide="megaphone" class="w-8 h-8 text-yellow-300 animate-pulse"></i>
+                </div>
+                
+                <div>
+                    <h4 class="font-outfit font-extrabold text-xl leading-tight">Ujian Semester</h4>
+                    <p class="text-[10px] text-white/60 mt-1 uppercase tracking-[0.2em] font-bold">Pengumuman Penting</p>
+                </div>
+                
+                <p class="text-sm text-white/80 leading-relaxed font-medium">
+                    Tinggal <span class="text-white font-bold underline decoration-yellow-400 decoration-4 underline-offset-4">14 hari lagi</span> sebelum ujian dimulai. Sudah sejauh mana persiapanmu?
+                </p>
+
+                <div class="flex flex-col w-full gap-3 pt-2">
+                    <button class="w-full py-4 bg-white text-[#4318FF] rounded-xl text-xs font-bold hover:bg-yellow-300 hover:text-[#2B3674] transition-all transform active:scale-95 shadow-xl shadow-black/10">
+                        Buka Bank Soal
+                    </button>
+                    <button @click="closeForNow()" class="w-full py-4 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all border border-white/10 active:scale-95 text-white/90">
+                        Ingatkan Nanti
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Konfirmasi logout dengan custom dialog
+        document.querySelectorAll('form[action*="logout"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const confirmed = confirm('⚠️ Apakah Anda yakin ingin keluar?\n\nSemua sesi akan berakhir dan Anda perlu login kembali.');
+                
+                if(confirmed) {
+                    const btn = this.querySelector('button');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+                    btn.disabled = true;
+                    this.submit();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -9,6 +9,13 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuruBkController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AgendaController;
+use App\Http\Controllers\GradeController;
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\DeteksiDiniController;
+use App\Http\Controllers\LaporanSiswaController;
+use App\Http\Controllers\AsesmenController;
+use App\Http\Controllers\CatatanKonselingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,18 +43,33 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('/schedule', [StudentMenuController::class, 'schedule'])->name('schedule');
         Route::get('/assignments', [StudentMenuController::class, 'assignments'])->name('assignments');
+        Route::post('/assignments/submit', [StudentMenuController::class, 'submitAssignment'])->name('assignments.submit');
         Route::get('/grades', [StudentMenuController::class, 'grades'])->name('grades');
         Route::get('/counseling', [StudentMenuController::class, 'counseling'])->name('counseling');
         Route::post('/counseling', [StudentMenuController::class, 'sendCounselingMessage'])->name('counseling.send');
         Route::get('/profile', [StudentMenuController::class, 'profile'])->name('profile');
         Route::post('/profile', [StudentMenuController::class, 'updateProfile'])->name('profile.update');
+        Route::put('/profile', [StudentMenuController::class, 'updateProfile'])->name('profile.update.put');
         Route::get('/appointments', [StudentMenuController::class, 'appointments'])->name('appointments');
         Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])->name('appointment.store');
         Route::get('/discipline', [StudentMenuController::class, 'discipline'])->name('discipline');
+        Route::get('/absensi', [StudentMenuController::class, 'absensi'])->name('absensi');
+        Route::post('/absensi/store', [StudentMenuController::class, 'storeAbsensi'])->name('absensi.store');
+        Route::get('/notifications', [StudentMenuController::class, 'notifications'])->name('notifications');
+        Route::get('/notifications/fetch', [StudentMenuController::class, 'fetchNotifications'])->name('notifications.fetch');
+        Route::post('/notifications/{id}/read', [StudentMenuController::class, 'markNotificationAsRead'])->name('notifications.read');
+        
+        // Asesmen mandiri siswa
+        Route::prefix('asesmen')->name('asesmen.')->group(function () {
+            Route::get('/', [AsesmenController::class, 'index'])->name('index');
+            Route::get('/isi/{jenis}', [AsesmenController::class, 'isi'])->name('isi');
+            Route::post('/simpan/{asesmen}', [AsesmenController::class, 'simpan'])->name('simpan');
+            Route::get('/hasil/{asesmen}', [AsesmenController::class, 'hasil'])->name('hasil');
+        });
     });
     
-    // ========== GURU AREA (BK & Mapel) ==========
-    Route::middleware(['checkRole:guru,guru_bk'])->prefix('guru')->name('guru.')->group(function () {
+    // ========== GURU BK AREA ==========
+    Route::middleware(['checkRole:guru_bk'])->prefix('guru-bk')->name('gurubk.')->group(function () {
         Route::get('/dashboard', [GuruBkController::class, 'index'])->name('dashboard');
         Route::get('/chats', [GuruBkController::class, 'chats'])->name('chats');
         Route::post('/chats/reply', [GuruBkController::class, 'reply'])->name('reply');
@@ -57,6 +79,46 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/appointments/{id}/status', [GuruBkController::class, 'updateAppointmentStatus'])->name('appointment.status');
         Route::get('/discipline', [GuruBkController::class, 'discipline'])->name('discipline');
         Route::post('/discipline', [GuruBkController::class, 'storeDiscipline'])->name('discipline.store');
+        Route::resource('catatan-konseling', CatatanKonselingController::class);
+        Route::get('/deteksi-asesmen', [GuruBkController::class, 'deteksiAsesmen'])->name('deteksi-asesmen.index');
+        Route::get('/laporan', [GuruBkController::class, 'laporanIndex'])->name('laporan.index');
+        Route::patch('/laporan/{laporan}/proses', [GuruBkController::class, 'laporanProses'])->name('laporan.proses');
+    });
+    
+    // ========== GURU MAPEL AREA ==========
+    Route::middleware(['checkRole:guru'])->prefix('guru')->name('guru.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('guru.dashboard');
+        })->name('dashboard');
+        Route::view('/jadwal', 'guru.jadwal')->name('jadwal');
+        Route::view('/absensi', 'guru.absensi')->name('absensi');
+        Route::view('/raport', 'guru.raport')->name('raport');
+        Route::view('/profil', 'guru.profil')->name('profil');
+        
+        Route::controller(GradeController::class)->group(function () {
+            Route::get('/nilai', 'index')->name('nilai');
+            Route::post('/nilai', 'store')->name('nilai.store');
+        });
+        
+        Route::controller(AssignmentController::class)->group(function () {
+            Route::get('/tugas', 'index')->name('tugas');
+            Route::post('/tugas', 'store')->name('tugas.store');
+            Route::put('/tugas/{id}', 'update')->name('tugas.update');
+            Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
+        });
+        
+        Route::controller(AnnouncementController::class)->group(function () {
+            Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
+            Route::post('/pengumuman', 'store')->name('pengumuman.store');
+            Route::delete('/pengumuman/{id}', 'destroy')->name('pengumuman.destroy');
+        });
+        
+        Route::prefix('laporan-siswa')->name('laporan.')->group(function () {
+            Route::get('/', [LaporanSiswaController::class, 'index'])->name('index');
+            Route::get('/buat', [LaporanSiswaController::class, 'create'])->name('create');
+            Route::post('/', [LaporanSiswaController::class, 'store'])->name('store');
+            Route::get('/{laporan}', [LaporanSiswaController::class, 'show'])->name('show');
+        });
     });
     
     // ========== ADMIN AREA ==========
@@ -81,12 +143,11 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/teachers/{id}', [AdminController::class, 'deleteTeacher'])->name('teachers.delete');
         
         // Agenda Management
-       // Agenda Management
         Route::get('/agendas', [AgendaController::class, 'index'])->name('agendas.index');
         Route::get('/agendas/create', [AgendaController::class, 'create'])->name('agendas.create');
         Route::post('/agendas', [AgendaController::class, 'store'])->name('agendas.store');
         Route::get('/agendas/{id}/edit', [AgendaController::class, 'edit'])->name('agendas.edit');
-        Route::put('/agendas/{id}', [AgendaController::class, '204'])->name('agendas.update');
+        Route::put('/agendas/{id}', [AgendaController::class, 'update'])->name('agendas.update');
         Route::delete('/agendas/{id}', [AgendaController::class, 'destroy'])->name('agendas.delete');
         Route::post('/agendas/{id}/toggle', [AgendaController::class, 'toggleActive'])->name('agendas.toggle');
         
@@ -96,7 +157,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/classes', [AdminController::class, 'storeClass'])->name('classes.store');
         Route::get('/classes/{id}/edit', [AdminController::class, 'editClass'])->name('classes.edit');
         Route::put('/classes/{id}', [AdminController::class, 'updateClass'])->name('classes.update');
-        Route::delete('/classes/{id}', [AdminController::class, 'deleteClass'])->name('classes.delete'); // ← PERBAIKAN
+        Route::delete('/classes/{id}', [AdminController::class, 'deleteClass'])->name('classes.delete');
         
         // Class - Student Management
         Route::post('/classes/{class}/add-student', [AdminController::class, 'addStudentToClass'])->name('classes.add-student');
@@ -110,6 +171,20 @@ Route::middleware(['auth'])->group(function () {
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
         Route::put('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
+    });
+    
+    // ========== BK / KONSELOR - Deteksi Dini & Asesmen ==========
+    Route::middleware(['checkRole:guru_bk'])->prefix('bk')->name('bk.')->group(function () {
+        Route::prefix('deteksi-dini')->name('deteksi.')->group(function () {
+            Route::get('/', [DeteksiDiniController::class, 'index'])->name('index');
+            Route::get('/siswa', [DeteksiDiniController::class, 'daftarSiswa'])->name('daftar-siswa');
+            Route::get('/siswa/{siswaId}', [DeteksiDiniController::class, 'detailSiswa'])->name('detail-siswa');
+            Route::get('/laporan', [DeteksiDiniController::class, 'daftarLaporan'])->name('laporan');
+            Route::patch('/laporan/{laporan}/proses', [DeteksiDiniController::class, 'prosesLaporan'])->name('laporan.proses');
+            Route::get('/asesmen/{asesmen}', [DeteksiDiniController::class, 'detailAsesmen'])->name('asesmen.detail');
+            Route::patch('/asesmen/{asesmen}/catatan', [DeteksiDiniController::class, 'catatanAsesmen'])->name('asesmen.catatan');
+            Route::post('/refresh-skor', [DeteksiDiniController::class, 'refreshSemuaSkor'])->name('refresh-skor');
+        });
     });
 });
 
