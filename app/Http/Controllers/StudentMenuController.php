@@ -9,8 +9,10 @@ use App\Models\Assignment;
 use App\Models\User;
 use App\Models\Chat;
 use App\Models\Absensi;
+use App\Models\Submission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class StudentMenuController extends Controller
 {
@@ -85,11 +87,16 @@ class StudentMenuController extends Controller
                 foreach ($assignments as $assignment) {
                     $submission = $assignment->submissions->first();
                     
-                    if ($submission && $submission->status == 'submitted') {
-                        $assignment->status = 'submitted';
-                        $assignment->is_late = false;
-                    } else if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
-                        $assignment->status = 'late';
+                    if ($submission && in_array($submission->status, ['submitted', 'late', 'graded'])) {
+                        $assignment->status = $submission->status;
+                        $assignment->submission_id = $submission->id;
+                        $assignment->submission_file = $submission->file;
+                        $assignment->submission_note = $submission->note;
+                        $assignment->submitted_at = $submission->submitted_at;
+                        $assignment->score = $submission->score;
+                        $assignment->is_late = ($submission->status == 'late');
+                    } else if ($assignment->due_date && Carbon::parse($assignment->due_date)->isPast()) {
+                        $assignment->status = 'pending';
                         $assignment->is_late = true;
                     } else {
                         $assignment->status = 'pending';
@@ -114,38 +121,60 @@ class StudentMenuController extends Controller
         
         $studentData = $this->getStudent();
         if (!$studentData || !$studentData->id) {
-            return response()->json(['success' => false, 'message' => 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.']);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.']);
+            }
+            return back()->with('error', 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.');
         }
         
         try {
             $assignment = Assignment::findOrFail($request->assignment_id);
             
             // Cek apakah sudah submit
-            $existing = \App\Models\Submission::where('assignment_id', $assignment->id)
+            $existing = Submission::where('assignment_id', $assignment->id)
                 ->where('student_id', $studentData->id)
                 ->first();
                 
             if ($existing) {
-                return response()->json(['success' => false, 'message' => 'Anda sudah mengumpulkan tugas ini']);
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Anda sudah mengumpulkan tugas ini']);
+                }
+                return back()->with('error', 'Anda sudah mengumpulkan tugas ini');
             }
             
             $status = 'submitted';
-            if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
+            if ($assignment->due_date && Carbon::parse($assignment->due_date)->isPast()) {
                 $status = 'late';
             }
             
-            \App\Models\Submission::create([
+            // Gunakan kolom yang sesuai dengan database: 'file' dan 'note'
+            $submission = Submission::create([
                 'assignment_id' => $assignment->id,
                 'student_id' => $studentData->id,
-                'file_url' => $request->submission_link,
-                'notes' => $request->notes,
+                'file' => $request->submission_link,  // kolom 'file' bukan 'file_url'
+                'note' => $request->notes,             // kolom 'note' bukan 'notes'
                 'status' => $status,
-                'score' => null, // Belum dinilai
+                'submitted_at' => now(),
             ]);
             
-            return response()->json(['success' => true, 'message' => 'Tugas berhasil dikumpulkan']);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Tugas berhasil dikumpulkan',
+                    'data' => $submission
+                ]);
+            }
+            
+            return redirect()->route('student.assignments')->with('success', '✅ Tugas berhasil dikumpulkan!');
+            
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal mengumpulkan tugas: ' . $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::error('Submit assignment error: ' . $e->getMessage());
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal mengumpulkan tugas: ' . $e->getMessage()]);
+            }
+            
+            return back()->with('error', 'Gagal mengumpulkan tugas: ' . $e->getMessage());
         }
     }
 
