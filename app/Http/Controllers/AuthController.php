@@ -2,59 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showLogin()
+    /**
+     * Menampilkan halaman login
+     */
+    public function showLogin(): View|RedirectResponse
     {
-        if (auth()->check()) {
-            return $this->redirectBasedOnRole(auth()->user());
+        if (Auth::check()) {
+            return $this->redirectBasedOnRole(Auth::user());
         }
 
         return view('auth.login');
     }
 
-    private function redirectBasedOnRole($user)
+    /**
+     * Redirect berdasarkan role user
+     */
+    private function redirectBasedOnRole($user): RedirectResponse
     {
-        if ($user->role === 'siswa') {
-            return redirect()->route('student.dashboard');
-        }
-        if ($user->role === 'guru_bk') {
-            return redirect()->route('gurubk.dashboard');
-        }
-        return redirect()->route('dashboard');
+        return match ($user->role) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'siswa' => redirect()->route('student.dashboard'),
+            'guru_bk' => redirect()->route('gurubk.dashboard'),
+            default => redirect('/'),
+        };
     }
 
-    public function login(Request $request)
+    /**
+     * Proses login
+     */
+    public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        if (auth()->attempt($credentials)) {
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return $this->redirectBasedOnRole(auth()->user());
+            return $this->redirectBasedOnRole(Auth::user());
         }
 
         return back()->with('error', 'Email atau password salah');
     }
 
-    public function dashboard()
+    /**
+     * Dashboard - redirect sesuai role
+     */
+    public function dashboard(): RedirectResponse
     {
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        return $this->redirectBasedOnRole(auth()->user());
+        return $this->redirectBasedOnRole(Auth::user());
     }
 
-    public function logout(Request $request)
+    /**
+     * Logout
+     */
+    public function logout(Request $request): RedirectResponse
     {
-        auth()->logout();
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
         return redirect()->route('login');
     }
 }
