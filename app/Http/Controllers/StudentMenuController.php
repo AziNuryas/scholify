@@ -451,4 +451,29 @@ class StudentMenuController extends Controller
         
         return response()->json(['success' => false], 404);
     }
+    public function settings()
+    {
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+        $user = auth()->user();
+
+        return view('student.settings', compact('student', 'studentData', 'user'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'password' => 'nullable|min:6|confirmed',
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+            $user->save();
+            return back()->with('success', 'Kata sandi berhasil diperbarui!');
+        }
+
+        return back()->with('success', 'Pengaturan berhasil disimpan!');
+    }
 }
