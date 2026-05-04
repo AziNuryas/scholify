@@ -57,6 +57,9 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         // Tambahkan route PUT untuk mendukung method PUT jika diperlukan
         Route::put('/profile', 'updateProfile')->name('profile.update.put');
 
+        Route::get('/settings', 'settings')->name('settings');
+        Route::post('/settings', 'updateSettings')->name('settings.update');
+
         Route::get('/appointments', 'appointments')->name('appointments');
         Route::post('/appointments', 'storeAppointment')->name('appointments.store');
 

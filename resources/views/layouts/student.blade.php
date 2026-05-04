@@ -20,12 +20,26 @@
     <style>
         :root {
             --bg: #e6edf3;
-            --shadow-dark: #b8c6d6;
             --text-primary: #1e293b;
             --text-secondary: #475569;
             --text-muted: #94a3b8;
-            --accent: #5A189A; /* Match screenshot purple */
+            --accent: #5A189A; 
             --accent-light: #7B2CBF;
+            
+            --shadow-light: 255, 255, 255;
+            --shadow-dark: 184, 198, 214;
+        }
+
+        .dark {
+            --bg: #2b3040;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --accent: #a855f7;
+            --accent-light: #c084fc;
+
+            --shadow-light: 50, 56, 75;
+            --shadow-dark: 35, 39, 53;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,6 +48,7 @@
             font-family: 'Inter', sans-serif; 
             background: var(--bg);
             color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .font-outfit { font-family: 'Outfit', sans-serif; }
@@ -42,46 +57,55 @@
         .neo-flat {
             background: var(--bg);
             border-radius: 20px;
-            box-shadow: 6px 6px 12px rgba(184, 198, 214, 0.45),
-                        -6px -6px 12px rgba(255, 255, 255, 0.8);
+            box-shadow: 8px 8px 16px rgba(var(--shadow-dark), 0.65),
+                        -8px -8px 16px rgba(var(--shadow-light), 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .neo-pressed {
             background: var(--bg);
             border-radius: 15px;
-            box-shadow: inset 4px 4px 8px rgba(184, 198, 214, 0.45),
-                        inset -4px -4px 8px rgba(255, 255, 255, 0.7);
+            box-shadow: inset 6px 6px 12px rgba(var(--shadow-dark), 0.6),
+                        inset -6px -6px 12px rgba(var(--shadow-light), 0.9);
+            transition: all 0.3s ease;
         }
 
         .neo-card {
             background: var(--bg);
             border-radius: 20px;
-            box-shadow: 5px 5px 10px rgba(184, 198, 214, 0.35),
-                        -5px -5px 10px rgba(255, 255, 255, 0.9);
+            box-shadow: 8px 8px 16px rgba(var(--shadow-dark), 0.5),
+                        -8px -8px 16px rgba(var(--shadow-light), 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .neo-btn {
             background: var(--bg);
             border-radius: 12px;
-            box-shadow: 4px 4px 8px rgba(184, 198, 214, 0.5),
-                        -4px -4px 8px rgba(255, 255, 255, 0.7);
+            box-shadow: 5px 5px 10px rgba(var(--shadow-dark), 0.6),
+                        -5px -5px 10px rgba(var(--shadow-light), 1);
             border: none;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-primary);
         }
         .neo-btn:hover {
-            box-shadow: 2px 2px 4px rgba(184, 198, 214, 0.5),
-                        -2px -2px 4px rgba(255, 255, 255, 0.7);
+            box-shadow: 2px 2px 5px rgba(var(--shadow-dark), 0.4),
+                        -2px -2px 5px rgba(var(--shadow-light), 0.7),
+                        0 0 20px rgba(90, 24, 154, 0.5);
+            background: var(--accent);
+            color: white !important;
+            transform: translateY(-2px);
         }
         .neo-btn:active, .neo-btn.active {
-            box-shadow: inset 3px 3px 6px rgba(184, 198, 214, 0.5),
-                        inset -3px -3px 6px rgba(255, 255, 255, 0.6);
+            box-shadow: inset 4px 4px 8px rgba(var(--shadow-dark), 0.6),
+                        inset -4px -4px 8px rgba(var(--shadow-light), 0.8);
+            transform: translateY(0);
         }
 
         .neo-input {
             background: var(--bg);
-            box-shadow: inset 3px 3px 6px rgba(184, 198, 214, 0.5),
-                        inset -3px -3px 6px rgba(255, 255, 255, 0.6);
+            box-shadow: inset 3px 3px 6px rgba(var(--shadow-dark), 0.5),
+                        inset -3px -3px 6px rgba(var(--shadow-light), 0.6);
             border: none;
             outline: none;
             padding: 12px 16px;
@@ -91,8 +115,8 @@
             transition: all 0.3s ease;
         }
         .neo-input:focus {
-            box-shadow: inset 2px 2px 4px rgba(184, 198, 214, 0.5),
-                        inset -2px -2px 4px rgba(255, 255, 255, 0.6),
+            box-shadow: inset 2px 2px 4px rgba(var(--shadow-dark), 0.5),
+                        inset -2px -2px 4px rgba(var(--shadow-light), 0.6),
                         0 0 0 2px rgba(90, 24, 154, 0.2);
         }
         .neo-input::placeholder { color: var(--text-muted); }
@@ -120,17 +144,24 @@
         }
 
         /* ====== CARD HOVER ====== */
-        .neo-card-hover { transition: all 0.3s ease; }
-        .neo-card-hover:hover {
-            box-shadow: 8px 8px 16px rgba(184, 198, 214, 0.6),
-                        -8px -8px 16px rgba(255, 255, 255, 0.7);
-            transform: translateY(-2px);
+        .neo-card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .neo-card-hover:hover, .hover-neo:hover {
+            box-shadow: 12px 12px 20px rgba(var(--shadow-dark), 0.7),
+                        -12px -12px 20px rgba(var(--shadow-light), 1);
+            transform: translateY(-3px);
+        }
+
+        .hover-glow:hover {
+            box-shadow: inset 2px 2px 5px rgba(var(--shadow-dark), 0.4),
+                        inset -2px -2px 5px rgba(var(--shadow-light), 0.7),
+                        0 0 15px rgba(90, 24, 154, 0.2);
+            border-color: rgba(90, 24, 154, 0.3);
         }
 
         /* ====== SCROLLBAR ====== */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(184, 198, 214, 0.8); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--shadow-dark), 0.8); border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
 
         /* ====== ANIMATIONS ====== */
@@ -155,6 +186,25 @@
 
         [x-cloak] { display: none !important; }
     </style>
+
+    <script>
+        // Inisialisasi Tema
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+    </script>
 </head>
 <body class="antialiased flex h-screen overflow-hidden" x-data="{ mobileMenuOpen: false }">
 
@@ -162,7 +212,7 @@
     <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden" x-transition x-cloak></div>
 
     <!-- ====== SIDEBAR ====== -->
-    <aside :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="w-[260px] h-full fixed lg:static inset-y-0 left-0 flex flex-col bg-[var(--bg)] border-r border-[var(--shadow-dark)]/10 z-40 transition-transform duration-300 ease-in-out">
+    <aside :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="w-[260px] h-full fixed lg:static inset-y-0 left-0 flex flex-col bg-[var(--bg)] z-40 transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none">
         
         <!-- Logo -->
         <div class="h-[88px] px-4 pt-6 pb-0">
@@ -194,6 +244,7 @@
                     ];
                     $pengaturan = [
                         ['route' => 'student.profile', 'icon' => 'user', 'label' => 'Profil', 'color' => 'text-purple-500'],
+                        ['route' => 'student.settings', 'icon' => 'settings', 'label' => 'Pengaturan', 'color' => 'text-slate-500'],
                     ];
                 @endphp
 
@@ -288,6 +339,12 @@
                         <input type="text" placeholder="Cari sesuatu..." class="bg-transparent border-none outline-none text-sm ml-3 w-full text-[var(--text-primary)] placeholder-[var(--text-muted)]">
                     </div>
 
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="neo-btn p-2.5 rounded-xl text-[var(--text-secondary)] outline-none hover:text-[var(--accent)] transition-colors" title="Ubah Tema">
+                        <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                        <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                    </button>
+
                 <!-- Notification -->
                 <div x-data="{ 
                         unread: 0, showDropdown: false, notifications: [],
@@ -343,13 +400,16 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 text-[var(--text-muted)] ml-1" :class="open ? 'rotate-180' : ''" style="transition: transform 0.2s"></i>
                     </button>
                     <div x-show="open" x-transition class="absolute right-0 mt-2 w-48 neo-flat py-2 z-50" x-cloak>
-                        <a href="{{ route('student.profile') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/30 transition">
+                        <a href="{{ route('student.profile') }}" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:neo-pressed transition-all duration-300">
                             <i data-lucide="user" class="w-4 h-4"></i> Profil
                         </a>
-                        <div class="my-1 mx-3 h-px bg-[var(--shadow-dark)]/10"></div>
+                        <a href="{{ route('student.settings') }}" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:neo-pressed transition-all duration-300">
+                            <i data-lucide="settings" class="w-4 h-4"></i> Pengaturan
+                        </a>
+                        <div class="my-2 mx-4 h-px bg-[var(--shadow-dark)]/10"></div>
                         <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                             @csrf
-                            <button type="submit" class="flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-500 w-full text-left transition">
+                            <button type="submit" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-red-500 hover:text-red-600 hover:neo-pressed w-[calc(100%-16px)] text-left transition-all duration-300">
                                 <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
                             </button>
                         </form>
@@ -361,7 +421,7 @@
 
         <!-- Content -->
         <div class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scroll">
-            <div class="max-w-7xl mx-auto pb-20 lg:pb-6">
+            <div class="w-full pb-20 lg:pb-6">
                 @yield('content')
             </div>
         </div>
