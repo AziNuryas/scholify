@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Chat;
 use App\Models\Absensi;
 use App\Models\Submission;
+use App\Models\UserNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -147,12 +148,11 @@ class StudentMenuController extends Controller
                 $status = 'late';
             }
             
-            // Gunakan kolom yang sesuai dengan database: 'file' dan 'note'
             $submission = Submission::create([
                 'assignment_id' => $assignment->id,
                 'student_id' => $studentData->id,
-                'file' => $request->submission_link,  // kolom 'file' bukan 'file_url'
-                'note' => $request->notes,             // kolom 'note' bukan 'notes'
+                'file' => $request->submission_link,
+                'note' => $request->notes,
                 'status' => $status,
                 'submitted_at' => now(),
             ]);
@@ -334,16 +334,13 @@ class StudentMenuController extends Controller
             return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Validasi
         $request->validate([
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        // Handle photo upload
         if ($request->hasFile('photo')) {
-            // Hapus avatar lama jika ada
             if ($studentModel->avatar) {
                 $oldPath = str_replace('/storage/', '', $studentModel->avatar);
                 if (Storage::disk('public')->exists($oldPath)) {
@@ -351,14 +348,12 @@ class StudentMenuController extends Controller
                 }
             }
             
-            // Upload avatar baru
             $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('avatars', $filename, 'public');
             $studentModel->avatar = $path;
         }
 
-        // Update student data
         if ($request->has('phone')) {
             $studentModel->phone = $request->phone;
         }
@@ -432,7 +427,7 @@ class StudentMenuController extends Controller
         return view('student.discipline', compact('student', 'records'));
     }
 
-    // ================= NOTIFIKASI =================
+    // ================= NOTIFIKASI (LENGKAP) =================
 
     public function notifications()
     {
@@ -440,7 +435,7 @@ class StudentMenuController extends Controller
         $student = $this->formatStudent($studentData);
         
         $userId = auth()->id();
-        $notifications = \App\Models\Notification::where('user_id', $userId)
+        $notifications = UserNotification::where('user_id', $userId)
             ->latest()
             ->paginate(15);
             
@@ -450,11 +445,11 @@ class StudentMenuController extends Controller
     public function fetchNotifications()
     {
         $userId = auth()->id();
-        $unreadCount = \App\Models\Notification::where('user_id', $userId)
+        $unreadCount = UserNotification::where('user_id', $userId)
             ->where('is_read', false)
             ->count();
             
-        $latest = \App\Models\Notification::where('user_id', $userId)
+        $latest = UserNotification::where('user_id', $userId)
             ->latest()
             ->take(5)
             ->get();
@@ -468,7 +463,7 @@ class StudentMenuController extends Controller
 
     public function markNotificationAsRead($id)
     {
-        $notif = \App\Models\Notification::where('id', $id)
+        $notif = UserNotification::where('id', $id)
             ->where('user_id', auth()->id())
             ->first();
             
@@ -480,6 +475,38 @@ class StudentMenuController extends Controller
         
         return response()->json(['success' => false], 404);
     }
+
+    public function deleteNotification($id)
+    {
+        $notif = UserNotification::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+            
+        if ($notif) {
+            $notif->delete();
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false], 404);
+    }
+
+    public function deleteAllNotifications()
+    {
+        UserNotification::where('user_id', auth()->id())->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function markAllNotificationsAsRead()
+    {
+        UserNotification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+        
+        return response()->json(['success' => true]);
+    }
+
+    // ================= SETTINGS =================
+
     public function settings()
     {
         $studentData = $this->getStudent();

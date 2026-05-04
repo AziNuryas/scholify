@@ -50,11 +50,9 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         Route::get('/counseling', 'counseling')->name('counseling');
         Route::post('/counseling', 'sendCounselingMessage')->name('counseling.send');
 
-        // PROFILE - menggunakan POST (bisa juga ditambahkan PUT jika perlu)
+        // PROFILE
         Route::get('/profile', 'profile')->name('profile');
         Route::post('/profile', 'updateProfile')->name('profile.update');
-        
-        // Tambahkan route PUT untuk mendukung method PUT jika diperlukan
         Route::put('/profile', 'updateProfile')->name('profile.update.put');
 
         Route::get('/settings', 'settings')->name('settings');
@@ -68,12 +66,14 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         Route::get('/absensi', 'absensi')->name('absensi');
         Route::post('/absensi/store', 'storeAbsensi')->name('absensi.store');
         
-        // Notifications
+        // 🔔 NOTIFICATIONS (LENGKAP)
         Route::get('/notifications', 'notifications')->name('notifications');
         Route::get('/notifications/fetch', 'fetchNotifications')->name('notifications.fetch');
         Route::post('/notifications/{id}/read', 'markNotificationAsRead')->name('notifications.read');
+        Route::delete('/notifications/{id}', 'deleteNotification')->name('notifications.delete');
+        Route::delete('/notifications/delete-all', 'deleteAllNotifications')->name('notifications.delete-all');
+        Route::post('/notifications/mark-all-read', 'markAllNotificationsAsRead')->name('notifications.mark-all-read');
     });
-
 
     // Asesmen mandiri siswa
     Route::prefix('asesmen')->name('asesmen.')->group(function () {

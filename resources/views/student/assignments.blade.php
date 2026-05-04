@@ -43,22 +43,42 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($assignments as $assign)
             @php
-                $status = $assign->status ?? 'pending';
-                $isLate = $assign->is_late ?? false;
-                $dueDate = $assign->due_date ? \Carbon\Carbon::parse($assign->due_date) : null;
-                $isUrgent = $dueDate ? ($dueDate->isToday() || $dueDate->diffInDays(now()) <= 2) : false;
+                // Hitung status tugas secara otomatis
                 $submission = null;
                 $progress = null;
+                $isSubmitted = false;
                 
                 if(isset($assign->submissions) && $assign->submissions) {
                     $submission = $assign->submissions->where('student_id', auth()->id())->first();
-                    $progress = $submission ? $submission->score : null;
+                    if($submission) {
+                        $isSubmitted = true;
+                        $progress = $submission->score;
+                    }
+                }
+                
+                $dueDate = $assign->due_date ? \Carbon\Carbon::parse($assign->due_date) : null;
+                $isLate = false;
+                $isUrgent = false;
+                $status = 'pending';
+                
+                // Logika penentuan status otomatis
+                if($isSubmitted) {
+                    $status = 'submitted';
+                } else if($dueDate && $dueDate->isPast()) {
+                    $status = 'late';
+                    $isLate = true;
+                } else {
+                    $status = 'pending';
+                    // Urgent jika deadline <= 2 hari
+                    if($dueDate && $dueDate->diffInDays(now()) <= 2) {
+                        $isUrgent = true;
+                    }
                 }
                 
                 $deadlineText = '-';
                 if ($dueDate) {
                     $daysLeft = now()->startOfDay()->diffInDays($dueDate->startOfDay(), false);
-                    if($daysLeft < 0) {
+                    if($status == 'late') {
                         $deadlineText = 'Terlambat ' . abs($daysLeft) . ' hari';
                     } elseif($daysLeft == 0) {
                         $deadlineText = 'Hari terakhir';
@@ -69,7 +89,10 @@
                     }
                 }
             @endphp
-            <div class="task-card group relative neo-flat rounded-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1" data-status="{{ $status }}">
+            <div class="task-card group relative neo-flat rounded-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1" 
+                 data-status="{{ $status }}"
+                 data-id="{{ $assign->id }}">
+                
                 <!-- Progress Bar -->
                 <div class="h-1 w-full neo-pressed">
                     <div class="h-full bg-indigo-500 transition-all duration-700 ease-out" style="width: {{ $progress ? min(($progress / 100) * 100, 100) : 0 }}%"></div>
@@ -78,14 +101,22 @@
                 <div class="p-5">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex gap-2">
-                            @if($isUrgent && $status == 'pending')
-                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-red-500/10 text-red-600">Urgent</span>
-                            @elseif($status == 'submitted')
-                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-emerald-500/10 text-emerald-600">Selesai</span>
-                            @elseif($isLate)
-                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-orange-500/10 text-orange-600">Terlambat</span>
+                            @if($status == 'submitted')
+                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-emerald-500/10 text-emerald-600">
+                                    <i data-lucide="check-circle" class="w-3 h-3 inline mr-0.5"></i> Selesai
+                                </span>
+                            @elseif($status == 'late')
+                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-red-500/10 text-red-600">
+                                    <i data-lucide="alert-circle" class="w-3 h-3 inline mr-0.5"></i> Terlambat
+                                </span>
+                            @elseif($isUrgent)
+                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-orange-500/10 text-orange-600">
+                                    <i data-lucide="clock" class="w-3 h-3 inline mr-0.5"></i> Urgent
+                                </span>
                             @else
-                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-blue-500/10 text-blue-600">Aktif</span>
+                                <span class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md bg-blue-500/10 text-blue-600">
+                                    <i data-lucide="play-circle" class="w-3 h-3 inline mr-0.5"></i> Aktif
+                                </span>
                             @endif
                         </div>
                     </div>
@@ -108,20 +139,27 @@
                     <div class="flex items-center justify-between mt-4 pt-4 border-t border-[var(--shadow-dark)]/5">
                         <div class="flex flex-col">
                             <div class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Deadline</div>
-                            <span class="text-xs font-bold {{ ($isUrgent && $status == 'pending') || $isLate ? 'text-red-500' : 'text-[var(--text-primary)]' }}">
+                            <span class="text-xs font-bold {{ $status == 'late' ? 'text-red-500' : ($isUrgent && $status == 'pending' ? 'text-orange-500' : 'text-[var(--text-primary)]') }}">
                                 {{ $dueDate ? $dueDate->format('H:i') . ' WIB' : '-' }}
+                                @if($deadlineText != '-')
+                                    <span class="text-[10px] ml-1">({{ $deadlineText }})</span>
+                                @endif
                             </span>
                         </div>
                         
-                        @if($status != 'submitted')
-                            <button class="submit-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5" data-id="{{ $assign->id }}">
-                                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Submit
-                            </button>
-                        @else
+                        @if($status == 'submitted')
                             <div class="text-right">
                                 <div class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Nilai</div>
                                 <div class="text-xl font-extrabold text-emerald-500 leading-none">{{ $progress ?? '—' }}</div>
                             </div>
+                        @elseif($status == 'late')
+                            <button disabled class="bg-gray-400 cursor-not-allowed text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5">
+                                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Terlambat
+                            </button>
+                        @else
+                            <button class="submit-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5" data-id="{{ $assign->id }}">
+                                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Submit
+                            </button>
                         @endif
                     </div>
                 </div>
@@ -135,8 +173,8 @@
             <div class="w-16 h-16 neo-pressed rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-500">
                 <i data-lucide="check-square" class="w-8 h-8"></i>
             </div>
-            <h2 class="font-outfit font-bold text-lg text-[var(--text-primary)] mb-1">Tidak Ada Tugas Aktif</h2>
-            <p class="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">Semua tugas telah diselesaikan. Gunakan waktumu untuk mempersiapkan materi selanjutnya.</p>
+            <h2 class="font-outfit font-bold text-lg text-[var(--text-primary)] mb-1">Tidak Ada Tugas</h2>
+            <p class="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">Belum ada tugas yang diberikan. Santai dulu ya!</p>
         </div>
     @endif
 </div>
@@ -159,7 +197,7 @@
                 <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
                     Link Tugas <span class="text-red-500">*</span>
                 </label>
-                <input type="text" name="submission_link" class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)]" placeholder="https://drive.google.com/..." required>
+                <input type="url" name="submission_link" class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)]" placeholder="https://drive.google.com/..." required>
             </div>
             
             <div>
@@ -179,97 +217,145 @@
 </div>
 
 <script>
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('neo-flat');
-                b.classList.add('neo-btn');
-                b.querySelector('span').classList.remove('text-indigo-500');
-                b.querySelector('span').classList.add('text-[var(--text-secondary)]');
-            });
-            
-            this.classList.remove('neo-btn');
-            this.classList.add('neo-flat');
-            this.querySelector('span').classList.remove('text-[var(--text-secondary)]');
-            this.querySelector('span').classList.add('text-indigo-500');
-            
-            const filter = this.dataset.filter;
-            const cards = document.querySelectorAll('.task-card');
-            
-            cards.forEach(card => {
-                if(filter === 'all' || 
-                  (filter === 'active' && card.dataset.status === 'pending') ||
-                  (filter === 'completed' && card.dataset.status === 'submitted') ||
-                  (filter === 'late' && card.dataset.status === 'late')) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    });
-    
-    // Modal Handling
-    const modal = document.getElementById('submitModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const submitBtns = document.querySelectorAll('.submit-btn');
-    const assignmentIdInput = document.getElementById('assignment_id');
-    
-    function openModal(assignmentId) {
-        assignmentIdInput.value = assignmentId;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-    
-    function closeModal() {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.getElementById('submitForm').reset();
-    }
-    
-    if(submitBtns.length > 0) {
-        submitBtns.forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.id)));
-    }
-    if(closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-    if(modal) modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
-    
-    const submitForm = document.getElementById('submitForm');
-    if(submitForm) {
-        submitForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Mengirim...';
-            
-            try {
-                const formData = new FormData(this);
-                const response = await fetch('{{ route("student.assignments.submit") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
+    document.addEventListener('DOMContentLoaded', function() {
+        // Re-inisialisasi icon Lucide
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+        // Filter Tugas
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('neo-flat');
+                    b.classList.add('neo-btn');
+                    const span = b.querySelector('span');
+                    if(span) {
+                        span.classList.remove('text-indigo-500');
+                        span.classList.add('text-[var(--text-secondary)]');
+                    }
                 });
                 
-                const data = await response.json();
-                
-                if(data.success) {
-                    alert('✓ Tugas berhasil dikirimkan!');
-                    setTimeout(() => location.reload(), 500);
-                } else {
-                    alert('✗ ' + (data.message || 'Terjadi kesalahan.'));
+                this.classList.remove('neo-btn');
+                this.classList.add('neo-flat');
+                const thisSpan = this.querySelector('span');
+                if(thisSpan) {
+                    thisSpan.classList.remove('text-[var(--text-secondary)]');
+                    thisSpan.classList.add('text-indigo-500');
                 }
-            } catch(error) {
-                console.error('Error:', error);
-                alert('✗ Gagal mengirim tugas.');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }
+                
+                const filter = this.dataset.filter;
+                const cards = document.querySelectorAll('.task-card');
+                
+                cards.forEach(card => {
+                    const cardStatus = card.dataset.status;
+                    if(filter === 'all') {
+                        card.style.display = 'block';
+                    } else if(filter === 'active' && cardStatus === 'pending') {
+                        card.style.display = 'block';
+                    } else if(filter === 'completed' && cardStatus === 'submitted') {
+                        card.style.display = 'block';
+                    } else if(filter === 'late' && cardStatus === 'late') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
         });
-    }
+        
+        // Modal Handling
+        const modal = document.getElementById('submitModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const submitBtns = document.querySelectorAll('.submit-btn');
+        const assignmentIdInput = document.getElementById('assignment_id');
+        
+        function openModal(assignmentId) {
+            if(assignmentIdInput) assignmentIdInput.value = assignmentId;
+            if(modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+        
+        function closeModal() {
+            if(modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            const form = document.getElementById('submitForm');
+            if(form) form.reset();
+        }
+        
+        if(submitBtns.length > 0) {
+            submitBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openModal(btn.dataset.id);
+                });
+            });
+        }
+        
+        if(closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+        if(modal) modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+        
+        // Submit Form via AJAX
+        const submitForm = document.getElementById('submitForm');
+        if(submitForm) {
+            submitForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Mengirim...';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                
+                try {
+                    const formData = new FormData(this);
+                    const response = await fetch('{{ route("student.assignments.submit") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if(data.success) {
+                        alert('✓ Tugas berhasil dikirimkan!');
+                        closeModal();
+                        setTimeout(() => location.reload(), 500);
+                    } else {
+                        alert('✗ ' + (data.message || 'Terjadi kesalahan.'));
+                    }
+                } catch(error) {
+                    console.error('Error:', error);
+                    alert('✗ Gagal mengirim tugas. Periksa koneksi internet Anda.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }
+            });
+        }
+    });
 </script>
+
+<style>
+    /* Spin animation untuk loading */
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+    
+    /* Disabled button style */
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+</style>
 @endsection
