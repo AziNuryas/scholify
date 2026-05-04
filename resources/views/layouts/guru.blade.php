@@ -3,286 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schoolify - Tenaga Pendidik</title>
-
+    <title>@yield('title', 'Schoolify - Guru Space')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            --primary-indigo: #4F46E5;
-            --primary-purple: #7C3AED;
-            --secondary-indigo: #818CF8;
-            --bg-gradient-start: #F8FAFC;
-            --bg-gradient-end: #EEF2FF;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            color: #0F172A;
-        }
-        
-        .font-heading { font-family: 'Outfit', sans-serif; }
-
-        .mesh-orb {
-            position: fixed;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: 0;
-            opacity: 0.4;
-            pointer-events: none;
-        }
-        
-        .orb-1 { 
-            top: -100px; 
-            right: -100px; 
-            background: radial-gradient(circle, rgba(79, 70, 229, 0.4), rgba(124, 58, 237, 0.2));
-        }
-        
-        .orb-2 { 
-            bottom: -100px; 
-            left: -100px; 
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.4), rgba(79, 70, 229, 0.2));
-        }
-        
-        .orb-3 {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent);
-            filter: blur(100px);
+            --bg: #e6edf3;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent: #4F46E5;
+            --accent-light: #818CF8;
+            
+            --shadow-light: 255, 255, 255;
+            --shadow-dark: 184, 198, 214;
         }
 
-        .sidebar-active {
-            position: relative;
-            background: linear-gradient(90deg, rgba(79, 70, 229, 0.12) 0%, rgba(79, 70, 229, 0) 100%);
-            color: var(--primary-indigo);
-            font-weight: 600;
-        }
-        
-        .sidebar-active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 20%;
-            height: 60%;
-            width: 3px;
-            background: linear-gradient(135deg, var(--primary-indigo), var(--primary-purple));
-            border-radius: 0 4px 4px 0;
+        .dark {
+            --bg: #2b3040;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --accent: #818CF8;
+            --accent-light: #A5B4FC;
+
+            --shadow-light: 50, 56, 75;
+            --shadow-dark: 35, 39, 53;
         }
 
-        .sidebar-item {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .sidebar-item:hover:not(.sidebar-active) {
-            background: rgba(79, 70, 229, 0.06);
-            transform: translateX(4px);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+
+        /* ====== NEUMORPHISM CORE ====== */
+        .neo-flat {
+            background: var(--bg);
+            border-radius: 20px;
+            box-shadow: 8px 8px 16px rgba(var(--shadow-dark), 0.65),
+                        -8px -8px 16px rgba(var(--shadow-light), 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
+
+        .neo-pressed {
+            background: var(--bg);
+            border-radius: 15px;
+            box-shadow: inset 6px 6px 12px rgba(var(--shadow-dark), 0.6),
+                        inset -6px -6px 12px rgba(var(--shadow-light), 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .neo-card {
+            background: var(--bg);
+            border-radius: 20px;
+            box-shadow: 8px 8px 16px rgba(var(--shadow-dark), 0.5),
+                        -8px -8px 16px rgba(var(--shadow-light), 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .neo-btn {
+            background: var(--bg);
+            border-radius: 12px;
+            box-shadow: 5px 5px 10px rgba(var(--shadow-dark), 0.6),
+                        -5px -5px 10px rgba(var(--shadow-light), 1);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-primary);
+        }
+        .neo-btn:hover {
+            box-shadow: 2px 2px 5px rgba(var(--shadow-dark), 0.4),
+                        -2px -2px 5px rgba(var(--shadow-light), 0.7),
+                        0 0 20px rgba(79, 70, 229, 0.5);
+            background: var(--accent);
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        .neo-btn:active, .neo-btn.active {
+            box-shadow: inset 4px 4px 8px rgba(var(--shadow-dark), 0.6),
+                        inset -4px -4px 8px rgba(var(--shadow-light), 0.8);
+            transform: translateY(0);
+        }
+
+        .neo-input {
+            background: var(--bg);
+            box-shadow: inset 3px 3px 6px rgba(var(--shadow-dark), 0.5),
+                        inset -3px -3px 6px rgba(var(--shadow-light), 0.6);
+            border: none;
+            outline: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .neo-input:focus {
+            box-shadow: inset 2px 2px 4px rgba(var(--shadow-dark), 0.5),
+                        inset -2px -2px 4px rgba(var(--shadow-light), 0.6),
+                        0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        .neo-input::placeholder { color: var(--text-muted); }
+
+        /* ====== ACCENT BADGES ====== */
+        .neo-badge-indigo {
+            background: var(--accent);
+            color: white;
+            box-shadow: 4px 4px 8px rgba(79, 70, 229, 0.25);
+        }
+        .neo-badge-green {
+            background: #10b981;
+            color: white;
+            box-shadow: 4px 4px 8px rgba(16, 185, 129, 0.25);
+        }
+        .neo-badge-red {
+            background: #ef4444;
+            color: white;
+            box-shadow: 4px 4px 8px rgba(239, 68, 68, 0.25);
+        }
+        .neo-badge-orange {
+            background: #f59e0b;
+            color: white;
+            box-shadow: 4px 4px 8px rgba(245, 158, 11, 0.25);
+        }
+
+        /* ====== CARD HOVER ====== */
+        .neo-card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .neo-card-hover:hover, .hover-neo:hover {
+            box-shadow: 12px 12px 20px rgba(var(--shadow-dark), 0.7),
+                        -12px -12px 20px rgba(var(--shadow-light), 1);
+            transform: translateY(-3px);
+        }
+
+        .hover-glow:hover {
+            box-shadow: inset 2px 2px 5px rgba(var(--shadow-dark), 0.4),
+                        inset -2px -2px 5px rgba(var(--shadow-light), 0.7),
+                        0 0 15px rgba(79, 70, 229, 0.2);
+            border-color: rgba(79, 70, 229, 0.3);
+        }
+
+        /* ====== SCROLLBAR ====== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--shadow-dark), 0.8); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+
+        /* ====== ANIMATIONS ====== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .logout-btn { transition: all 0.3s ease; }
-        
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
-            transform: scale(1.02);
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-15px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        
-        .logout-btn:hover i { animation: shake 0.5s ease-in-out; }
-        
-        .dropdown-menu { animation: slideIn 0.2s ease-out; }
-        
-        .stat-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(15px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #E2E8F0; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, var(--primary-indigo), var(--primary-purple));
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, var(--primary-purple), var(--primary-indigo));
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .logo-image { object-fit: cover; width: 100%; height: 100%; }
+        .animate-fadeInUp { animation: fadeInUp 0.4s ease-out forwards; }
+        .animate-slideInLeft { animation: slideInLeft 0.4s ease-out forwards; }
+        .animate-slideInRight { animation: slideInRight 0.4s ease-out forwards; }
+
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        [x-cloak] { display: none !important; }
     </style>
+
+    <script>
+        // Inisialisasi Tema
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+    </script>
 </head>
-<body>
+<body class="antialiased flex h-screen overflow-hidden" x-data="{ mobileMenuOpen: false }">
 
-    <div class="mesh-orb orb-1"></div>
-    <div class="mesh-orb orb-2"></div>
-    <div class="mesh-orb orb-3"></div>
+    <!-- Mobile Overlay -->
+    <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden" x-transition x-cloak></div>
 
-    <div class="flex min-h-screen relative z-10">
-        <aside class="w-72 bg-white/60 backdrop-blur-xl border-r border-white/40 shadow-xl p-6 sticky top-0 h-screen overflow-y-auto">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-indigo-200 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                    <img src="{{ asset('images/scholify-logo.png') }}" alt="Scholify Logo" class="w-full h-full object-cover">
+    <!-- ====== SIDEBAR ====== -->
+    <aside :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="w-[260px] h-full fixed lg:static inset-y-0 left-0 flex flex-col bg-[var(--bg)] z-40 transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none">
+        
+        <!-- Logo -->
+        <div class="h-[88px] px-4 pt-6 pb-0">
+            <div class="neo-flat w-full h-16 px-4 rounded-3xl flex items-center gap-3 justify-center">
+                <div class="w-8 h-8 neo-pressed rounded-xl flex items-center justify-center text-[var(--accent)] text-xl">
+                    <i data-lucide="graduation-cap" class="w-4 h-4"></i>
                 </div>
-                <div class="flex flex-col">
-                    <h1 class="text-2xl font-heading font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent leading-tight">
-                        Scholify<span class="text-indigo-600">.</span>
-                    </h1>
-                    <p class="text-[10px] font-semibold text-slate-400 tracking-wide uppercase mt-0.5">Belajar · Terhubung · Berkembang</p>
-                </div>
+                <span class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] tracking-tight">Scholify</span>
             </div>
+        </div>
 
-            <nav class="space-y-1.5">
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Menu Utama</p>
+        <!-- Nav -->
+        <nav class="flex-1 overflow-y-auto px-4 pb-4 pt-6 custom-scroll">
+            <div class="neo-flat rounded-3xl p-3 flex flex-col gap-0.5">
+                <p class="px-3 text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.15em] mb-2 mt-1">Menu Utama</p>
                 
                 @php
                     $menus = [
-                        ['route' => 'guru.dashboard',   'icon' => 'layout-dashboard', 'label' => 'Dashboard',      'badge' => null],
-                        ['route' => 'guru.jadwal',       'icon' => 'calendar',         'label' => 'Jadwal Kelas',   'badge' => null],
-                        ['route' => 'guru.absensi',      'icon' => 'user-check',       'label' => 'Absensi',        'badge' => null],
-                        ['route' => 'guru.nilai',        'icon' => 'edit-3',           'label' => 'Nilai & Rapor',  'badge' => null],
-                        ['route' => 'guru.tugas',        'icon' => 'clipboard-list',   'label' => 'Tugas',          'badge' => null],
-                        ['route' => 'guru.pengumuman',   'icon' => 'megaphone',        'label' => 'Pengumuman',     'badge' => null],
-                        ['route' => 'guru.laporan.index','icon' => 'flag',             'label' => 'Laporan Siswa',  'badge' => null],
+                        ['route' => 'guru.dashboard', 'icon' => 'layout-dashboard', 'label' => 'Dashboard', 'color' => 'text-indigo-500'],
+                        ['route' => 'guru.jadwal', 'icon' => 'calendar', 'label' => 'Jadwal Kelas', 'color' => 'text-emerald-500'],
+                        ['route' => 'guru.absensi', 'icon' => 'user-check', 'label' => 'Absensi', 'color' => 'text-orange-500'],
+                        ['route' => 'guru.nilai', 'icon' => 'edit-3', 'label' => 'Nilai & Rapor', 'color' => 'text-amber-500'],
+                        ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas', 'color' => 'text-blue-500'],
+                        ['route' => 'guru.pengumuman', 'icon' => 'megaphone', 'label' => 'Pengumuman', 'color' => 'text-pink-500'],
+                    ];
+                    $lainnya = [
+                        ['route' => 'guru.laporan.index', 'icon' => 'flag', 'label' => 'Laporan Siswa', 'color' => 'text-rose-500'],
+                        ['route' => 'guru.profil', 'icon' => 'user-circle', 'label' => 'Profil Saya', 'color' => 'text-purple-500'],
                     ];
                 @endphp
 
-                @foreach($menus as $menu)
-                <a href="{{ route($menu['route']) }}" 
-                   class="sidebar-item flex items-center justify-between px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs($menu['route']) ? 'sidebar-active' : 'text-slate-500 hover:bg-indigo-50/50' }}">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="{{ $menu['icon'] }}" class="w-5 h-5"></i>
-                        <span class="text-sm font-medium">{{ $menu['label'] }}</span>
-                    </div>
-                    @if($menu['badge'])
-                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $menu['badge'] }}</span>
-                    @endif
-                </a>
-                @endforeach
-
-                <div class="my-6 border-t border-white/40 mx-3"></div>
-                
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Lainnya</p>
-                
-                <a href="{{ route('guru.profil') }}" 
-                   class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('guru.profil') ? 'sidebar-active' : 'text-slate-500 hover:bg-indigo-50/50' }}">
-                    <i data-lucide="user-circle" class="w-5 h-5"></i>
-                    <span class="text-sm font-medium">Profil Saya</span>
-                </a>
-            </nav>
-        </aside>
-
-        <main class="flex-1 p-8 overflow-y-auto">
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <div class="w-1 h-6 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full"></div>
-                        <h2 class="text-2xl font-heading font-bold text-slate-800">@yield('page_title', 'Selamat Datang')</h2>
-                    </div>
-                    <p class="text-slate-500 text-sm ml-3">@yield('page_subtitle', 'Kelola data akademik Anda dengan mudah.')</p>
+                <div class="space-y-0.5">
+                    @foreach($menus as $m)
+                        <a href="{{ route($m['route']) }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 group
+                                  {{ request()->routeIs($m['route']) 
+                                     ? 'neo-pressed text-[var(--text-primary)]' 
+                                     : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
+                            <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
+                            </div>
+                            <span>{{ $m['label'] }}</span>
+                        </a>
+                    @endforeach
                 </div>
 
-                <div class="relative group">
-                    <div class="flex items-center gap-4 bg-white/70 backdrop-blur-sm p-1.5 pr-5 rounded-2xl shadow-lg border border-white/40 cursor-pointer hover:shadow-xl hover:border-indigo-200 transition-all duration-300">
-                        <div class="relative">
-                            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center rounded-xl font-bold shadow-lg shadow-indigo-200">
-                                BG
+                <div class="my-3 mx-4 h-px bg-[var(--shadow-dark)]/10"></div>
+                <p class="px-3 text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.15em] mb-2">Lainnya</p>
+
+                <div class="space-y-0.5">
+                    @foreach($lainnya as $m)
+                        <a href="{{ route($m['route']) }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 group
+                                  {{ request()->routeIs($m['route']) 
+                                     ? 'neo-pressed text-[var(--text-primary)]' 
+                                     : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
+                            <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
                             </div>
-                            <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+                            <span>{{ $m['label'] }}</span>
+                        </a>
+                    @endforeach
+                    
+                    <div class="mt-2 pt-2 border-t border-[var(--shadow-dark)]/10">
+                        <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
+                            @csrf
+                            <button type="submit" class="flex items-center gap-3 px-3 py-2.5 w-full rounded-2xl text-sm font-bold transition-all duration-300 group text-[var(--text-secondary)] hover:bg-red-50/50">
+                                <div class="w-7 h-7 rounded-lg bg-[var(--bg)] group-hover:neo-flat flex items-center justify-center transition-all">
+                                    <i data-lucide="log-out" class="w-4 h-4 text-[var(--text-muted)] group-hover:text-red-500 transition-colors"></i>
+                                </div>
+                                <span class="group-hover:text-red-500 transition-colors">Keluar</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- ====== MAIN ====== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden w-full relative">
+        
+        <!-- Header -->
+        <header class="p-4 lg:p-6 pb-0 flex-shrink-0 z-20">
+            <div class="neo-flat rounded-3xl h-16 px-4 md:px-6 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button class="lg:hidden neo-btn p-2 rounded-xl text-[var(--text-secondary)] outline-none" @click="mobileMenuOpen = true">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div class="lg:hidden flex items-center gap-2">
+                        <div class="w-8 h-8 bg-white shadow-sm rounded-lg flex items-center justify-center text-[var(--accent)]">
+                            <i data-lucide="graduation-cap" class="w-4 h-4"></i>
                         </div>
-                        <div class="hidden sm:block">
-                            <p class="font-bold text-sm leading-tight text-slate-800">Bapak Guru Budi</p>
-                            <p class="text-[10px] uppercase tracking-wider font-semibold text-indigo-500">Tenaga Pendidik</p>
-                        </div>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform duration-300"></i>
+                    </div>
+                    <h2 class="hidden lg:block font-outfit font-bold text-lg text-[var(--text-primary)]">@yield('page-title', 'Dashboard Guru')</h2>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- Search -->
+                    <div class="hidden md:flex items-center neo-pressed rounded-full px-5 py-2.5 w-64">
+                        <i data-lucide="search" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                        <input type="text" placeholder="Cari sesuatu..." class="bg-transparent border-none outline-none text-sm ml-3 w-full text-[var(--text-primary)] placeholder-[var(--text-muted)]">
                     </div>
 
-                    <div class="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden dropdown-menu">
-                        <div class="relative px-4 py-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 border-b border-indigo-100">
-                            <div class="flex items-center gap-3">
-                                <div class="relative">
-                                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
-                                        BG
-                                    </div>
-                                    <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-sm text-slate-800">Bapak Guru Budi</p>
-                                    <p class="text-xs text-slate-500">budi.guru@schoolify.com</p>
-                                    <p class="text-[10px] font-semibold text-indigo-600 mt-0.5">Guru Mapel RPL</p>
-                                </div>
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="neo-btn p-2.5 rounded-xl text-[var(--text-secondary)] outline-none hover:text-[var(--accent)] transition-colors" title="Ubah Tema">
+                        <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                        <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                    </button>
+
+                    <!-- Notification (Sementara nonaktif) -->
+                    <div class="relative" x-data="{ showDropdown: false }">
+                        <button @click="showDropdown = !showDropdown" class="relative neo-btn p-2 rounded-xl text-[var(--text-secondary)] outline-none">
+                            <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+                        </button>
+                        <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute right-0 mt-2 w-72 neo-flat p-3 z-50" x-cloak>
+                            <div class="text-center py-3">
+                                <i data-lucide="bell-off" class="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2"></i>
+                                <p class="text-xs text-[var(--text-muted)]">Fitur notifikasi sedang dalam pengembangan</p>
                             </div>
                         </div>
-                        
-                        <div class="p-2">
-                            <a href="{{ route('guru.profil') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 rounded-xl transition-all duration-200 group">
-                                <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
-                                    <i data-lucide="user-circle" class="w-4 h-4 text-indigo-600"></i>
-                                </div>
-                                <span class="font-medium">Profil Saya</span>
+                    </div>
+
+                    <!-- Profile Dropdown -->
+                    <div class="relative ml-2" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false" class="flex items-center gap-3 neo-flat px-4 py-1.5 rounded-full outline-none hover:scale-105 transition-transform">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-sm font-bold text-[var(--text-primary)]">{{ Str::words(auth()->user()->name ?? 'Guru', 2, '') }}</p>
+                                <p class="text-[10px] font-semibold text-[var(--text-muted)] uppercase">Tenaga Pendidik</p>
+                            </div>
+                            
+                            @php
+                                $guruProfile = \App\Models\Teacher::where('user_id', auth()->id())->first();
+                            @endphp
+                            <div class="w-9 h-9 bg-[var(--accent)] text-white rounded-full overflow-hidden flex items-center justify-center font-bold shadow-md shadow-[var(--accent)]/30">
+                                @if($guruProfile && $guruProfile->avatar)
+                                    <img src="{{ asset('storage/' . str_replace('/storage/', '', $guruProfile->avatar)) }}" alt="Profile" class="w-full h-full object-cover">
+                                @else
+                                    {{ strtoupper(substr(auth()->user()->name ?? 'GR', 0, 2)) }}
+                                @endif
+                            </div>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-[var(--text-muted)] ml-1" :class="open ? 'rotate-180' : ''" style="transition: transform 0.2s"></i>
+                        </button>
+                        <div x-show="open" x-transition class="absolute right-0 mt-2 w-48 neo-flat py-2 z-50" x-cloak>
+                            <a href="{{ route('guru.profil') }}" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:neo-pressed transition-all duration-300">
+                                <i data-lucide="user-circle" class="w-4 h-4"></i> Profil
                             </a>
-                            
-                            <div class="border-t border-gray-100 my-2"></div>
-                            
-                            <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                            @if(Route::has('guru.pengaturan'))
+                            <a href="{{ route('guru.pengaturan') }}" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:neo-pressed transition-all duration-300">
+                                <i data-lucide="settings" class="w-4 h-4"></i> Pengaturan
+                            </a>
+                            @endif
+                            <div class="my-2 mx-4 h-px bg-[var(--shadow-dark)]/10"></div>
+                            <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                                 @csrf
-                                <button type="submit" class="logout-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 rounded-xl transition-all duration-300 group">
-                                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                                        <i data-lucide="log-out" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
-                                    </div>
-                                    <span>Keluar Aplikasi</span>
-                                    <svg class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
+                                <button type="submit" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-red-500 hover:text-red-600 hover:neo-pressed w-[calc(100%-16px)] text-left transition-all duration-300">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
                                 </button>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
+        </header>
 
-            @yield('content')
-        </main>
-    </div>
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scroll">
+            <div class="w-full pb-20 lg:pb-6">
+                @yield('content')
+            </div>
+        </div>
+    </main>
 
     <script>
         lucide.createIcons();
-        
-        document.querySelectorAll('.logout-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const confirmed = confirm('⚠️ Apakah Anda yakin ingin keluar?\n\nSemua sesi akan berakhir dan Anda perlu login kembali.');
-                if(confirmed) {
-                    const btn = this.querySelector('button');
-                    btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
-                    btn.disabled = true;
-                    this.submit();
-                }
-            });
-        });
     </script>
 </body>
 </html>
