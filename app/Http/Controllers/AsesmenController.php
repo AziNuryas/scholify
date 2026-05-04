@@ -18,10 +18,10 @@ class AsesmenController extends Controller
         $siswaId     = Auth::id();
 
         $jenisAsesmen = [
-            'sosiometri'       => ['label' => 'Sosiometri', 'icon' => 'people', 'deskripsi' => 'Pemetaan hubungan pertemanan di kelas'],
-            'minat_bakat'      => ['label' => 'Minat & Bakat', 'icon' => 'star', 'deskripsi' => 'Temukan minat dan potensi karirmu (Holland RIASEC)'],
-            'gaya_belajar'     => ['label' => 'Gaya Belajar', 'icon' => 'book', 'deskripsi' => 'Apakah kamu Visual, Auditori, atau Kinestetik?'],
-            'kesehatan_mental' => ['label' => 'Kesehatan Mental', 'icon' => 'heart', 'deskripsi' => 'Skrining awal kondisi mental dan emosional'],
+            'sosiometri'       => ['label' => 'Sosiometri',         'icon' => 'people',          'deskripsi' => 'Pemetaan hubungan pertemanan di kelas'],
+            'minat_bakat'      => ['label' => 'Minat & Bakat',      'icon' => 'star',            'deskripsi' => 'Temukan minat dan potensi karirmu (Holland RIASEC)'],
+            'gaya_belajar'     => ['label' => 'Gaya Belajar',       'icon' => 'book',            'deskripsi' => 'Apakah kamu Visual, Auditori, atau Kinestetik?'],
+            'kesehatan_mental' => ['label' => 'Kesehatan Mental',   'icon' => 'heart',           'deskripsi' => 'Skrining awal kondisi mental dan emosional'],
             'masalah_umum'     => ['label' => 'Daftar Cek Masalah', 'icon' => 'clipboard-check', 'deskripsi' => 'Apa saja masalah yang kamu alami saat ini?'],
         ];
 
@@ -71,13 +71,17 @@ class AsesmenController extends Controller
         abort_if($asesmen->status === 'selesai', 403, 'Asesmen sudah dikunci.');
 
         $request->validate([
-            'jawaban' => 'required|array',
+            'jawaban' => 'nullable|array', // nullable agar DCM tidak error saat tidak ada yang dicentang
             'selesai' => 'sometimes|boolean',
         ]);
 
-        $asesmen->update(['jawaban' => $request->jawaban]);
+        $jawaban = $request->input('jawaban', []);
+
+        $asesmen->update(['jawaban' => $jawaban]);
 
         if ($request->boolean('selesai')) {
+            $asesmen->refresh();
+
             $hasilAnalisis = $this->analisisHasil($asesmen);
 
             $asesmen->update([
