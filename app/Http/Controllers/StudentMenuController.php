@@ -116,6 +116,7 @@ class StudentMenuController extends Controller
     {
         $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
+            'submission_file' => 'nullable|file|max:20480', // 20MB max
             'submission_link' => 'nullable|url',
             'notes' => 'nullable|string',
         ]);
@@ -148,10 +149,19 @@ class StudentMenuController extends Controller
                 $status = 'late';
             }
             
+            $filePath = $request->submission_link;
+            
+            if ($request->hasFile('submission_file')) {
+                $file = $request->file('submission_file');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('submissions', $filename, 'public');
+                $filePath = '/storage/' . $path;
+            }
+            
             $submission = Submission::create([
                 'assignment_id' => $assignment->id,
                 'student_id' => $studentData->id,
-                'file' => $request->submission_link,
+                'file' => $filePath,
                 'note' => $request->notes,
                 'status' => $status,
                 'submitted_at' => now(),
@@ -243,6 +253,8 @@ class StudentMenuController extends Controller
             'status' => 'required|in:hadir,izin,sakit,alpha',
             'tanggal' => 'required|date',
             'keterangan' => 'nullable|string|max:500',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
         
         $studentData = $this->getStudent();
@@ -258,6 +270,38 @@ class StudentMenuController extends Controller
                 
             if ($existing) {
                 return back()->with('error', 'Anda sudah melakukan absensi untuk tanggal ' . date('d/m/Y', strtotime($request->tanggal)) . '!');
+            }
+            
+            // Validasi GPS untuk status 'hadir'
+            if ($request->status === 'hadir') {
+                if (!$request->latitude || !$request->longitude) {
+                    return back()->with('error', 'Akses lokasi (GPS) wajib diizinkan untuk melakukan absensi Hadir!');
+                }
+                
+                // Koordinat Sekolah (Contoh: Bundaran HI Jakarta untuk demo)
+                // Dalam aplikasi nyata, koordinat ini diambil dari database Settings/Sekolah
+                $schoolLat = -6.1950;
+                $schoolLng = 106.8230;
+                
+                // Radius toleransi dalam meter
+                $maxRadius = 100;
+                
+                // Hitung jarak dengan Haversine formula
+                $earthRadius = 6371000; // Radius bumi dalam meter
+                $latFrom = deg2rad($request->latitude);
+                $lonFrom = deg2rad($request->longitude);
+                $latTo = deg2rad($schoolLat);
+                $lonTo = deg2rad($schoolLng);
+
+                $latDelta = $latTo - $latFrom;
+                $lonDelta = $lonTo - $lonFrom;
+
+                $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+                $distance = $angle * $earthRadius;
+                
+                if ($distance > $maxRadius) {
+                    return back()->with('error', 'Gagal absen! Anda berada di luar area sekolah (' . round($distance) . ' meter dari sekolah). Anda harus berada dalam radius ' . $maxRadius . ' meter.');
+                }
             }
             
             Absensi::create([

@@ -5,9 +5,14 @@
 @section('content')
 <div class="space-y-6 animate-fadeInUp">
 
-    <div>
-        <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Daftar Tugas & Ulangan</h1>
-        <p class="text-sm text-[var(--text-secondary)]">Kelola dan selesaikan semua tugas akademismu tepat waktu.</p>
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="book-open" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+            <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Daftar Tugas & Ulangan</h1>
+            <p class="text-sm text-[var(--text-secondary)]">Kelola dan selesaikan semua tugas akademismu tepat waktu.</p>
+        </div>
     </div>
 
     <!-- Tabs Filter Neumorphism -->
@@ -195,9 +200,16 @@
             
             <div>
                 <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
-                    Link Tugas <span class="text-red-500">*</span>
+                    File Tugas <span class="text-[9px] text-[var(--text-muted)]">(Opsional)</span>
                 </label>
-                <input type="url" name="submission_link" class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)]" placeholder="https://drive.google.com/..." required>
+                <input type="file" name="submission_file" class="w-full neo-input rounded-xl px-4 py-2 text-sm font-semibold text-[var(--text-primary)]" accept=".jpg,.jpeg,.png,.doc,.docx,.ppt,.pptx,.pdf,.mp4,.avi">
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
+                    Link Tugas <span class="text-[9px] text-[var(--text-muted)]">(Opsional jika sudah upload file)</span>
+                </label>
+                <input type="url" name="submission_link" class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)]" placeholder="https://drive.google.com/...">
             </div>
             
             <div>

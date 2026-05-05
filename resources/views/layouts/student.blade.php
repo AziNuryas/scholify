@@ -255,8 +255,8 @@
                                   {{ request()->routeIs($m['route']) 
                                      ? 'neo-pressed text-[var(--text-primary)]' 
                                      : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
-                            <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
-                                <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
+                            <div class="w-8 h-8 rounded-xl {{ request()->routeIs($m['route']) ? 'neo-pressed' : 'bg-transparent' }} flex items-center justify-center transition-all group-hover:scale-110">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-5 h-5 {{ $m['color'] }} transition-colors"></i>
                             </div>
                             <span>{{ $m['label'] }}</span>
                         </a>
@@ -273,8 +273,8 @@
                                   {{ request()->routeIs($m['route']) 
                                      ? 'neo-pressed text-[var(--text-primary)]' 
                                      : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
-                            <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
-                                <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
+                            <div class="w-8 h-8 rounded-xl {{ request()->routeIs($m['route']) ? 'neo-pressed' : 'bg-transparent' }} flex items-center justify-center transition-all group-hover:scale-110">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-5 h-5 {{ $m['color'] }} transition-colors"></i>
                             </div>
                             <span>{{ $m['label'] }}</span>
                         </a>
@@ -291,8 +291,8 @@
                                   {{ request()->routeIs($m['route']) 
                                      ? 'neo-pressed text-[var(--text-primary)]' 
                                      : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
-                            <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
-                                <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
+                            <div class="w-8 h-8 rounded-xl {{ request()->routeIs($m['route']) ? 'neo-pressed' : 'bg-transparent' }} flex items-center justify-center transition-all group-hover:scale-110">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-5 h-5 {{ $m['color'] }} transition-colors"></i>
                             </div>
                             <span>{{ $m['label'] }}</span>
                         </a>
@@ -302,8 +302,8 @@
                         <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                             @csrf
                             <button type="submit" class="flex items-center gap-3 px-3 py-2.5 w-full rounded-2xl text-sm font-bold transition-all duration-300 group text-[var(--text-secondary)] hover:bg-red-50/50">
-                                <div class="w-7 h-7 rounded-lg bg-[var(--bg)] group-hover:neo-flat flex items-center justify-center transition-all">
-                                    <i data-lucide="log-out" class="w-4 h-4 text-[var(--text-muted)] group-hover:text-red-500 transition-colors"></i>
+                                <div class="w-8 h-8 rounded-xl bg-transparent flex items-center justify-center transition-all group-hover:scale-110">
+                                    <i data-lucide="log-out" class="w-5 h-5 text-red-500 transition-colors"></i>
                                 </div>
                                 <span class="group-hover:text-red-500 transition-colors">Keluar</span>
                             </button>
@@ -349,7 +349,7 @@
                 <div x-data="{ 
                         unread: 0, showDropdown: false, notifications: [],
                         fetchNotifs() {
-                            fetch('{{ route('student.notifications.fetch') }}')
+                            fetch('{{ route('notifications.fetch') }}')
                                 .then(r => r.json())
                                 .then(d => { if(d.success) { this.unread = d.unread_count; this.notifications = d.notifications; } });
                         }
@@ -363,11 +363,11 @@
                     <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute right-0 mt-2 w-72 neo-flat p-3 z-50" x-cloak>
                         <div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--shadow-dark)]/10">
                             <h4 class="font-bold text-sm">Notifikasi</h4>
-                            <a href="{{ route('student.notifications') }}" class="text-xs text-[var(--accent)] font-semibold hover:underline">Semua</a>
+                            <a href="{{ route('notifications.index') }}" class="text-xs text-[var(--accent)] font-semibold hover:underline">Semua</a>
                         </div>
                         <div class="space-y-1 max-h-[250px] overflow-y-auto custom-scroll">
                             <template x-for="n in notifications" :key="n.id">
-                                <a :href="n.link || '{{ route('student.notifications') }}'" class="block p-2 rounded-lg hover:bg-white/30 transition text-sm">
+                                <a :href="n.link || '{{ route('notifications.index') }}'" class="block p-2 rounded-lg hover:bg-white/30 transition text-sm">
                                     <p class="font-semibold text-[var(--text-primary)] text-xs" x-text="n.title"></p>
                                     <p class="text-[var(--text-muted)] text-[11px] mt-0.5 line-clamp-1" x-text="n.message"></p>
                                 </a>

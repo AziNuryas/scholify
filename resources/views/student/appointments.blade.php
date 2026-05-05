@@ -4,17 +4,18 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto space-y-6">
-    <div class="mb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 animate-fadeInUp">
-        <div>
-            <div class="flex items-center gap-2 mb-2">
-                <div class="w-1 h-8 neo-badge-blue rounded-full"></div>
-                <span class="text-sm font-bold text-indigo-500 tracking-wide">APPOINTMENTS</span>
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 animate-fadeInUp">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/30 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="calendar" class="w-7 h-7 text-white"></i>
             </div>
-            <h1 class="font-outfit font-bold text-3xl text-[var(--brand-secondary)] mb-2">Jadwal Temu & Antrian</h1>
-            <p class="text-[var(--text-muted)]">Pantau status dari janji temu yang telah kamu ajukan ke Guru BK.</p>
+            <div>
+                <h1 class="font-outfit font-bold text-3xl text-[var(--brand-secondary)] mb-1">Jadwal Temu & Antrian</h1>
+                <p class="text-[var(--text-muted)] text-sm">Pantau status dari janji temu yang telah kamu ajukan ke Guru BK.</p>
+            </div>
         </div>
-        <button onclick="document.getElementById('modal-appointment').classList.remove('hidden')" class="neo-badge-blue text-white px-6 py-3 rounded-full font-bold transition flex items-center gap-2 hover:scale-105 hover:opacity-90">
-            <i class='bx bx-calendar-plus'></i> Ajukan Jadwal Baru
+        <button onclick="document.getElementById('modal-appointment').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-md shadow-indigo-600/30 hover:scale-105">
+            <i data-lucide="calendar-plus" class="w-5 h-5"></i> Ajukan Jadwal Baru
         </button>
     </div>
 
@@ -83,9 +84,10 @@
                     <tr>
                         <td colspan="4" class="px-6 py-10 text-center text-[var(--text-muted)]">
                             <div class="w-14 h-14 neo-pressed rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class='bx bx-calendar-x text-2xl text-[var(--text-muted)]'></i>
+                                <i data-lucide="calendar-x" class="w-8 h-8 text-[var(--text-muted)]"></i>
                             </div>
-                            Kamu belum memiliki antrian jadwal temu.
+                            <p class="font-bold text-[var(--text-primary)]">Tidak Ada Antrian</p>
+                            <p class="text-xs text-[var(--text-muted)] mt-1">Kamu belum memiliki antrian jadwal temu.</p>
                         </td>
                     </tr>
                     @endforelse

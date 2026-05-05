@@ -7,15 +7,15 @@
     <!-- Header Section -->
     <div class="neo-flat rounded-2xl p-10 relative overflow-hidden mt-4 animate-fadeInUp">
         <div class="relative z-10 w-full md:w-2/3">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full neo-pressed text-xs font-bold uppercase tracking-widest text-indigo-600 mb-4">
-                <i class='bx bx-support text-lg'></i> Layanan Bimbingan Konseling
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 text-xs font-bold uppercase tracking-widest text-indigo-600 mb-4 border border-indigo-200">
+                <i data-lucide="headphones" class="w-4 h-4"></i> Layanan Bimbingan Konseling
             </div>
             <h1 class="font-outfit font-bold text-4xl text-[var(--brand-secondary)] mb-4 leading-tight">Jangan Ragu Bercerita,<br><span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Kami Siap Mendengar!</span></h1>
             <p class="text-[var(--text-muted)] text-sm md:text-base mb-8 leading-relaxed max-w-lg">
                 Punya beban pikiran, kebingungan memilih jurusan, atau masalah akademis? Ajukan jadwal pertemuan langsung dengan Guru BK-mu sekarang.
             </p>
-            <button onclick="document.getElementById('modal-appointment').classList.remove('hidden'); document.getElementById('modal-appointment').classList.add('flex')" class="neo-badge-blue text-white px-8 py-3.5 rounded-full font-bold flex items-center justify-center gap-3 transition-all hover:opacity-90 hover:scale-105">
-                <i class='bx bx-calendar-plus text-xl'></i> Ajukan Jadwal Pertemuan
+            <button onclick="document.getElementById('modal-appointment').classList.remove('hidden'); document.getElementById('modal-appointment').classList.add('flex')" class="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/30 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-3 transition-all hover:scale-105">
+                <i data-lucide="calendar-plus" class="w-5 h-5"></i> Ajukan Jadwal Pertemuan
             </button>
         </div>
         

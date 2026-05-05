@@ -5,9 +5,14 @@
 @section('content')
 <div class="space-y-6 animate-fadeInUp">
     
-    <div>
-        <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Rekapitulasi Nilai</h1>
-        <p class="text-sm text-[var(--text-secondary)]">Laporan akademik dan hasil ujian selama semester berlangsung.</p>
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="bar-chart-2" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+            <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Rekapitulasi Nilai</h1>
+            <p class="text-sm text-[var(--text-secondary)]">Laporan akademik dan hasil ujian selama semester berlangsung.</p>
+        </div>
     </div>
 
     <div class="neo-flat rounded-2xl p-6">

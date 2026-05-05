@@ -13,8 +13,8 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
             <div>
                 <div class="flex items-center gap-3 mb-2">
-                    <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
-                        <i data-lucide="bell" class="w-5 h-5 text-[var(--accent)]"></i>
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="bell" class="w-6 h-6 text-white"></i>
                     </div>
                     <h1 class="font-outfit text-2xl font-bold text-[var(--text-primary)]">Pusat Notifikasi</h1>
                     <span id="unreadBadge" class="neo-badge-red px-2 py-0.5 rounded-full text-[10px] font-bold hidden">0</span>
@@ -34,8 +34,8 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div class="neo-card p-5 group hover:neo-pressed transition-all duration-300 cursor-pointer" onclick="filterByStatus('all')">
             <div class="flex items-center gap-4">
-                <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <i data-lucide="bell" class="w-5 h-5 text-[var(--accent)]"></i>
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i data-lucide="bell" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
                     <p class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Notifikasi</p>
@@ -45,8 +45,8 @@
         </div>
         <div class="neo-card p-5 group hover:neo-pressed transition-all duration-300 cursor-pointer" onclick="filterByStatus('unread')">
             <div class="flex items-center gap-4">
-                <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <i data-lucide="inbox" class="w-5 h-5 text-blue-500"></i>
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i data-lucide="inbox" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
                     <p class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Belum Dibaca</p>
@@ -56,8 +56,8 @@
         </div>
         <div class="neo-card p-5 group hover:neo-pressed transition-all duration-300 cursor-pointer" onclick="filterByStatus('read')">
             <div class="flex items-center gap-4">
-                <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
                     <p class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Sudah Dibaca</p>
@@ -140,8 +140,8 @@
         <div class="neo-pressed p-5 rounded-t-xl">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
-                        <i data-lucide="bell" class="w-5 h-5 text-[var(--accent)]"></i>
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
+                        <i data-lucide="bell" class="w-5 h-5 text-white"></i>
                     </div>
                     <h3 id="modalTitle" class="font-outfit font-bold text-lg text-[var(--text-primary)]">Detail Notifikasi</h3>
                 </div>
@@ -371,8 +371,8 @@
             <div class="notification-item p-5 cursor-pointer group ${isUnread ? 'unread' : ''}" 
                  onclick='openModal(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
                 <div class="flex items-start gap-4">
-                    <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-300">
-                        <i data-lucide="${isUnread ? 'bell-ring' : 'bell'}" class="w-5 h-5 ${isUnread ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}"></i>
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-300 ${isUnread ? 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30' : 'neo-pressed'}">
+                        <i data-lucide="${isUnread ? 'bell-ring' : 'bell'}" class="w-5 h-5 ${isUnread ? 'text-white' : 'text-[var(--text-muted)]'}"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">

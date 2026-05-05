@@ -5,9 +5,14 @@
 @section('content')
 <div class="space-y-6 animate-fadeInUp">
     
-    <div>
-        <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Informasi Profil Siswa</h1>
-        <p class="text-sm text-[var(--text-secondary)]">Lengkapi dan perbarui data diri Anda di bawah ini.</p>
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="user" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+            <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Informasi Profil Siswa</h1>
+            <p class="text-sm text-[var(--text-secondary)]">Lengkapi dan perbarui data diri Anda di bawah ini.</p>
+        </div>
     </div>
 
     <form action="{{ route('student.profile.update') }}" method="POST" enctype="multipart/form-data">

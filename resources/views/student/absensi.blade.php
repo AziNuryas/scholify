@@ -5,9 +5,14 @@
 @section('content')
 <div class="space-y-6 animate-fadeInUp">
     
-    <div>
-        <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Rekam Kehadiran</h1>
-        <p class="text-sm text-[var(--text-secondary)]">Pantau dan rekam kehadiran harian Anda di sini.</p>
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="check-square" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+            <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Rekam Kehadiran</h1>
+            <p class="text-sm text-[var(--text-secondary)]">Pantau dan rekam kehadiran harian Anda di sini.</p>
+        </div>
     </div>
 
     <!-- Statistics Cards in a single layout row -->
@@ -138,6 +143,10 @@
                 <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)]" readonly>
             </div>
             
+            <!-- Hidden inputs for GPS Location -->
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+            
             <div>
                 <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Status Kehadiran</label>
                 <div class="grid grid-cols-2 gap-3">
@@ -183,5 +192,39 @@ function openAbsensiModal() {
 function closeAbsensiModal() {
     document.getElementById('absensiModal').style.display = 'none';
 }
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+            },
+            (error) => {
+                let msg = "Gagal mendapatkan lokasi.";
+                if(error.code === error.PERMISSION_DENIED) msg = "Anda harus mengizinkan akses lokasi (GPS) untuk absen Hadir.";
+                alert(msg);
+                // Uncheck 'hadir' if location failed
+                document.querySelector('input[value="hadir"]').checked = false;
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    } else {
+        alert("Browser Anda tidak mendukung Geolocation.");
+    }
+}
+
+// Listen for status changes
+document.querySelectorAll('input[name="status"]').forEach((elem) => {
+    elem.addEventListener("change", function(event) {
+        if(event.target.value === 'hadir') {
+            getLocation();
+        } else {
+            // Clear location if not 'hadir'
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+        }
+    });
+});
 </script>
 @endsection

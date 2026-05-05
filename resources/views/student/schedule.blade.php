@@ -5,9 +5,14 @@
 @section('content')
 <div class="space-y-6 animate-fadeInUp">
 
-    <div>
-        <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Jadwal Kelas Mingguan</h1>
-        <p class="text-sm text-[var(--text-secondary)]">Pantau jadwal belajarmu setiap hari agar tidak ketinggalan mata pelajaran penting.</p>
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="calendar" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+            <h1 class="font-outfit font-extrabold text-2xl text-[var(--text-primary)] mb-1">Jadwal Kelas Mingguan</h1>
+            <p class="text-sm text-[var(--text-secondary)]">Pantau jadwal belajarmu setiap hari agar tidak ketinggalan mata pelajaran penting.</p>
+        </div>
     </div>
 
     @if($schedulesGrouped->count() > 0)

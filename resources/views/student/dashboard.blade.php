@@ -98,7 +98,7 @@
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30 flex items-center justify-center">
                             <i data-lucide="bar-chart-2" class="w-5 h-5 text-white"></i>
                         </div>
-                        <h3 class="font-outfit font-extrabold text-base lg:text-lg text-[var(--text-primary)]">Statistik Belajar</h3>
+                        <h3 class="font-outfit font-extrabold text-base lg:text-lg text-[var(--text-primary)]">Rata-Rata Nilai</h3>
                     </div>
                 </div>
                 

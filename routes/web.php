@@ -29,6 +29,15 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware('auth')->get('/dashboard', [AuthController::class, 'dashboard'])
     ->name('dashboard');
 
+Route::middleware('auth')->prefix('notifications')->name('notifications.')->controller(\App\Http\Controllers\NotificationController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('/fetch', 'fetch')->name('fetch');
+    Route::post('/{id}/read', 'markAsRead')->name('read');
+    Route::delete('/{id}', 'destroy')->name('destroy');
+    Route::delete('/delete-all', 'destroyAll')->name('delete-all');
+    Route::post('/mark-all-read', 'markAllRead')->name('mark-all-read');
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -66,7 +75,7 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
         Route::get('/absensi', 'absensi')->name('absensi');
         Route::post('/absensi/store', 'storeAbsensi')->name('absensi.store');
         
-        // 🔔 NOTIFICATIONS (LENGKAP)
+        // NOTIFICATIONS
         Route::get('/notifications', 'notifications')->name('notifications');
         Route::get('/notifications/fetch', 'fetchNotifications')->name('notifications.fetch');
         Route::post('/notifications/{id}/read', 'markNotificationAsRead')->name('notifications.read');
@@ -145,10 +154,12 @@ Route::middleware('auth')->prefix('guru')->name('guru.')->group(function () {
         Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
     });
 
+    // ANNOUNCEMENT ROUTES (FITUR PENGUMUMAN)
     Route::controller(AnnouncementController::class)->group(function () {
         Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
         Route::post('/pengumuman', 'store')->name('pengumuman.store');
         Route::delete('/pengumuman/{id}', 'destroy')->name('pengumuman.destroy');
+        Route::get('/pengumuman/download/{id}', 'download')->name('pengumuman.download');
     });
 
     // Laporan siswa bermasalah (guru mapel)
