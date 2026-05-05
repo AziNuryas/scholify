@@ -113,10 +113,5 @@ class DatabaseSeeder extends Seeder
             ['student_id' => $studentId, 'subject_id' => $webId, 'type' => 'UTS', 'score' => 95, 'semester' => 'Ganjil', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // 9. Buat Pesan Dummy (Chats)
-        DB::table('chats')->insert([
-            ['sender_id' => $studentUser->id, 'receiver_id' => $bkUser->id, 'message' => 'Selamat pagi Ibu, saya ingin bercerita tentang masalah saya tidak fokus belajar.', 'is_read' => 0, 'created_at' => now()->subHours(2), 'updated_at' => now()],
-            ['sender_id' => $bkUser->id, 'receiver_id' => $studentUser->id, 'message' => 'Selamat pagi Azi. Tentu, silakan datang ke ruang BK siang ini ya.', 'is_read' => 1, 'created_at' => now()->subHour(), 'updated_at' => now()],
-        ]);
     }
 }

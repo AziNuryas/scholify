@@ -22,7 +22,7 @@
                 <i class='bx bx-group'></i>
             </div>
             <div>
-                <p class="text-sm font-bold text-gray-400 uppercase tracking-wide">Total Siswa Aktif</p>
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-wide">Total Siswa Yang Ditangani</p>
                 <h3 class="font-outfit font-black text-2xl text-[#1E293B]">{{ number_format($stats['total_students']) }}</h3>
             </div>
         </div>
@@ -34,16 +34,6 @@
             <div>
                 <p class="text-sm font-bold text-gray-400 uppercase tracking-wide">Kasus Berjalan</p>
                 <h3 class="font-outfit font-black text-2xl text-[#1E293B]">{{ $stats['active_cases'] }}</h3>
-            </div>
-        </div>
-
-        <div class="glass-card bg-teal-600 p-6 rounded-[24px] shadow-lg shadow-teal-200 flex items-center gap-5 text-white transform hover:-translate-y-1 transition cursor-pointer" onclick="window.location.href='{{ route('gurubk.chats') }}'">
-            <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-3xl">
-                <i class='bx bx-envelope'></i>
-            </div>
-            <div>
-                <p class="text-sm font-bold text-teal-100 uppercase tracking-wide">Pesan Baru</p>
-                <h3 class="font-outfit font-black text-2xl shadow-sm">{{ $stats['unread_messages'] }} Siswa</h3>
             </div>
         </div>
 
@@ -64,7 +54,7 @@
         <!-- Agenda Hari Ini -->
         <div class="lg:col-span-2 glass-card bg-white rounded-[24px] border border-gray-100 shadow-sm p-6 md:p-8">
             <div class="flex justify-between items-center mb-6 border-b border-gray-50 pb-4">
-                <h3 class="font-bold text-lg text-[#1E293B]"><i class='bx bx-notepad text-teal-500 mr-2'></i> Agenda Temu Fisik</h3>
+                <h3 class="font-bold text-lg text-[#1E293B]"><i class='bx bx-notepad text-teal-500 mr-2'></i> Agenda Temu </h3>
                 <button class="text-sm font-bold text-teal-600 hover:text-teal-800">Lihat Semua</button>
             </div>
             
@@ -103,7 +93,7 @@
                 <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl mb-6">
                     <i class='bx bxs-report'></i>
                 </div>
-                <h3 class="font-outfit font-bold text-xl mb-2">Buat Laporan Baru</h3>
+                <h3 class="font-outfit font-bold text-xl mb-2">Buat Catatan Konseling</h3>
                 <p class="text-gray-300 text-sm mb-6">Catat pelanggaran atau lapor keluhan perkembangan karakter siswa secara manual ke dalam sistem.</p>
                 <button onclick="alert('Formulir Laporan BK')" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-xl transition shadow-md">
                     Isi Laporan

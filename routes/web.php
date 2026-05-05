@@ -104,9 +104,6 @@ Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function ()
     Route::controller(GuruBkController::class)->group(function () {
         Route::get('/dashboard', 'index')->name('dashboard');
 
-        Route::get('/chats', 'chats')->name('chats');
-        Route::post('/chats/reply', 'reply')->name('reply');
-
         Route::get('/profile', 'profile')->name('profile');
         Route::post('/profile', 'updateProfile')->name('profile.update');
 
@@ -189,16 +186,4 @@ Route::middleware('auth')->prefix('bk')->name('bk.')->group(function () {
         Route::patch('/asesmen/{asesmen}/catatan',        [DeteksiDiniController::class, 'catatanAsesmen'])->name('asesmen.catatan');
         Route::post('/refresh-skor',                      [DeteksiDiniController::class, 'refreshSemuaSkor'])->name('refresh-skor');
     });
-});
-
-
-/*
-|--------------------------------------------------------------------------
-| CHAT API
-|--------------------------------------------------------------------------
-*/
-Route::middleware('auth')->prefix('api/chat')->name('chat.')->group(function () {
-    Route::get('/fetch/{partnerId}', [ChatController::class, 'fetch'])->name('fetch');
-    Route::post('/send', [ChatController::class, 'send'])->name('send');
-    Route::get('/unread', [ChatController::class, 'unreadCount'])->name('unread');
 });

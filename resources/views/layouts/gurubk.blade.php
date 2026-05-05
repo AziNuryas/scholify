@@ -56,15 +56,7 @@
                 <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Menu Utama</p>
                 <a href="{{ route('gurubk.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('gurubk.dashboard') ? 'bg-teal-600 text-white shadow-md shadow-teal-100 transition-transform hover:-translate-y-0.5' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors' }}">
                     <i class='bx bxs-dashboard text-xl'></i>
-                    <span class="font-semibold">Ikhtisar BK</span>
-                </a>
-                <a href="{{ route('gurubk.chats') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('gurubk.chats') ? 'bg-teal-600 text-white shadow-md shadow-teal-100 transition-transform hover:-translate-y-0.5' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors' }} relative">
-                    <i class='bx bx-message-square-dots text-xl'></i>
-                    <span class="font-semibold">Ruang Konsultasi</span>
-                    @php $unread = \App\Models\Chat::where('receiver_id', auth()->id())->where('is_read', false)->count(); @endphp
-                    @if($unread > 0)
-                    <span class="absolute right-4 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm uppercase">{{ $unread }}</span>
-                    @endif
+                    <span class="font-semibold">Dashboard</span>
                 </a>
                 <a href="{{ route('gurubk.profile') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('gurubk.profile') ? 'bg-teal-600 text-white shadow-md shadow-teal-100 transition-transform hover:-translate-y-0.5' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors' }}">
                     <i class='bx bx-user text-xl'></i>
