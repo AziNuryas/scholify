@@ -5,7 +5,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentMenuController;
 use App\Http\Controllers\GuruBkController;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AssignmentController;
