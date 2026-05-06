@@ -155,51 +155,5 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 7. Buat Tugas (Assignments) - cek dulu
-        $assignmentExists = DB::table('assignments')
-            ->where('class_id', $classId)
-            ->where('title', 'Latihan Soal Aljabar')
-            ->exists();
-        
-        if (!$assignmentExists) {
-            DB::table('assignments')->insert([
-                ['class_id' => $classId, 'subject_id' => $mtkId, 'teacher_id' => $teacherId, 'title' => 'Latihan Soal Aljabar', 'description' => 'Kerjakan LKS Hal 12', 'type' => 'Homework', 'due_date' => Carbon::now()->addDays(2), 'created_at' => now(), 'updated_at' => now()],
-                ['class_id' => $classId, 'subject_id' => $webId, 'teacher_id' => $teacherId, 'title' => 'Tugas Akhir Laravel', 'description' => 'Selesaikan layout blade', 'type' => 'Project', 'due_date' => Carbon::now()->addDays(5), 'created_at' => now(), 'updated_at' => now()],
-            ]);
-        }
-        
-        // 8. Buat Nilai Dummy (Grades) - cek dulu
-        $gradeExists = DB::table('grades')
-            ->where('student_id', $studentId)
-            ->where('subject_id', $mtkId)
-            ->exists();
-        
-        if (!$gradeExists) {
-            DB::table('grades')->insert([
-                ['student_id' => $studentId, 'subject_id' => $mtkId, 'type' => 'UTS', 'score' => 88, 'semester' => 'Ganjil', 'created_at' => now(), 'updated_at' => now()],
-                ['student_id' => $studentId, 'subject_id' => $webId, 'type' => 'UTS', 'score' => 95, 'semester' => 'Ganjil', 'created_at' => now(), 'updated_at' => now()],
-            ]);
-        }
-
-        // 9. Buat Pesan Dummy (Chats) - cek dulu
-        $chatExists = DB::table('chats')
-            ->where('sender_id', $studentUser->id)
-            ->where('receiver_id', $bkUser->id)
-            ->exists();
-        
-        if (!$chatExists) {
-            DB::table('chats')->insert([
-                ['sender_id' => $studentUser->id, 'receiver_id' => $bkUser->id, 'message' => 'Selamat pagi Ibu, saya ingin bercerita tentang masalah saya tidak fokus belajar.', 'is_read' => 0, 'created_at' => now()->subHours(2), 'updated_at' => now()],
-                ['sender_id' => $bkUser->id, 'receiver_id' => $studentUser->id, 'message' => 'Selamat pagi Azi. Tentu, silakan datang ke ruang BK siang ini ya.', 'is_read' => 1, 'created_at' => now()->subHour(), 'updated_at' => now()],
-            ]);
-        }
-
-        // Optional: Tampilkan informasi di console
-        $this->command->info('✅ Database seeded successfully!');
-        $this->command->info('📧 Admin Khoerul Paroid: khoerulparoid@gmail.com / admin123');
-        $this->command->info('📧 Root Admin: admin@school.com / admin123');
-        $this->command->info('📧 Guru: guru@school.com / guru123');
-        $this->command->info('📧 Guru BK: azibk@gmail.com / bk123');
-        $this->command->info('📧 Siswa: siswa@school.com / siswa123');
     }
 }

@@ -20,6 +20,7 @@
     <style>
         :root {
             --bg: #e6edf3;
+<<<<<<< HEAD
             --shadow-dark: #b8c6d6;
             --text-primary: #1e293b;
             --text-secondary: #475569;
@@ -28,12 +29,40 @@
             --accent-light: #7B2CBF;
         }
 
+=======
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent: #5A189A; 
+            --accent-light: #7B2CBF;
+            
+            --shadow-light: 255, 255, 255;
+            --shadow-dark: 184, 198, 214;
+        }
+
+        .dark {
+            --bg: #2b3040;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --accent: #a855f7;
+            --accent-light: #c084fc;
+
+            --shadow-light: 50, 56, 75;
+            --shadow-dark: 35, 39, 53;
+        }
+
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg);
             color: var(--text-primary);
+<<<<<<< HEAD
+=======
+            transition: background 0.3s ease, color 0.3s ease;
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         }
 
         .font-outfit { font-family: 'Outfit', sans-serif; }
@@ -42,27 +71,46 @@
         .neo-flat {
             background: var(--bg);
             border-radius: 20px;
+<<<<<<< HEAD
             box-shadow: 6px 6px 12px rgba(184, 198, 214, 0.45),
                         -6px -6px 12px rgba(255, 255, 255, 0.8);
+=======
+            box-shadow: 8px 8px 16px rgba(var(--shadow-dark), 0.65),
+                        -8px -8px 16px rgba(var(--shadow-light), 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         }
 
         .neo-pressed {
             background: var(--bg);
             border-radius: 15px;
+<<<<<<< HEAD
             box-shadow: inset 4px 4px 8px rgba(184, 198, 214, 0.45),
                         inset -4px -4px 8px rgba(255, 255, 255, 0.7);
+=======
+            box-shadow: inset 6px 6px 12px rgba(var(--shadow-dark), 0.6),
+                        inset -6px -6px 12px rgba(var(--shadow-light), 0.9);
+            transition: all 0.3s ease;
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         }
 
         .neo-card {
             background: var(--bg);
             border-radius: 20px;
+<<<<<<< HEAD
             box-shadow: 5px 5px 10px rgba(184, 198, 214, 0.35),
                         -5px -5px 10px rgba(255, 255, 255, 0.9);
+=======
+            box-shadow: 8px 8px 16px rgba(var(--shadow-dark), 0.5),
+                        -8px -8px 16px rgba(var(--shadow-light), 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         }
 
         .neo-btn {
             background: var(--bg);
             border-radius: 12px;
+<<<<<<< HEAD
             box-shadow: 4px 4px 8px rgba(184, 198, 214, 0.5),
                         -4px -4px 8px rgba(255, 255, 255, 0.7);
             border: none;
@@ -76,12 +124,38 @@
         .neo-btn:active, .neo-btn.active {
             box-shadow: inset 3px 3px 6px rgba(184, 198, 214, 0.5),
                         inset -3px -3px 6px rgba(255, 255, 255, 0.6);
+=======
+            box-shadow: 5px 5px 10px rgba(var(--shadow-dark), 0.6),
+                        -5px -5px 10px rgba(var(--shadow-light), 1);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-primary);
+        }
+        .neo-btn:hover {
+            box-shadow: 2px 2px 5px rgba(var(--shadow-dark), 0.4),
+                        -2px -2px 5px rgba(var(--shadow-light), 0.7),
+                        0 0 20px rgba(90, 24, 154, 0.5);
+            background: var(--accent);
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        .neo-btn:active, .neo-btn.active {
+            box-shadow: inset 4px 4px 8px rgba(var(--shadow-dark), 0.6),
+                        inset -4px -4px 8px rgba(var(--shadow-light), 0.8);
+            transform: translateY(0);
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         }
 
         .neo-input {
             background: var(--bg);
+<<<<<<< HEAD
             box-shadow: inset 3px 3px 6px rgba(184, 198, 214, 0.5),
                         inset -3px -3px 6px rgba(255, 255, 255, 0.6);
+=======
+            box-shadow: inset 3px 3px 6px rgba(var(--shadow-dark), 0.5),
+                        inset -3px -3px 6px rgba(var(--shadow-light), 0.6);
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
             border: none;
             outline: none;
             padding: 12px 16px;
@@ -91,8 +165,13 @@
             transition: all 0.3s ease;
         }
         .neo-input:focus {
+<<<<<<< HEAD
             box-shadow: inset 2px 2px 4px rgba(184, 198, 214, 0.5),
                         inset -2px -2px 4px rgba(255, 255, 255, 0.6),
+=======
+            box-shadow: inset 2px 2px 4px rgba(var(--shadow-dark), 0.5),
+                        inset -2px -2px 4px rgba(var(--shadow-light), 0.6),
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                         0 0 0 2px rgba(90, 24, 154, 0.2);
         }
         .neo-input::placeholder { color: var(--text-muted); }
@@ -120,17 +199,36 @@
         }
 
         /* ====== CARD HOVER ====== */
+<<<<<<< HEAD
         .neo-card-hover { transition: all 0.3s ease; }
         .neo-card-hover:hover {
             box-shadow: 8px 8px 16px rgba(184, 198, 214, 0.6),
                         -8px -8px 16px rgba(255, 255, 255, 0.7);
             transform: translateY(-2px);
+=======
+        .neo-card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .neo-card-hover:hover, .hover-neo:hover {
+            box-shadow: 12px 12px 20px rgba(var(--shadow-dark), 0.7),
+                        -12px -12px 20px rgba(var(--shadow-light), 1);
+            transform: translateY(-3px);
+        }
+
+        .hover-glow:hover {
+            box-shadow: inset 2px 2px 5px rgba(var(--shadow-dark), 0.4),
+                        inset -2px -2px 5px rgba(var(--shadow-light), 0.7),
+                        0 0 15px rgba(90, 24, 154, 0.2);
+            border-color: rgba(90, 24, 154, 0.3);
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         }
 
         /* ====== SCROLLBAR ====== */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
+<<<<<<< HEAD
         ::-webkit-scrollbar-thumb { background: rgba(184, 198, 214, 0.8); border-radius: 10px; }
+=======
+        ::-webkit-scrollbar-thumb { background: rgba(var(--shadow-dark), 0.8); border-radius: 10px; }
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         .custom-scroll::-webkit-scrollbar { width: 4px; }
 
         /* ====== ANIMATIONS ====== */
@@ -155,6 +253,25 @@
 
         [x-cloak] { display: none !important; }
     </style>
+
+    <script>
+        // Inisialisasi Tema
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+    </script>
 </head>
 <body class="antialiased flex h-screen overflow-hidden" x-data="{ mobileMenuOpen: false }">
 
@@ -162,7 +279,11 @@
     <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden" x-transition x-cloak></div>
 
     <!-- ====== SIDEBAR ====== -->
+<<<<<<< HEAD
     <aside :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="w-[260px] h-full fixed lg:static inset-y-0 left-0 flex flex-col bg-[var(--bg)] border-r border-[var(--shadow-dark)]/10 z-40 transition-transform duration-300 ease-in-out">
+=======
+    <aside :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="w-[260px] h-full fixed lg:static inset-y-0 left-0 flex flex-col bg-[var(--bg)] z-40 transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none">
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
         
         <!-- Logo -->
         <div class="h-[88px] px-4 pt-6 pb-0">
@@ -194,6 +315,10 @@
                     ];
                     $pengaturan = [
                         ['route' => 'student.profile', 'icon' => 'user', 'label' => 'Profil', 'color' => 'text-purple-500'],
+<<<<<<< HEAD
+=======
+                        ['route' => 'student.settings', 'icon' => 'settings', 'label' => 'Pengaturan', 'color' => 'text-slate-500'],
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                     ];
                 @endphp
 
@@ -204,8 +329,13 @@
                                   {{ request()->routeIs($m['route']) 
                                      ? 'neo-pressed text-[var(--text-primary)]' 
                                      : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
+<<<<<<< HEAD
                             <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
                                 <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
+=======
+                            <div class="w-8 h-8 rounded-xl {{ request()->routeIs($m['route']) ? 'neo-pressed' : 'bg-transparent' }} flex items-center justify-center transition-all group-hover:scale-110">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-5 h-5 {{ $m['color'] }} transition-colors"></i>
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                             </div>
                             <span>{{ $m['label'] }}</span>
                         </a>
@@ -222,8 +352,13 @@
                                   {{ request()->routeIs($m['route']) 
                                      ? 'neo-pressed text-[var(--text-primary)]' 
                                      : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
+<<<<<<< HEAD
                             <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
                                 <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
+=======
+                            <div class="w-8 h-8 rounded-xl {{ request()->routeIs($m['route']) ? 'neo-pressed' : 'bg-transparent' }} flex items-center justify-center transition-all group-hover:scale-110">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-5 h-5 {{ $m['color'] }} transition-colors"></i>
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                             </div>
                             <span>{{ $m['label'] }}</span>
                         </a>
@@ -240,8 +375,13 @@
                                   {{ request()->routeIs($m['route']) 
                                      ? 'neo-pressed text-[var(--text-primary)]' 
                                      : 'text-[var(--text-secondary)] hover:bg-white/40' }}">
+<<<<<<< HEAD
                             <div class="w-7 h-7 rounded-lg {{ request()->routeIs($m['route']) ? 'neo-flat' : 'bg-[var(--bg)] group-hover:neo-flat' }} flex items-center justify-center transition-all">
                                 <i data-lucide="{{ $m['icon'] }}" class="w-4 h-4 {{ request()->routeIs($m['route']) ? $m['color'] : 'text-[var(--text-muted)] group-hover:'.$m['color'] }} transition-colors"></i>
+=======
+                            <div class="w-8 h-8 rounded-xl {{ request()->routeIs($m['route']) ? 'neo-pressed' : 'bg-transparent' }} flex items-center justify-center transition-all group-hover:scale-110">
+                                <i data-lucide="{{ $m['icon'] }}" class="w-5 h-5 {{ $m['color'] }} transition-colors"></i>
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                             </div>
                             <span>{{ $m['label'] }}</span>
                         </a>
@@ -251,8 +391,13 @@
                         <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                             @csrf
                             <button type="submit" class="flex items-center gap-3 px-3 py-2.5 w-full rounded-2xl text-sm font-bold transition-all duration-300 group text-[var(--text-secondary)] hover:bg-red-50/50">
+<<<<<<< HEAD
                                 <div class="w-7 h-7 rounded-lg bg-[var(--bg)] group-hover:neo-flat flex items-center justify-center transition-all">
                                     <i data-lucide="log-out" class="w-4 h-4 text-[var(--text-muted)] group-hover:text-red-500 transition-colors"></i>
+=======
+                                <div class="w-8 h-8 rounded-xl bg-transparent flex items-center justify-center transition-all group-hover:scale-110">
+                                    <i data-lucide="log-out" class="w-5 h-5 text-red-500 transition-colors"></i>
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                                 </div>
                                 <span class="group-hover:text-red-500 transition-colors">Keluar</span>
                             </button>
@@ -288,11 +433,24 @@
                         <input type="text" placeholder="Cari sesuatu..." class="bg-transparent border-none outline-none text-sm ml-3 w-full text-[var(--text-primary)] placeholder-[var(--text-muted)]">
                     </div>
 
+<<<<<<< HEAD
+=======
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="neo-btn p-2.5 rounded-xl text-[var(--text-secondary)] outline-none hover:text-[var(--accent)] transition-colors" title="Ubah Tema">
+                        <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                        <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                    </button>
+
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                 <!-- Notification -->
                 <div x-data="{ 
                         unread: 0, showDropdown: false, notifications: [],
                         fetchNotifs() {
+<<<<<<< HEAD
                             fetch('{{ route('student.notifications.fetch') }}')
+=======
+                            fetch('{{ route('notifications.fetch') }}')
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                                 .then(r => r.json())
                                 .then(d => { if(d.success) { this.unread = d.unread_count; this.notifications = d.notifications; } });
                         }
@@ -306,11 +464,19 @@
                     <div x-show="showDropdown" @click.away="showDropdown = false" class="absolute right-0 mt-2 w-72 neo-flat p-3 z-50" x-cloak>
                         <div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--shadow-dark)]/10">
                             <h4 class="font-bold text-sm">Notifikasi</h4>
+<<<<<<< HEAD
                             <a href="{{ route('student.notifications') }}" class="text-xs text-[var(--accent)] font-semibold hover:underline">Semua</a>
                         </div>
                         <div class="space-y-1 max-h-[250px] overflow-y-auto custom-scroll">
                             <template x-for="n in notifications" :key="n.id">
                                 <a :href="n.link || '{{ route('student.notifications') }}'" class="block p-2 rounded-lg hover:bg-white/30 transition text-sm">
+=======
+                            <a href="{{ route('notifications.index') }}" class="text-xs text-[var(--accent)] font-semibold hover:underline">Semua</a>
+                        </div>
+                        <div class="space-y-1 max-h-[250px] overflow-y-auto custom-scroll">
+                            <template x-for="n in notifications" :key="n.id">
+                                <a :href="n.link || '{{ route('notifications.index') }}'" class="block p-2 rounded-lg hover:bg-white/30 transition text-sm">
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                                     <p class="font-semibold text-[var(--text-primary)] text-xs" x-text="n.title"></p>
                                     <p class="text-[var(--text-muted)] text-[11px] mt-0.5 line-clamp-1" x-text="n.message"></p>
                                 </a>
@@ -343,6 +509,7 @@
                         <i data-lucide="chevron-down" class="w-4 h-4 text-[var(--text-muted)] ml-1" :class="open ? 'rotate-180' : ''" style="transition: transform 0.2s"></i>
                     </button>
                     <div x-show="open" x-transition class="absolute right-0 mt-2 w-48 neo-flat py-2 z-50" x-cloak>
+<<<<<<< HEAD
                         <a href="{{ route('student.profile') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/30 transition">
                             <i data-lucide="user" class="w-4 h-4"></i> Profil
                         </a>
@@ -350,6 +517,18 @@
                         <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
                             @csrf
                             <button type="submit" class="flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-500 w-full text-left transition">
+=======
+                        <a href="{{ route('student.profile') }}" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:neo-pressed transition-all duration-300">
+                            <i data-lucide="user" class="w-4 h-4"></i> Profil
+                        </a>
+                        <a href="{{ route('student.settings') }}" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:neo-pressed transition-all duration-300">
+                            <i data-lucide="settings" class="w-4 h-4"></i> Pengaturan
+                        </a>
+                        <div class="my-2 mx-4 h-px bg-[var(--shadow-dark)]/10"></div>
+                        <form action="{{ route('logout') }}" method="POST" onsubmit="sessionStorage.clear()">
+                            @csrf
+                            <button type="submit" class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl text-sm font-semibold text-red-500 hover:text-red-600 hover:neo-pressed w-[calc(100%-16px)] text-left transition-all duration-300">
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                                 <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
                             </button>
                         </form>
@@ -361,7 +540,11 @@
 
         <!-- Content -->
         <div class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scroll">
+<<<<<<< HEAD
             <div class="max-w-7xl mx-auto pb-20 lg:pb-6">
+=======
+            <div class="w-full pb-20 lg:pb-6">
+>>>>>>> 2d69a22a751a0a871ab0857e8c66c984671d5093
                 @yield('content')
             </div>
         </div>

@@ -54,15 +54,19 @@
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <i class="fas fa-lock"></i>
                     </span>
-                    <input type="password" name="password" required 
-                        class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200"
+                    <input type="password" name="password" id="passwordInput" required 
+                        class="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200"
                         placeholder="••••••••">
+                    <button type="button" onclick="togglePassword()"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition duration-200">
+                        <i id="toggleIcon" class="fas fa-eye"></i>
+                    </button>
                 </div>
             </div>
 
             <button type="submit" 
                 class="w-full bg-schoolify hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 transition duration-300 flex items-center justify-center">
-                <span>Login Dashboard</span>
+                <span>Login</span>
                 <i class="fas fa-arrow-right ml-2 text-sm"></i>
             </button>
         </form>
@@ -83,7 +87,7 @@
 
                 {{-- Guru Mapel --}}
                 <div class="mb-2">
-                    <p class="text-[10px] font-bold text-indigo-600 mb-1">GURU MAPEL:</p>
+                    <p class="text-[10px] font-bold text-indigo-600 mb-1">GURU</p>
                     <div class="bg-white p-2 rounded border border-indigo-100 bg-indigo-50/20">
                         <span class="font-bold text-indigo-600 text-[10px] uppercase px-1.5 py-0.5 bg-indigo-100 rounded mr-1">GURU</span>
                         guru@school.com | <span class="text-gray-400">guru123</span>
@@ -92,7 +96,7 @@
 
                 {{-- Guru BK --}}
                 <div>
-                    <p class="text-[10px] font-bold text-teal-600 mb-1">GURU BK:</p>
+                    <p class="text-[10px] font-bold text-teal-600 mb-1">GURU BK</p>
                     <div class="bg-white p-2 rounded border border-teal-100">
                         <span class="font-bold text-teal-700 text-[10px] uppercase px-1.5 py-0.5 bg-teal-100 rounded mr-1">BK</span>
                         azibk@gmail.com | <span class="text-gray-400">bk123</span>
@@ -101,6 +105,22 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('toggleIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 
 </body>
 </html>

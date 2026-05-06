@@ -7,7 +7,6 @@ use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentMenuController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuruBkController;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\AnnouncementController;
@@ -16,6 +15,7 @@ use App\Http\Controllers\DeteksiDiniController;
 use App\Http\Controllers\LaporanSiswaController;
 use App\Http\Controllers\AsesmenController;
 use App\Http\Controllers\CatatanKonselingController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\CheckRole;
 
 /*
@@ -37,6 +37,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/api/agendas', [AgendaController::class, 'calendarEvents'])->name('api.agendas');
     
+    // Notifications
+    Route::prefix('notifications')->name('notifications.')->controller(NotificationController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/fetch', 'fetch')->name('fetch');
+        Route::post('/{id}/read', 'markAsRead')->name('read');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+        Route::delete('/delete-all', 'destroyAll')->name('delete-all');
+        Route::post('/mark-all-read', 'markAllRead')->name('mark-all-read');
+    });
+    
     // STUDENT AREA
     Route::middleware([CheckRole::class.':siswa'])->prefix('student')->name('student.')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
@@ -49,14 +59,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/profile', [StudentMenuController::class, 'profile'])->name('profile');
         Route::post('/profile', [StudentMenuController::class, 'updateProfile'])->name('profile.update');
         Route::put('/profile', [StudentMenuController::class, 'updateProfile'])->name('profile.update.put');
+        Route::get('/settings', [StudentMenuController::class, 'settings'])->name('settings');
+        Route::post('/settings', [StudentMenuController::class, 'updateSettings'])->name('settings.update');
         Route::get('/appointments', [StudentMenuController::class, 'appointments'])->name('appointments');
-        Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])->name('appointment.store');
+        Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])->name('appointments.store');
         Route::get('/discipline', [StudentMenuController::class, 'discipline'])->name('discipline');
         Route::get('/absensi', [StudentMenuController::class, 'absensi'])->name('absensi');
         Route::post('/absensi/store', [StudentMenuController::class, 'storeAbsensi'])->name('absensi.store');
         Route::get('/notifications', [StudentMenuController::class, 'notifications'])->name('notifications');
         Route::get('/notifications/fetch', [StudentMenuController::class, 'fetchNotifications'])->name('notifications.fetch');
         Route::post('/notifications/{id}/read', [StudentMenuController::class, 'markNotificationAsRead'])->name('notifications.read');
+        Route::delete('/notifications/{id}', [StudentMenuController::class, 'deleteNotification'])->name('notifications.delete');
+        Route::delete('/notifications/delete-all', [StudentMenuController::class, 'deleteAllNotifications'])->name('notifications.delete-all');
+        Route::post('/notifications/mark-all-read', [StudentMenuController::class, 'markAllNotificationsAsRead'])->name('notifications.mark-all-read');
         Route::prefix('asesmen')->name('asesmen.')->group(function () {
             Route::get('/', [AsesmenController::class, 'index'])->name('index');
             Route::get('/isi/{jenis}', [AsesmenController::class, 'isi'])->name('isi');
@@ -73,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/profile', [GuruBkController::class, 'profile'])->name('profile');
         Route::post('/profile', [GuruBkController::class, 'updateProfile'])->name('profile.update');
         Route::get('/appointments', [GuruBkController::class, 'appointments'])->name('appointments');
-        Route::post('/appointments/{id}/status', [GuruBkController::class, 'updateAppointmentStatus'])->name('appointment.status');
+        Route::post('/appointments/{id}/status', [GuruBkController::class, 'updateAppointmentStatus'])->name('appointments.status');
         Route::get('/discipline', [GuruBkController::class, 'discipline'])->name('discipline');
         Route::post('/discipline', [GuruBkController::class, 'storeDiscipline'])->name('discipline.store');
         Route::resource('catatan-konseling', CatatanKonselingController::class);
@@ -103,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
             Route::post('/pengumuman', 'store')->name('pengumuman.store');
             Route::delete('/pengumuman/{id}', 'destroy')->name('pengumuman.destroy');
+            Route::get('/pengumuman/download/{id}', 'download')->name('pengumuman.download');
         });
         Route::prefix('laporan-siswa')->name('laporan.')->group(function () {
             Route::get('/', [LaporanSiswaController::class, 'index'])->name('index');
@@ -166,7 +182,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
     });
     
-    // BK / KONSELOR
+    // BK / KONSELOR - Deteksi Dini & Asesmen
     Route::middleware([CheckRole::class.':guru_bk'])->prefix('bk')->name('bk.')->group(function () {
         Route::prefix('deteksi-dini')->name('deteksi.')->group(function () {
             Route::get('/', [DeteksiDiniController::class, 'index'])->name('index');
@@ -179,11 +195,4 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/refresh-skor', [DeteksiDiniController::class, 'refreshSemuaSkor'])->name('refresh-skor');
         });
     });
-});
-
-// API Chat Routes
-Route::middleware(['auth'])->prefix('api/chat')->name('api.chat.')->group(function () {
-    Route::get('/fetch/{partnerId}', [ChatController::class, 'fetch'])->name('fetch');
-    Route::post('/send', [ChatController::class, 'send'])->name('send');
-    Route::get('/unread', [ChatController::class, 'unreadCount'])->name('unread');
 });

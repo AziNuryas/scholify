@@ -9,8 +9,11 @@ use App\Models\Assignment;
 use App\Models\User;
 use App\Models\Chat;
 use App\Models\Absensi;
+use App\Models\Submission;
+use App\Models\UserNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class StudentMenuController extends Controller
 {
@@ -85,11 +88,16 @@ class StudentMenuController extends Controller
                 foreach ($assignments as $assignment) {
                     $submission = $assignment->submissions->first();
                     
-                    if ($submission && $submission->status == 'submitted') {
-                        $assignment->status = 'submitted';
-                        $assignment->is_late = false;
-                    } else if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
-                        $assignment->status = 'late';
+                    if ($submission && in_array($submission->status, ['submitted', 'late', 'graded'])) {
+                        $assignment->status = $submission->status;
+                        $assignment->submission_id = $submission->id;
+                        $assignment->submission_file = $submission->file;
+                        $assignment->submission_note = $submission->note;
+                        $assignment->submitted_at = $submission->submitted_at;
+                        $assignment->score = $submission->score;
+                        $assignment->is_late = ($submission->status == 'late');
+                    } else if ($assignment->due_date && Carbon::parse($assignment->due_date)->isPast()) {
+                        $assignment->status = 'pending';
                         $assignment->is_late = true;
                     } else {
                         $assignment->status = 'pending';
@@ -108,44 +116,75 @@ class StudentMenuController extends Controller
     {
         $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
+            'submission_file' => 'nullable|file|max:20480', // 20MB max
             'submission_link' => 'nullable|url',
             'notes' => 'nullable|string',
         ]);
         
         $studentData = $this->getStudent();
         if (!$studentData || !$studentData->id) {
-            return response()->json(['success' => false, 'message' => 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.']);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.']);
+            }
+            return back()->with('error', 'Data profil siswa tidak ditemukan. Lengkapi profil Anda terlebih dahulu.');
         }
         
         try {
             $assignment = Assignment::findOrFail($request->assignment_id);
             
             // Cek apakah sudah submit
-            $existing = \App\Models\Submission::where('assignment_id', $assignment->id)
+            $existing = Submission::where('assignment_id', $assignment->id)
                 ->where('student_id', $studentData->id)
                 ->first();
                 
             if ($existing) {
-                return response()->json(['success' => false, 'message' => 'Anda sudah mengumpulkan tugas ini']);
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Anda sudah mengumpulkan tugas ini']);
+                }
+                return back()->with('error', 'Anda sudah mengumpulkan tugas ini');
             }
             
             $status = 'submitted';
-            if ($assignment->due_date && \Carbon\Carbon::parse($assignment->due_date)->isPast()) {
+            if ($assignment->due_date && Carbon::parse($assignment->due_date)->isPast()) {
                 $status = 'late';
             }
             
-            \App\Models\Submission::create([
+            $filePath = $request->submission_link;
+            
+            if ($request->hasFile('submission_file')) {
+                $file = $request->file('submission_file');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('submissions', $filename, 'public');
+                $filePath = '/storage/' . $path;
+            }
+            
+            $submission = Submission::create([
                 'assignment_id' => $assignment->id,
                 'student_id' => $studentData->id,
-                'file_url' => $request->submission_link,
-                'notes' => $request->notes,
+                'file' => $filePath,
+                'note' => $request->notes,
                 'status' => $status,
-                'score' => null, // Belum dinilai
+                'submitted_at' => now(),
             ]);
             
-            return response()->json(['success' => true, 'message' => 'Tugas berhasil dikumpulkan']);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Tugas berhasil dikumpulkan',
+                    'data' => $submission
+                ]);
+            }
+            
+            return redirect()->route('student.assignments')->with('success', '✅ Tugas berhasil dikumpulkan!');
+            
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal mengumpulkan tugas: ' . $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::error('Submit assignment error: ' . $e->getMessage());
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal mengumpulkan tugas: ' . $e->getMessage()]);
+            }
+            
+            return back()->with('error', 'Gagal mengumpulkan tugas: ' . $e->getMessage());
         }
     }
 
@@ -214,6 +253,8 @@ class StudentMenuController extends Controller
             'status' => 'required|in:hadir,izin,sakit,alpha',
             'tanggal' => 'required|date',
             'keterangan' => 'nullable|string|max:500',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
         
         $studentData = $this->getStudent();
@@ -229,6 +270,38 @@ class StudentMenuController extends Controller
                 
             if ($existing) {
                 return back()->with('error', 'Anda sudah melakukan absensi untuk tanggal ' . date('d/m/Y', strtotime($request->tanggal)) . '!');
+            }
+            
+            // Validasi GPS untuk status 'hadir'
+            if ($request->status === 'hadir') {
+                if (!$request->latitude || !$request->longitude) {
+                    return back()->with('error', 'Akses lokasi (GPS) wajib diizinkan untuk melakukan absensi Hadir!');
+                }
+                
+                // Koordinat Sekolah (Contoh: Bundaran HI Jakarta untuk demo)
+                // Dalam aplikasi nyata, koordinat ini diambil dari database Settings/Sekolah
+                $schoolLat = -6.1950;
+                $schoolLng = 106.8230;
+                
+                // Radius toleransi dalam meter
+                $maxRadius = 100;
+                
+                // Hitung jarak dengan Haversine formula
+                $earthRadius = 6371000; // Radius bumi dalam meter
+                $latFrom = deg2rad($request->latitude);
+                $lonFrom = deg2rad($request->longitude);
+                $latTo = deg2rad($schoolLat);
+                $lonTo = deg2rad($schoolLng);
+
+                $latDelta = $latTo - $latFrom;
+                $lonDelta = $lonTo - $lonFrom;
+
+                $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+                $distance = $angle * $earthRadius;
+                
+                if ($distance > $maxRadius) {
+                    return back()->with('error', 'Gagal absen! Anda berada di luar area sekolah (' . round($distance) . ' meter dari sekolah). Anda harus berada dalam radius ' . $maxRadius . ' meter.');
+                }
             }
             
             Absensi::create([
@@ -305,26 +378,13 @@ class StudentMenuController extends Controller
             return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Validasi
         $request->validate([
-            'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'nisn' => 'nullable|string|max:20',
-            'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
             'address' => 'nullable|string',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        // Update user name
-        if ($request->name) {
-            $user->name = $request->name;
-            $user->save();
-        }
-
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            // Hapus avatar lama jika ada
+        if ($request->hasFile('photo')) {
             if ($studentModel->avatar) {
                 $oldPath = str_replace('/storage/', '', $studentModel->avatar);
                 if (Storage::disk('public')->exists($oldPath)) {
@@ -332,21 +392,18 @@ class StudentMenuController extends Controller
                 }
             }
             
-            // Upload avatar baru
-            $file = $request->file('avatar');
+            $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('avatars', $filename, 'public');
-            $studentModel->avatar = '/storage/' . $path;
+            $studentModel->avatar = $path;
         }
 
-        // Update student data
-        $studentModel->name = $request->name;
-        $studentModel->first_name = $request->name;
-        $studentModel->nisn = $request->nisn;
-        $studentModel->phone = $request->phone;
-        $studentModel->birth_place = $request->birth_place;
-        $studentModel->birth_date = $request->birth_date;
-        $studentModel->address = $request->address;
+        if ($request->has('phone')) {
+            $studentModel->phone = $request->phone;
+        }
+        if ($request->has('address')) {
+            $studentModel->address = $request->address;
+        }
 
         $studentModel->save();
 
@@ -414,7 +471,7 @@ class StudentMenuController extends Controller
         return view('student.discipline', compact('student', 'records'));
     }
 
-    // ================= NOTIFIKASI =================
+    // ================= NOTIFIKASI (LENGKAP) =================
 
     public function notifications()
     {
@@ -422,7 +479,7 @@ class StudentMenuController extends Controller
         $student = $this->formatStudent($studentData);
         
         $userId = auth()->id();
-        $notifications = \App\Models\Notification::where('user_id', $userId)
+        $notifications = UserNotification::where('user_id', $userId)
             ->latest()
             ->paginate(15);
             
@@ -432,11 +489,11 @@ class StudentMenuController extends Controller
     public function fetchNotifications()
     {
         $userId = auth()->id();
-        $unreadCount = \App\Models\Notification::where('user_id', $userId)
+        $unreadCount = UserNotification::where('user_id', $userId)
             ->where('is_read', false)
             ->count();
             
-        $latest = \App\Models\Notification::where('user_id', $userId)
+        $latest = UserNotification::where('user_id', $userId)
             ->latest()
             ->take(5)
             ->get();
@@ -450,7 +507,7 @@ class StudentMenuController extends Controller
 
     public function markNotificationAsRead($id)
     {
-        $notif = \App\Models\Notification::where('id', $id)
+        $notif = UserNotification::where('id', $id)
             ->where('user_id', auth()->id())
             ->first();
             
@@ -461,5 +518,62 @@ class StudentMenuController extends Controller
         }
         
         return response()->json(['success' => false], 404);
+    }
+
+    public function deleteNotification($id)
+    {
+        $notif = UserNotification::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+            
+        if ($notif) {
+            $notif->delete();
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false], 404);
+    }
+
+    public function deleteAllNotifications()
+    {
+        UserNotification::where('user_id', auth()->id())->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function markAllNotificationsAsRead()
+    {
+        UserNotification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+        
+        return response()->json(['success' => true]);
+    }
+
+    // ================= SETTINGS =================
+
+    public function settings()
+    {
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+        $user = auth()->user();
+
+        return view('student.settings', compact('student', 'studentData', 'user'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'password' => 'nullable|min:6|confirmed',
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+            $user->save();
+            return back()->with('success', 'Kata sandi berhasil diperbarui!');
+        }
+
+        return back()->with('success', 'Pengaturan berhasil disimpan!');
     }
 }

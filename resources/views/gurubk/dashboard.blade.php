@@ -1,117 +1,154 @@
 @extends('layouts.gurubk')
 
 @section('title', 'Dashboard Bimbingan Konseling - Schoolify')
+@section('page-title', 'Dashboard')
 
 @section('content')
-<div class="space-y-8 max-w-7xl mx-auto">
-    <!-- Header Greeting -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-            <h1 class="font-outfit font-bold text-3xl text-[#1E293B] mb-2">Selamat Datang, {{ explode(',', $guru['name'])[0] }}!</h1>
-            <p class="text-gray-500">Pantau kesehatan mental dan perkembangan karakter seluruh siswa di sini.</p>
+<div class="space-y-6 animate-fadeInUp">
+
+    <!-- Welcome Banner -->
+    <div class="neo-flat rounded-2xl p-6 sm:p-8 relative overflow-hidden flex items-center justify-between neo-card-hover"
+         style="background: linear-gradient(135deg, #5B21B6, #7C3AED);">
+        <div class="z-10 relative text-white">
+            <!-- Date Pill -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3"
+                 style="background: rgba(0,0,0,0.1); box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.1);">
+                <i class='bx bx-calendar text-purple-200 text-sm'></i>
+                <p class="text-[10px] text-purple-100 font-bold uppercase tracking-wider">
+                    {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+                </p>
+            </div>
+
+            <h1 class="font-outfit font-extrabold text-2xl sm:text-3xl text-white mb-4">
+                Selamat Datang, {{ explode(',', $guru['name'])[0] }}! 👋
+            </h1>
+
+            <div class="p-3.5 rounded-xl max-w-md"
+                 style="background: rgba(255,255,255,0.05); box-shadow: 4px 4px 8px rgba(0,0,0,0.15), -4px -4px 8px rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08);">
+                <p class="text-sm text-purple-100 leading-relaxed">
+                    Pantau kesehatan mental dan perkembangan karakter seluruh siswa di sini.
+                </p>
+            </div>
         </div>
-        <div class="text-sm font-bold text-teal-600 bg-teal-50 px-4 py-2 rounded-lg flex items-center gap-2">
-            <i class='bx bx-calendar-event text-lg'></i> {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+
+        <div class="hidden sm:flex items-center justify-center w-28 h-28 rounded-full z-10 relative"
+             style="background: rgba(0,0,0,0.08); box-shadow: inset 6px 6px 12px rgba(0,0,0,0.25), inset -6px -6px 12px rgba(255,255,255,0.15);">
+            <i class='bx bxs-heart-circle text-white/90 text-5xl'></i>
         </div>
+
+        <div class="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+        <div class="absolute left-0 bottom-0 w-48 h-48 bg-purple-900/30 rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
     </div>
 
-    <!-- Metrik Statistik -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="glass-card bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-5 hover:border-teal-200 transition">
-            <div class="w-14 h-14 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-3xl">
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="neo-flat rounded-2xl p-6 flex items-center gap-5 neo-card-hover">
+            <div class="w-14 h-14 rounded-full neo-pressed flex items-center justify-center text-2xl" style="color: #60a5fa">
                 <i class='bx bx-group'></i>
             </div>
             <div>
-                <p class="text-sm font-bold text-gray-400 uppercase tracking-wide">Total Siswa Aktif</p>
-                <h3 class="font-outfit font-black text-2xl text-[#1E293B]">{{ number_format($stats['total_students']) }}</h3>
+                <p class="text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">Total Siswa Ditangani</p>
+                <h3 class="font-outfit font-black text-2xl text-[var(--text-primary)]">{{ number_format($stats['total_students']) }}</h3>
             </div>
         </div>
-        
-        <div class="glass-card bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-5 hover:border-teal-200 transition">
-            <div class="w-14 h-14 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-3xl">
+
+        <div class="neo-flat rounded-2xl p-6 flex items-center gap-5 neo-card-hover">
+            <div class="w-14 h-14 rounded-full neo-pressed flex items-center justify-center text-2xl" style="color: #fb923c">
                 <i class='bx bx-user-voice'></i>
             </div>
             <div>
-                <p class="text-sm font-bold text-gray-400 uppercase tracking-wide">Kasus Berjalan</p>
-                <h3 class="font-outfit font-black text-2xl text-[#1E293B]">{{ $stats['active_cases'] }}</h3>
+                <p class="text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">Kasus Berjalan</p>
+                <h3 class="font-outfit font-black text-2xl text-[var(--text-primary)]">{{ $stats['active_cases'] }}</h3>
             </div>
         </div>
 
-        <div class="glass-card bg-teal-600 p-6 rounded-[24px] shadow-lg shadow-teal-200 flex items-center gap-5 text-white transform hover:-translate-y-1 transition cursor-pointer" onclick="window.location.href='{{ route('gurubk.chats') }}'">
-            <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-3xl">
-                <i class='bx bx-envelope'></i>
-            </div>
-            <div>
-                <p class="text-sm font-bold text-teal-100 uppercase tracking-wide">Pesan Baru</p>
-                <h3 class="font-outfit font-black text-2xl shadow-sm">{{ $stats['unread_messages'] }} Siswa</h3>
-            </div>
-        </div>
-
-        <div class="glass-card bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-5 hover:border-teal-200 transition">
-            <div class="w-14 h-14 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-3xl">
+        <div class="neo-flat rounded-2xl p-6 flex items-center gap-5 neo-card-hover">
+            <div class="w-14 h-14 rounded-full neo-pressed flex items-center justify-center text-2xl" style="color: var(--accent-light)">
                 <i class='bx bx-calendar-heart'></i>
             </div>
             <div>
-                <p class="text-sm font-bold text-gray-400 uppercase tracking-wide">Jadwal Temu Hari Ini</p>
-                <h3 class="font-outfit font-black text-2xl text-[#1E293B]">{{ $stats['appointments_today'] }}</h3>
+                <p class="text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">Jadwal Temu Hari Ini</p>
+                <h3 class="font-outfit font-black text-2xl text-[var(--text-primary)]">{{ $stats['appointments_today'] }}</h3>
             </div>
         </div>
     </div>
 
-    <!-- Daftar Jadwal & Kasus -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- Agenda Hari Ini -->
-        <div class="lg:col-span-2 glass-card bg-white rounded-[24px] border border-gray-100 shadow-sm p-6 md:p-8">
-            <div class="flex justify-between items-center mb-6 border-b border-gray-50 pb-4">
-                <h3 class="font-bold text-lg text-[#1E293B]"><i class='bx bx-notepad text-teal-500 mr-2'></i> Agenda Temu Fisik</h3>
-                <button class="text-sm font-bold text-teal-600 hover:text-teal-800">Lihat Semua</button>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-teal-50 transition border border-transparent hover:border-teal-100 cursor-pointer">
-                    <div class="flex items-center gap-4">
-                        <img src="https://ui-avatars.com/api/?name=Dimas&background=random" class="w-12 h-12 rounded-full">
-                        <div>
-                            <h4 class="font-bold text-[#1E293B]">Dimas Aditya (XII TKR 2)</h4>
-                            <p class="text-sm text-gray-500">Konsultasi SNMPTN & Pemilihan Jurusan</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-teal-600 bg-white px-3 py-1 rounded inline-block shadow-sm">13:00 WIB</p>
-                    </div>
-                </div>
+    <!-- Agenda + Shortcut -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-teal-50 transition border border-transparent hover:border-teal-100 cursor-pointer">
+        <!-- Agenda -->
+        <div class="lg:col-span-2 neo-flat rounded-2xl p-6 neo-card-hover">
+            <div class="flex justify-between items-center mb-5 pb-4" style="border-bottom: 1px solid rgba(var(--shadow-dark), 0.15)">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                         style="background: linear-gradient(135deg, #7C3AED, #9333EA); box-shadow: 0 4px 12px rgba(124,58,237,0.3)">
+                        <i class='bx bx-notepad text-white text-lg'></i>
+                    </div>
+                    <h3 class="font-outfit font-extrabold text-lg text-[var(--text-primary)]">Agenda Temu</h3>
+                </div>
+                <a href="{{ route('gurubk.appointments') }}"
+                   class="text-sm font-bold transition-colors hover:opacity-80" style="color: var(--accent-light)">
+                    Lihat Semua
+                </a>
+            </div>
+
+            <div class="space-y-3">
+                @forelse($appointments ?? [
+                    ['name' => 'Dimas Aditya', 'class' => 'XII TKR 2', 'topic' => 'Konsultasi SNMPTN & Pemilihan Jurusan', 'time' => '13:00 WIB', 'type' => 'normal'],
+                    ['name' => 'Siti Nurbaya', 'class' => 'X MIPA 1', 'topic' => 'Kasus Pendisiplinan (Ketidakhadiran)', 'time' => '14:30 WIB', 'type' => 'alert'],
+                ] as $appt)
+                <div class="neo-pressed rounded-xl p-4 flex items-center justify-between group hover-glow transition-all cursor-pointer">
                     <div class="flex items-center gap-4">
-                        <img src="https://ui-avatars.com/api/?name=Siti&background=random" class="w-12 h-12 rounded-full">
+                        <div class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0"
+                             style="background: var(--accent); box-shadow: 0 4px 10px rgba(124,58,237,0.3)">
+                            {{ strtoupper(substr($appt['name'] ?? 'BK', 0, 2)) }}
+                        </div>
                         <div>
-                            <h4 class="font-bold text-[#1E293B]">Siti Nurbaya (X MIPA 1)</h4>
-                            <p class="text-sm text-red-500 font-medium">Kasus Pendisiplinan (Ketidakhadiran)</p>
+                            <h4 class="font-bold text-sm text-[var(--text-primary)] group-hover:text-[var(--accent-light)] transition-colors">
+                                {{ $appt['name'] ?? '-' }} ({{ $appt['class'] ?? '-' }})
+                            </h4>
+                            <p class="text-xs font-medium mt-0.5 {{ ($appt['type'] ?? 'normal') === 'alert' ? 'text-red-400' : 'text-[var(--text-secondary)]' }}">
+                                {{ $appt['topic'] ?? '-' }}
+                            </p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="font-bold text-teal-600 bg-white px-3 py-1 rounded inline-block shadow-sm">14:30 WIB</p>
-                    </div>
+                    <span class="font-bold text-sm px-3 py-1.5 rounded-xl neo-flat flex-shrink-0 ml-3" style="color: var(--accent-light)">
+                        {{ $appt['time'] ?? '-' }}
+                    </span>
                 </div>
+                @empty
+                    <div class="neo-pressed rounded-xl p-6 text-center">
+                        <i class='bx bx-calendar-x text-3xl text-[var(--text-muted)]'></i>
+                        <p class="text-sm font-bold text-[var(--text-primary)] mt-2">Tidak ada agenda hari ini</p>
+                    </div>
+                @endforelse
             </div>
         </div>
 
-        <!-- Shortcut Action -->
-        <div class="glass-card bg-gradient-to-br from-[#1E293B] to-[#334155] rounded-[24px] shadow-lg p-8 relative overflow-hidden flex flex-col justify-center">
+        <!-- Shortcut Buat Catatan -->
+        <div class="neo-flat rounded-2xl p-8 relative overflow-hidden flex flex-col justify-center neo-card-hover"
+             style="background: linear-gradient(135deg, #1e1b4b, #312e81);">
             <div class="relative z-10 text-white">
-                <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl mb-6">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-6"
+                     style="background: rgba(255,255,255,0.1); box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.08)">
                     <i class='bx bxs-report'></i>
                 </div>
-                <h3 class="font-outfit font-bold text-xl mb-2">Buat Laporan Baru</h3>
-                <p class="text-gray-300 text-sm mb-6">Catat pelanggaran atau lapor keluhan perkembangan karakter siswa secara manual ke dalam sistem.</p>
-                <button onclick="alert('Formulir Laporan BK')" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-xl transition shadow-md">
+                <h3 class="font-outfit font-bold text-xl mb-2">Buat Catatan Konseling</h3>
+                <p class="text-purple-300 text-sm mb-6 leading-relaxed">
+                    Catat pelanggaran atau lapor keluhan perkembangan karakter siswa secara manual ke dalam sistem.
+                </p>
+                <a href="{{ route('gurubk.catatan-konseling.index') }}"
+                   class="block w-full text-center font-bold py-3 rounded-xl transition-all duration-300 text-white"
+                   style="background: var(--accent); box-shadow: 0 4px 15px rgba(124,58,237,0.4);"
+                   onmouseover="this.style.background='var(--accent-hover)'"
+                   onmouseout="this.style.background='var(--accent)'">
                     Isi Laporan
-                </button>
+                </a>
             </div>
-            <!-- Decorative circle -->
-            <div class="absolute -bottom-10 -right-10 w-40 h-40 border-[20px] border-white/5 rounded-full"></div>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 rounded-full" style="border: 20px solid rgba(255,255,255,0.04)"></div>
+            <div class="absolute -top-8 -left-8 w-32 h-32 rounded-full" style="border: 12px solid rgba(255,255,255,0.03)"></div>
         </div>
     </div>
+
 </div>
 @endsection

@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Announcement;
 use App\Models\SchoolClass;
+use App\Models\UserNotification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AnnouncementController extends Controller
 {
@@ -26,17 +29,17 @@ class AnnouncementController extends Controller
     }
 
     /**
-     * 📌 Simpan pengumuman dari guru
+     * 📌 Simpan pengumuman dari guru + kirim notifikasi ke siswa
      */
     public function store(Request $request)
     {
-        // Validasi - sudah sinkron dengan blade
+        // Validasi
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'target' => 'required|in:all,single_class', // ✅ Sesuai dengan value di blade
+            'target' => 'required|in:all,single_class',
             'class_id' => 'nullable|required_if:target,single_class|exists:school_classes,id',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120', // max 5MB
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ]);
 
         $filePath = null;
@@ -57,11 +60,46 @@ class AnnouncementController extends Controller
             'status'     => 'terkirim',
         ]);
 
-        return redirect()->back()->with('success', 'Pengumuman berhasil dikirim');
+        // 🔥 KIRIM NOTIFIKASI KE SISWA 🔥
+        try {
+            if ($request->target == 'all') {
+                // Kirim notifikasi ke SEMUA siswa
+                $students = User::where('role', 'siswa')->get();
+                foreach ($students as $student) {
+                    UserNotification::create([
+                        'user_id' => $student->id,
+                        'title' => '📢 Pengumuman Baru: ' . $announcement->title,
+                        'message' => strip_tags(substr($announcement->content, 0, 150)) . (strlen($announcement->content) > 150 ? '...' : ''),
+                        'type' => 'announcement',
+                        'link' => route('student.notifications'),
+                        'is_read' => false,
+                    ]);
+                }
+            } else {
+                // Kirim notifikasi ke siswa di KELAS TERTENTU saja
+                $students = User::where('role', 'siswa')
+                    ->where('class_id', $request->class_id)
+                    ->get();
+                foreach ($students as $student) {
+                    UserNotification::create([
+                        'user_id' => $student->id,
+                        'title' => '📢 Pengumuman Baru: ' . $announcement->title,
+                        'message' => strip_tags(substr($announcement->content, 0, 150)) . (strlen($announcement->content) > 150 ? '...' : ''),
+                        'type' => 'announcement',
+                        'link' => route('student.notifications'),
+                        'is_read' => false,
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Gagal membuat notifikasi: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Pengumuman berhasil dikirim dan notifikasi telah dikirim ke siswa');
     }
 
     /**
-     * 📌 Halaman siswa
+     * 📌 Halaman siswa (melihat pengumuman)
      */
     public function studentIndex()
     {
@@ -75,7 +113,7 @@ class AnnouncementController extends Controller
             ->latest()
             ->get();
 
-        return view('student.announcements', compact('announcements'));
+        return view('student.pengumuman', compact('announcements'));
     }
 
     /**

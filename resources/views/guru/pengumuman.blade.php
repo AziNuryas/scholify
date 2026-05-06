@@ -1,171 +1,60 @@
 @extends('layouts.guru')
 
-@section('page_title', 'Pengumuman')
-@section('page_subtitle', 'Buat dan kelola pengumuman untuk siswa')
+@section('title', 'Pengumuman - Scholify Guru')
+@section('page-title', 'Manajemen Pengumuman')
+@section('page-subtitle', 'Buat dan kelola pengumuman untuk siswa')
 
 @section('content')
-<style>
-    /* Font & Base */
-    body {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-    
-    /* Custom animations */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes slideInLeft {
-        from { opacity: 0; transform: translateX(-20px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    
-    @keyframes slideInRight {
-        from { opacity: 0; transform: translateX(20px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    
-    .animate-fadeIn {
-        animation: fadeIn 0.4s ease-out forwards;
-    }
-    
-    .animate-slideInLeft {
-        animation: slideInLeft 0.4s ease-out forwards;
-    }
-    
-    .animate-slideInRight {
-        animation: slideInRight 0.4s ease-out forwards;
-    }
-    
-    /* Card hover */
-    .announcement-card {
-        transition: all 0.25s ease;
-    }
-    
-    .announcement-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-        background: #fafbff;
-    }
-    
-    /* Form input focus */
-    .form-input {
-        transition: all 0.2s ease;
-    }
-    
-    .form-input:focus {
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08);
-        border-color: #A78BFA;
-        background: white;
-    }
-    
-    /* File input */
-    .file-input-label:hover {
-        background: #F5F3FF;
-        border-color: #C4B5FD;
-        transform: translateY(-1px);
-    }
-    
-    /* Custom scrollbar */
-    .custom-scroll::-webkit-scrollbar {
-        width: 4px;
-    }
-    
-    .custom-scroll::-webkit-scrollbar-track {
-        background: #F1F5F9;
-        border-radius: 10px;
-    }
-    
-    .custom-scroll::-webkit-scrollbar-thumb {
-        background: #DDD6FE;
-        border-radius: 10px;
-    }
-    
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-        background: #A78BFA;
-    }
-    
-    /* Line clamp */
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    
-    /* Badge styles - Soft pastel colors */
-    .badge {
-        font-size: 0.6875rem;
-        font-weight: 500;
-        padding: 0.25rem 0.625rem;
-        border-radius: 0.5rem;
-        letter-spacing: -0.01em;
-    }
-    
-    /* Select custom arrow */
-    select.form-input {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238B5CF6' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.75rem center;
-        background-size: 1rem;
-    }
-    
-    /* Button action */
-    .btn-action {
-        transition: all 0.2s ease;
-    }
-    .btn-action:hover {
-        transform: scale(1.05);
-    }
-    
-    /* Radio card style */
-    .radio-card {
-        transition: all 0.2s ease;
-    }
-    .radio-card.selected {
-        border-color: #8B5CF6;
-        background: #F5F3FF;
-    }
-</style>
+<div class="space-y-6">
+    {{-- Header dengan neumorphism --}}
+    <div class="neo-flat p-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center">
+                        <i data-lucide="megaphone" class="w-4 h-4 text-[var(--accent)]"></i>
+                    </div>
+                    <h1 class="font-outfit text-2xl font-bold text-[var(--text-primary)]">Pengumuman</h1>
+                </div>
+                <p class="text-[var(--text-secondary)] text-sm ml-10">Buat dan kelola pengumuman untuk siswa</p>
+            </div>
+            <div class="neo-pressed px-4 py-2 rounded-xl">
+                <span class="text-xs font-bold text-[var(--text-muted)] flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-3 h-3"></i>
+                    {{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
+                </span>
+            </div>
+        </div>
+    </div>
 
-<div class="p-5 max-w-7xl mx-auto">
     <div class="grid lg:grid-cols-12 gap-6">
         
         {{-- =========================
             FORM BUAT PENGUMUMAN - LEFT COLUMN
         ========================== --}}
         <div class="lg:col-span-5 animate-slideInLeft">
-            <div class="bg-white rounded-xl shadow-sm border border-purple-100 overflow-hidden">
-                <!-- Header -->
-                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 px-5 py-4 border-b border-purple-100">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="font-semibold text-purple-800 text-base">Buat Pengumuman Baru</h2>
-                            <p class="text-xs text-purple-400 mt-0.5">Isi form berikut untuk membuat pengumuman</p>
-                        </div>
+            <div class="neo-card p-6">
+                <div class="flex items-center gap-3 mb-5 pb-3 border-b border-[var(--shadow-dark)]/10">
+                    <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
+                        <i data-lucide="plus" class="w-5 h-5 text-[var(--accent)]"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-outfit font-bold text-lg text-[var(--text-primary)]">Buat Pengumuman Baru</h2>
+                        <p class="text-xs text-[var(--text-muted)]">Isi form berikut untuk membuat pengumuman</p>
                     </div>
                 </div>
 
-                <form action="{{ route('guru.pengumuman.store') }}" method="POST" enctype="multipart/form-data" class="p-5 space-y-4">
+                <form action="{{ route('guru.pengumuman.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                     @csrf
 
                     <!-- Alert Messages -->
                     @if ($errors->any())
-                        <div class="bg-rose-50 border-l-4 border-rose-500 rounded-lg p-3">
-                            <div class="flex items-center gap-2 text-rose-700 text-xs mb-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
+                        <div class="neo-pressed p-3 rounded-xl bg-rose-50/50">
+                            <div class="flex items-center gap-2 text-rose-600 text-xs mb-1">
+                                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
                                 <span class="font-semibold">Perlu diperhatikan!</span>
                             </div>
-                            <ul class="text-xs text-rose-600 space-y-1 ml-6">
+                            <ul class="text-xs text-rose-500 space-y-0.5 ml-6">
                                 @foreach ($errors->all() as $error)
                                     <li>• {{ $error }}</li>
                                 @endforeach
@@ -174,11 +63,9 @@
                     @endif
 
                     @if(session('success'))
-                        <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-lg p-3">
-                            <div class="flex items-center gap-2 text-emerald-700 text-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
+                        <div class="neo-pressed p-3 rounded-xl bg-emerald-50/50">
+                            <div class="flex items-center gap-2 text-emerald-600 text-xs">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
                                 <span class="font-semibold">{{ session('success') }}</span>
                             </div>
                         </div>
@@ -186,51 +73,47 @@
 
                     <!-- Judul Pengumuman -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Judul Pengumuman</label>
+                        <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+                            Judul Pengumuman
+                        </label>
                         <input type="text" name="title" value="{{ old('title') }}"
                                placeholder="Contoh: Ujian Akhir Semester"
-                               class="form-input w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white transition-all"
-                               required>
+                               class="neo-input w-full text-sm" required>
                     </div>
 
                     <!-- Isi Pengumuman -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Isi Pengumuman</label>
-                        <textarea name="content" rows="4"
+                        <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+                            Isi Pengumuman
+                        </label>
+                        <textarea name="content" rows="3"
                                   placeholder="Tulis detail pengumuman di sini..."
-                                  class="form-input w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white transition-all resize-none"
-                                  required>{{ old('content') }}</textarea>
+                                  class="neo-input w-full text-sm resize-none" required>{{ old('content') }}</textarea>
                     </div>
 
                     <!-- Target Pengumuman -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-2">Target Pengumuman</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="radio-card relative cursor-pointer">
+                        <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+                            Target Pengumuman
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="radio-card cursor-pointer">
                                 <input type="radio" name="target" value="all"
                                        {{ old('target', 'all') == 'all' ? 'checked' : '' }}
                                        class="peer sr-only" onchange="toggleClassSelect()">
-                                <div class="p-2.5 rounded-lg border-2 border-slate-200 text-center peer-checked:border-purple-500 peer-checked:bg-purple-50 transition-all">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4 text-slate-500 peer-checked:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                        </svg>
-                                        <span class="text-sm font-medium text-slate-700 peer-checked:text-purple-700">Semua Kelas</span>
-                                    </div>
+                                <div class="neo-flat p-3 rounded-xl text-center transition-all peer-checked:neo-pressed cursor-pointer">
+                                    <i data-lucide="users" class="w-5 h-5 mx-auto mb-1 text-[var(--text-muted)] peer-checked:text-[var(--accent)]"></i>
+                                    <span class="text-xs font-medium text-[var(--text-secondary)] peer-checked:text-[var(--accent)]">Semua Kelas</span>
                                 </div>
                             </label>
 
-                            <label class="radio-card relative cursor-pointer">
+                            <label class="radio-card cursor-pointer">
                                 <input type="radio" name="target" value="single_class"
                                        {{ old('target') == 'single_class' ? 'checked' : '' }}
                                        class="peer sr-only" onchange="toggleClassSelect()">
-                                <div class="p-2.5 rounded-lg border-2 border-slate-200 text-center peer-checked:border-purple-500 peer-checked:bg-purple-50 transition-all">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4 text-slate-500 peer-checked:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                        </svg>
-                                        <span class="text-sm font-medium text-slate-700 peer-checked:text-purple-700">Kelas Tertentu</span>
-                                    </div>
+                                <div class="neo-flat p-3 rounded-xl text-center transition-all peer-checked:neo-pressed cursor-pointer">
+                                    <i data-lucide="book-open" class="w-5 h-5 mx-auto mb-1 text-[var(--text-muted)] peer-checked:text-[var(--accent)]"></i>
+                                    <span class="text-xs font-medium text-[var(--text-secondary)] peer-checked:text-[var(--accent)]">Kelas Tertentu</span>
                                 </div>
                             </label>
                         </div>
@@ -238,9 +121,9 @@
 
                     <!-- Pilih Kelas (hidden by default) -->
                     <div id="classSelect" class="transition-all duration-300 {{ old('target') == 'single_class' ? '' : 'hidden' }}">
-                        <select name="class_id" class="form-input w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white transition-all">
+                        <select name="class_id" class="neo-input w-full text-sm">
                             <option value="">Pilih Kelas</option>
-                            @foreach($classes as $class)
+                            @foreach($classes ?? [] as $class)
                                 <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
                                     {{ $class->name }}
                                 </option>
@@ -250,24 +133,27 @@
 
                     <!-- Upload File -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Lampiran</label>
+                        <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+                            Lampiran (Opsional)
+                        </label>
                         <div class="relative">
                             <input type="file" name="file" id="fileInput" class="hidden">
-                            <label for="fileInput" class="file-input-label flex items-center justify-between w-full px-3 py-2 bg-purple-50/50 border-2 border-dashed border-purple-200 rounded-lg cursor-pointer transition-all hover:bg-purple-100/50">
+                            <label for="fileInput" class="neo-flat flex items-center justify-between w-full px-4 py-3 rounded-xl cursor-pointer transition-all hover:neo-pressed group">
                                 <div class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                    </svg>
-                                    <span class="text-xs text-purple-600 font-medium">Klik untuk upload file</span>
+                                    <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center group-hover:neo-flat transition-all">
+                                        <i data-lucide="upload" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <span class="text-sm text-[var(--text-secondary)]">Pilih file</span>
                                 </div>
-                                <span class="text-[10px] text-slate-400">PDF, DOC, JPG, PNG | Max 5MB</span>
+                                <span class="text-xs text-[var(--text-muted)]">PDF, DOC, JPG | Max 5MB</span>
                             </label>
-                            <p id="fileName" class="text-xs text-purple-500 mt-1.5 hidden"></p>
+                            <p id="fileName" class="text-xs text-[var(--accent)] mt-2 hidden"></p>
                         </div>
                     </div>
 
                     <!-- Submit Button -->
-                    <button class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm">
+                    <button class="neo-btn w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="send" class="w-4 h-4"></i>
                         Kirim Pengumuman
                     </button>
                 </form>
@@ -278,82 +164,70 @@
             LIST PENGUMUMAN - RIGHT COLUMN
         ========================== --}}
         <div class="lg:col-span-7 animate-slideInRight">
-            <div class="bg-white rounded-xl shadow-sm border border-emerald-100 overflow-hidden">
-                <!-- Header -->
-                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-5 py-4 border-b border-emerald-100">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 class="font-semibold text-emerald-800 text-base">Daftar Pengumuman</h2>
-                                <p class="text-xs text-emerald-400 mt-0.5">Semua pengumuman yang telah dibuat</p>
-                            </div>
+            <div class="neo-card p-6">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-5 pb-3 border-b border-[var(--shadow-dark)]/10">
+                    <div class="flex items-center gap-3">
+                        <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
+                            <i data-lucide="list" class="w-5 h-5 text-[var(--accent)]"></i>
                         </div>
-                        <div class="bg-emerald-100 rounded-full px-2.5 py-1">
-                            <span class="text-xs font-semibold text-emerald-600">{{ $announcements->count() }}</span>
-                            <span class="text-xs text-emerald-500"> Pengumuman</span>
+                        <div>
+                            <h2 class="font-outfit font-bold text-lg text-[var(--text-primary)]">Daftar Pengumuman</h2>
+                            <p class="text-xs text-[var(--text-muted)]">Semua pengumuman yang telah dibuat</p>
                         </div>
+                    </div>
+                    <div class="neo-pressed px-3 py-1.5 rounded-full">
+                        <span class="text-xs font-semibold text-[var(--text-primary)]">{{ $announcements->count() ?? 0 }}</span>
+                        <span class="text-xs text-[var(--text-muted)]"> Total Pengumuman</span>
                     </div>
                 </div>
 
-                <div class="divide-y divide-slate-100 max-h-[520px] overflow-y-auto custom-scroll" id="announcementsList">
-                    @forelse($announcements as $item)
-                        <div class="announcement-card p-4 hover:bg-slate-50/50 transition-all cursor-pointer"
+                <!-- Announcements List -->
+                <div class="space-y-3 max-h-[520px] overflow-y-auto custom-scroll pr-1" id="announcementsList">
+                    @forelse($announcements ?? [] as $item)
+                        <div class="announcement-card neo-flat p-4 transition-all duration-300 hover:neo-pressed cursor-pointer"
                              onclick="openModal({{ json_encode([
                                  'id' => $item->id,
                                  'title' => $item->title,
                                  'content' => $item->content,
                                  'target' => $item->target,
                                  'class_name' => optional($item->class)->name,
-                                 'created_at' => $item->created_at->isoFormat('d MMM Y H:i'),
+                                 'created_at' => $item->created_at->locale('id')->isoFormat('D MMM Y, H:i'),
                                  'created_at_human' => $item->created_at->diffForHumans(),
                                  'file' => $item->file
                              ]) }})">
                             <div class="flex justify-between items-start gap-3">
                                 <div class="flex-1 min-w-0">
-                                    <!-- Badges - Soft pastel colors -->
-                                    <div class="flex flex-wrap gap-1.5 mb-2">
+                                    <!-- Badges -->
+                                    <div class="flex flex-wrap gap-2 mb-3">
                                         @if($item->target == 'all')
-                                            <span class="badge bg-emerald-100 text-emerald-700">
-                                                <svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                                </svg>
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-indigo-100 text-indigo-600">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
                                                 Semua Kelas
                                             </span>
                                         @else
-                                            <span class="badge bg-blue-100 text-blue-700">
-                                                <svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                                </svg>
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-sky-100 text-sky-600">
+                                                <i data-lucide="book-open" class="w-3 h-3"></i>
                                                 {{ optional($item->class)->name ?? 'Kelas Tertentu' }}
                                             </span>
                                         @endif
                                         
-                                        <span class="badge bg-slate-100 text-slate-600">
-                                            <svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-[var(--text-secondary)] bg-[var(--bg)]">
+                                            <i data-lucide="clock" class="w-3 h-3"></i>
                                             {{ $item->created_at->diffForHumans() }}
                                         </span>
                                     </div>
 
-                                    <h3 class="font-semibold text-slate-700 text-sm mb-1.5 group-hover:text-purple-600 transition-colors">
+                                    <h3 class="font-semibold text-[var(--text-primary)] text-base mb-2">
                                         {{ $item->title }}
                                     </h3>
                                     
-                                    <p class="text-xs text-slate-500 mb-2 line-clamp-2">
+                                    <p class="text-sm text-[var(--text-secondary)] mb-3 line-clamp-2">
                                         {{ $item->content }}
                                     </p>
 
                                     @if($item->file)
-                                        <span class="inline-flex items-center gap-1.5 text-purple-500 text-xs font-medium">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"></path>
-                                            </svg>
+                                        <span class="inline-flex items-center gap-1.5 text-[var(--text-muted)] text-xs font-medium">
+                                            <i data-lucide="paperclip" class="w-3 h-3"></i>
                                             Ada lampiran
                                         </span>
                                     @endif
@@ -367,23 +241,19 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" 
-                                            class="btn-action w-7 h-7 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-500 bg-slate-100 hover:bg-rose-50 transition-all">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
+                                            class="btn-action neo-btn w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-rose-400 transition-all">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </form>
                             </div>
                         </div>
                     @empty
-                        <div class="p-12 text-center">
-                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <svg class="w-7 h-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
+                        <div class="neo-flat p-12 text-center">
+                            <div class="neo-pressed w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="inbox" class="w-10 h-10 text-[var(--text-muted)]"></i>
                             </div>
-                            <p class="text-slate-500 font-medium text-sm">Belum ada pengumuman</p>
-                            <p class="text-xs text-slate-400 mt-1">Buat pengumuman pertama Anda melalui form di samping</p>
+                            <p class="text-[var(--text-primary)] font-semibold text-base">Belum ada pengumuman</p>
+                            <p class="text-sm text-[var(--text-muted)] mt-1">Buat pengumuman pertama Anda melalui form di samping</p>
                         </div>
                     @endforelse
                 </div>
@@ -394,31 +264,117 @@
 
 <!-- MODAL DETAIL PENGUMUMAN -->
 <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50" onclick="closeModal()">
-    <div class="bg-white rounded-xl shadow-2xl w-[500px] max-w-[90%] max-h-[80vh] overflow-hidden animate-fadeIn" onclick="event.stopPropagation()">
-        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 px-5 py-4">
+    <div class="neo-card w-[500px] max-w-[90%] max-h-[80vh] overflow-hidden" onclick="event.stopPropagation()">
+        <div class="neo-pressed p-4 rounded-t-xl">
             <div class="flex justify-between items-center">
-                <h3 id="modalTitle" class="font-bold text-white text-base">Detail Pengumuman</h3>
-                <button onclick="closeModal()" class="text-white/80 hover:text-white transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="megaphone" class="w-4 h-4 text-[var(--accent)]"></i>
+                    <h3 id="modalTitle" class="font-outfit font-bold text-base text-[var(--text-primary)]">Detail Pengumuman</h3>
+                </div>
+                <button onclick="closeModal()" class="neo-btn w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-rose-400 transition-all">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
         
-        <div class="p-5 overflow-y-auto max-h-[60vh]">
-            <div id="modalMeta" class="flex flex-wrap gap-2 text-xs text-slate-500 mb-3 pb-2 border-b"></div>
-            <p id="modalContent" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line"></p>
-            <div id="modalFile" class="mt-4 pt-3 border-t"></div>
+        <div class="p-5 overflow-y-auto max-h-[60vh] custom-scroll">
+            <div id="modalMeta" class="flex flex-wrap gap-2 text-xs text-[var(--text-muted)] mb-3 pb-2 border-b border-[var(--shadow-dark)]/10"></div>
+            <p id="modalContent" class="text-sm text-[var(--text-primary)] leading-relaxed whitespace-pre-line"></p>
+            <div id="modalFile" class="mt-4 pt-3 border-t border-[var(--shadow-dark)]/10"></div>
         </div>
         
-        <div class="px-5 py-3 bg-slate-50 flex justify-end">
-            <button onclick="closeModal()" class="px-4 py-1.5 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition-all">
+        <div class="px-5 py-3 border-t border-[var(--shadow-dark)]/10 flex justify-end">
+            <button onclick="closeModal()" class="neo-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all">
                 Tutup
             </button>
         </div>
     </div>
 </div>
+
+<style>
+    /* Announcement card styles */
+    .announcement-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+    
+    .radio-card {
+        transition: all 0.2s ease;
+    }
+    
+    .radio-card input:checked + div {
+        box-shadow: inset 4px 4px 8px rgba(var(--shadow-dark), 0.5),
+                    inset -4px -4px 8px rgba(var(--shadow-light), 0.8);
+    }
+    
+    .btn-action {
+        transition: all 0.2s ease;
+    }
+    .btn-action:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Animations */
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .animate-slideInLeft {
+        animation: slideInLeft 0.4s ease-out forwards;
+    }
+    
+    .animate-slideInRight {
+        animation: slideInRight 0.4s ease-out forwards;
+    }
+    
+    /* Custom scrollbar */
+    .custom-scroll::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-track {
+        background: rgba(var(--shadow-dark), 0.08);
+        border-radius: 10px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(var(--shadow-dark), 0.2);
+        border-radius: 10px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--accent-color), 0.3);
+    }
+    
+    /* Form select arrow */
+    select.neo-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1rem;
+    }
+    
+    /* Input placeholder */
+    .neo-input::placeholder {
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+    
+    /* Line clamp */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
 
 <script>
     // Toggle class select
@@ -440,7 +396,7 @@
     if(fileInput) {
         fileInput.addEventListener('change', function() {
             if(this.files && this.files[0]) {
-                fileName.textContent = this.files[0].name;
+                fileName.textContent = '📎 ' + this.files[0].name;
                 fileName.classList.remove('hidden');
             } else {
                 fileName.classList.add('hidden');
@@ -454,24 +410,22 @@
         document.getElementById('modalContent').innerHTML = item.content.replace(/\n/g, '<br>');
         
         const targetIcon = item.target === 'all' 
-            ? '<svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>'
-            : '<svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>';
+            ? '<i data-lucide="users" class="w-3 h-3 inline mr-0.5"></i>'
+            : '<i data-lucide="book-open" class="w-3 h-3 inline mr-0.5"></i>';
         
         document.getElementById('modalMeta').innerHTML = `
-            <span class="inline-flex items-center gap-1">📅 ${item.created_at}</span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${item.created_at}</span>
             <span class="inline-flex items-center gap-1">${targetIcon} ${item.target === 'all' ? 'Semua Kelas' : 'Kelas ' + (item.class_name || 'Tertentu')}</span>
         `;
         
         const fileDiv = document.getElementById('modalFile');
         if (item.file && item.file !== null && item.file !== '') {
             fileDiv.innerHTML = `
-                <p class="text-xs font-semibold text-slate-700 mb-2">Lampiran:</p>
+                <p class="text-xs font-semibold text-[var(--text-secondary)] mb-2">Lampiran:</p>
                 <a href="/storage/${item.file}" 
                    target="_blank"
-                   class="inline-flex items-center gap-1.5 text-purple-500 hover:text-purple-600 text-xs font-medium bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"></path>
-                    </svg>
+                   class="inline-flex items-center gap-1.5 text-[var(--accent)] hover:text-[var(--accent-light)] text-xs font-medium neo-pressed px-3 py-1.5 rounded-lg transition-all">
+                    <i data-lucide="download" class="w-3 h-3"></i>
                     Download Lampiran
                 </a>
             `;
@@ -481,6 +435,8 @@
         
         document.getElementById('detailModal').classList.remove('hidden');
         document.getElementById('detailModal').classList.add('flex');
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function closeModal() {
@@ -490,7 +446,7 @@
 
     // Auto hide success message
     setTimeout(() => {
-        const successAlert = document.querySelector('.bg-emerald-50');
+        const successAlert = document.querySelector('.bg-emerald-50/50');
         if(successAlert) {
             successAlert.style.opacity = '0';
             successAlert.style.transform = 'translateY(-10px)';
@@ -498,5 +454,12 @@
             setTimeout(() => successAlert.remove(), 300);
         }
     }, 3000);
+    
+    // Re-initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
 </script>
 @endsection
