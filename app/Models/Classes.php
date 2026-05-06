@@ -40,11 +40,11 @@ class Classes extends Model
     ];
 
     /**
-     * Relasi ke wali kelas (Teacher)
+     * Relasi ke wali kelas (dari tabel users)
      */
     public function homeroomTeacher(): BelongsTo
     {
-        return $this->belongsTo(Teacher::class, 'homeroom_teacher_id');
+        return $this->belongsTo(User::class, 'homeroom_teacher_id');
     }
 
     /**
@@ -69,13 +69,5 @@ class Classes extends Model
     public function scopeByGradeLevel($query, $gradeLevel)
     {
         return $query->where('grade_level', $gradeLevel);
-    }
-
-    /**
-     * Mendapatkan daftar guru yang tersedia untuk menjadi wali kelas
-     */
-    public static function getAvailableTeachers()
-    {
-        return Teacher::with('user')->get();
     }
 }

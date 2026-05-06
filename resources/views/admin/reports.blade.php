@@ -1047,16 +1047,17 @@
         </div>
 
         <!-- Export Card -->
+        <!-- Export Card -->
         <div class="export-card">
             <h3>Ekspor Laporan</h3>
             <p>Unduh laporan dalam berbagai format untuk keperluan analisis dan dokumentasi</p>
             <div class="export-buttons">
-                <button class="btn-export" onclick="exportReport('pdf')">
+                <a href="{{ route('admin.reports.export-pdf') }}" class="btn-export">
                     <i class="fas fa-file-pdf"></i> Export PDF
-                </button>
-                <button class="btn-export" onclick="exportReport('excel')">
+                </a>
+                <a href="{{ route('admin.reports.export-excel') }}" class="btn-export">
                     <i class="fas fa-file-excel"></i> Export Excel
-                </button>
+                </a>
                 <button class="btn-export" onclick="window.print()">
                     <i class="fas fa-print"></i> Cetak
                 </button>

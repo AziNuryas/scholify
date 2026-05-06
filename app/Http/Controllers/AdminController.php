@@ -6,18 +6,22 @@ use App\Models\User;
 use App\Models\Classes;
 use App\Models\Teacher;
 use App\Models\Student;
+use App\Models\Kkm;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
     /**
      * Dashboard - Overview statistik
      */
-    public function index()
+    public function index(): View
     {
         $data = [
             'totalStudents' => Student::count(),
@@ -33,40 +37,62 @@ class AdminController extends Controller
 
     // ==================== STUDENT MANAGEMENT ====================
 
-    /**
-     * Menampilkan daftar siswa
-     */
-    public function students()
+    public function students(Request $request): View
     {
-        $students = Student::with(['user', 'schoolClass'])->latest()->paginate(15);
+        $query = Student::with(['user', 'schoolClass']);
+        
+        if ($request->filled('class_id')) {
+            $query->where('class_id', $request->class_id);
+        }
+        
+        if ($request->filled('gender')) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('gender', $request->gender);
+            });
+        }
+        
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nisn', 'like', "%{$search}%")
+                  ->orWhere('nis', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($q2) use ($search) {
+                      $q2->where('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        $students = $query->latest()->paginate(15)->appends($request->query());
+        
         return view('admin.students', compact('students'));
     }
 
-    /**
-     * Form tambah siswa
-     */
-    public function createStudent()
+    public function showStudent(int $id): View
+    {
+        $student = Student::with(['user', 'schoolClass'])->findOrFail($id);
+        $kkmData = Kkm::with('subject')->get();
+        
+        return view('admin.indexstudent', compact('student', 'kkmData'));
+    }
+
+    public function createStudent(): View
     {
         $classes = Classes::orderBy('grade_level')->orderBy('name')->get();
         return view('admin.students-create', compact('classes'));
     }
 
-    /**
-     * Simpan siswa baru - OTOMATIS ROLE SISWA
-     */
-    public function storeStudent(Request $request)
+    public function storeStudent(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
-            'first_name' => 'nullable|string|max:100',
-            'last_name' => 'nullable|string|max:100',
             'nisn' => 'nullable|string|unique:students,nisn',
             'nis' => 'nullable|string|unique:students,nis',
+            'gender' => 'nullable|in:L,P',
             'birth_place' => 'nullable|string|max:100',
             'birth_date' => 'nullable|date',
-            'gender' => 'nullable|in:L,P',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'class_id' => 'nullable|exists:classes,id',
@@ -91,8 +117,6 @@ class AdminController extends Controller
             'nisn' => $validated['nisn'] ?? null,
             'nis' => $validated['nis'] ?? null,
             'name' => $validated['name'],
-            'first_name' => $validated['first_name'] ?? null,
-            'last_name' => $validated['last_name'] ?? null,
             'birth_place' => $validated['birth_place'] ?? null,
             'birth_date' => $validated['birth_date'] ?? null,
             'address' => $validated['address'] ?? null,
@@ -100,23 +124,17 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.students')
-            ->with('success', '🎓 Siswa berhasil ditambahkan!');
+            ->with('success', 'Siswa berhasil ditambahkan!');
     }
 
-    /**
-     * Form edit siswa
-     */
-    public function editStudent($id)
+    public function editStudent(int $id): View
     {
         $student = Student::with('user')->findOrFail($id);
         $classes = Classes::orderBy('grade_level')->orderBy('name')->get();
         return view('admin.students-edit', compact('student', 'classes'));
     }
 
-    /**
-     * Update siswa
-     */
-    public function updateStudent(Request $request, $id)
+    public function updateStudent(Request $request, int $id): RedirectResponse
     {
         $student = Student::with('user')->findOrFail($id);
         $user = $student->user;
@@ -124,13 +142,11 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'first_name' => 'nullable|string|max:100',
-            'last_name' => 'nullable|string|max:100',
             'nisn' => 'nullable|string|unique:students,nisn,' . $id,
             'nis' => 'nullable|string|unique:students,nis,' . $id,
+            'gender' => 'nullable|in:L,P',
             'birth_place' => 'nullable|string|max:100',
             'birth_date' => 'nullable|date',
-            'gender' => 'nullable|in:L,P',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'class_id' => 'nullable|exists:classes,id',
@@ -157,8 +173,6 @@ class AdminController extends Controller
             'nisn' => $validated['nisn'] ?? $student->nisn,
             'nis' => $validated['nis'] ?? $student->nis,
             'name' => $validated['name'],
-            'first_name' => $validated['first_name'] ?? $student->first_name,
-            'last_name' => $validated['last_name'] ?? $student->last_name,
             'birth_place' => $validated['birth_place'] ?? $student->birth_place,
             'birth_date' => $validated['birth_date'] ?? $student->birth_date,
             'address' => $validated['address'] ?? $student->address,
@@ -166,52 +180,48 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.students')
-            ->with('success', '✏️ Siswa berhasil diperbarui!');
+            ->with('success', 'Siswa berhasil diperbarui!');
     }
 
-    /**
-     * Hapus siswa
-     */
-    public function deleteStudent($id)
+    public function deleteStudent(int $id): RedirectResponse
     {
         $student = Student::with('user')->findOrFail($id);
         $user = $student->user;
-        
         $student->delete();
-        
-        if ($user) {
-            $user->delete();
-        }
+        if ($user) { $user->delete(); }
 
         return redirect()->route('admin.students')
-            ->with('success', '🗑️ Siswa berhasil dihapus!');
+            ->with('success', 'Siswa berhasil dihapus!');
     }
 
     // ==================== TEACHER MANAGEMENT ====================
 
-    /**
-     * Menampilkan daftar semua guru (BK + Mapel)
-     */
-    public function teachers()
+    public function teachers(Request $request): View
     {
-        $teachers = User::whereIn('role', ['guru', 'guru_bk'])
-            ->with('homeroomClass')
-            ->paginate(15);
+        $query = User::whereIn('role', ['guru', 'guru_bk'])->with('homeroomClass');
+        
+        if ($request->filled('role')) { $query->where('role', $request->role); }
+        if ($request->filled('gender')) { $query->where('gender', $request->gender); }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        
+        $teachers = $query->latest()->paginate(10)->appends($request->query());
         return view('admin.teachers', compact('teachers'));
     }
 
-    /**
-     * Form tambah guru
-     */
-    public function createTeacher()
+    public function createTeacher(): View
     {
         return view('admin.teachers-create');
     }
 
-    /**
-     * Simpan guru baru (BK atau Mapel)
-     */
-    public function storeTeacher(Request $request)
+    public function storeTeacher(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -223,19 +233,10 @@ class AdminController extends Controller
             'birth_place' => 'nullable|string|max:100',
             'birth_date' => 'nullable|date',
             'phone' => 'nullable|string|max:20',
-            'religion' => 'nullable|string|max:50',
             'address' => 'nullable|string',
-            'subject' => 'nullable|required_if:role,guru|string|max:100',
-            'education_level' => 'nullable|string|max:10',
-            'major' => 'nullable|string|max:100',
-            'university' => 'nullable|string|max:100',
-            'graduation_year' => 'nullable|integer|min:1970|max:2030',
-            'employment_status' => 'nullable|string|max:50',
-            'start_year' => 'nullable|integer|min:1970|max:2030',
-            'certification' => 'nullable|string',
         ]);
 
-        $userData = [
+        User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -246,55 +247,20 @@ class AdminController extends Controller
             'birth_date' => $validated['birth_date'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
-            'subject' => $validated['subject'] ?? null,
-        ];
-
-        if (Schema::hasColumn('users', 'religion')) {
-            $userData['religion'] = $validated['religion'] ?? null;
-        }
-        if (Schema::hasColumn('users', 'education_level')) {
-            $userData['education_level'] = $validated['education_level'] ?? null;
-        }
-        if (Schema::hasColumn('users', 'major')) {
-            $userData['major'] = $validated['major'] ?? null;
-        }
-        if (Schema::hasColumn('users', 'university')) {
-            $userData['university'] = $validated['university'] ?? null;
-        }
-        if (Schema::hasColumn('users', 'graduation_year')) {
-            $userData['graduation_year'] = $validated['graduation_year'] ?? null;
-        }
-        if (Schema::hasColumn('users', 'employment_status')) {
-            $userData['employment_status'] = $validated['employment_status'] ?? null;
-        }
-        if (Schema::hasColumn('users', 'start_year')) {
-            $userData['start_year'] = $validated['start_year'] ?? null;
-        }
-        if (Schema::hasColumn('users', 'certification')) {
-            $userData['certification'] = $validated['certification'] ?? null;
-        }
-
-        User::create($userData);
+        ]);
 
         $roleLabel = $validated['role'] === 'guru_bk' ? 'Guru BK' : 'Guru Mapel';
-        
         return redirect()->route('admin.teachers')
-            ->with('success', '👩‍🏫 ' . $roleLabel . ' berhasil ditambahkan!');
+            ->with('success', $roleLabel . ' berhasil ditambahkan!');
     }
 
-    /**
-     * Form edit guru
-     */
-    public function editTeacher($id)
+    public function editTeacher(int $id): View
     {
         $teacher = User::whereIn('role', ['guru', 'guru_bk'])->findOrFail($id);
         return view('admin.teachers-edit', compact('teacher'));
     }
 
-    /**
-     * Update guru
-     */
-    public function updateTeacher(Request $request, $id)
+    public function updateTeacher(Request $request, int $id): RedirectResponse
     {
         $teacher = User::whereIn('role', ['guru', 'guru_bk'])->findOrFail($id);
         
@@ -307,55 +273,44 @@ class AdminController extends Controller
             'birth_place' => 'nullable|string|max:100',
             'birth_date' => 'nullable|date',
             'phone' => 'nullable|string|max:20',
-            'religion' => 'nullable|string|max:50',
             'address' => 'nullable|string',
-            'subject' => 'nullable|required_if:role,guru|string|max:100',
-            'education_level' => 'nullable|string|max:10',
-            'major' => 'nullable|string|max:100',
-            'university' => 'nullable|string|max:100',
-            'graduation_year' => 'nullable|integer|min:1970|max:2030',
-            'employment_status' => 'nullable|string|max:50',
-            'start_year' => 'nullable|integer|min:1970|max:2030',
-            'certification' => 'nullable|string',
         ]);
 
         if ($request->filled('password')) {
             $request->validate(['password' => 'min:6|confirmed']);
-            $validated['password'] = Hash::make($request->password);
+            $teacher->update(['password' => Hash::make($request->password)]);
         }
 
-        $updateData = array_filter($validated, function($key) {
-            return Schema::hasColumn('users', $key) || in_array($key, ['password']);
-        }, ARRAY_FILTER_USE_KEY);
-
-        $teacher->update($updateData);
+        $teacher->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'nip' => $validated['nip'] ?? $teacher->nip,
+            'gender' => $validated['gender'] ?? $teacher->gender,
+            'birth_place' => $validated['birth_place'] ?? $teacher->birth_place,
+            'birth_date' => $validated['birth_date'] ?? $teacher->birth_date,
+            'phone' => $validated['phone'] ?? $teacher->phone,
+            'address' => $validated['address'] ?? $teacher->address,
+        ]);
 
         $roleLabel = $validated['role'] === 'guru_bk' ? 'Guru BK' : 'Guru Mapel';
-        
         return redirect()->route('admin.teachers')
-            ->with('success', '✏️ ' . $roleLabel . ' berhasil diperbarui!');
+            ->with('success', $roleLabel . ' berhasil diperbarui!');
     }
 
-    /**
-     * Hapus guru
-     */
-    public function deleteTeacher($id)
+    public function deleteTeacher(int $id): RedirectResponse
     {
         $teacher = User::whereIn('role', ['guru', 'guru_bk'])->findOrFail($id);
         $teacher->delete();
-
         return redirect()->route('admin.teachers')
-            ->with('success', '🗑️ Guru berhasil dihapus!');
+            ->with('success', 'Guru berhasil dihapus!');
     }
 
     // ==================== CLASS MANAGEMENT ====================
 
-    /**
-     * Menampilkan daftar kelas
-     */
-    public function classes()
+    public function classes(): View
     {
-        $classes = Classes::with('homeroomTeacher')->get();
+        $classes = Classes::with(['homeroomTeacher', 'students'])->get();
         
         $classesByGrade = [
             'X' => $classes->where('grade_level', 'X'),
@@ -373,35 +328,25 @@ class AdminController extends Controller
         return view('admin.classes', compact('classes', 'classesByGrade', 'stats'));
     }
 
-    /**
-     * Form tambah kelas
-     */
-    public function createClass()
+    public function createClass(): View
     {
         $grades = ['X', 'XI', 'XII'];
-        $teachers = Teacher::orderBy('name')->get();
+        $teachers = User::whereIn('role', ['guru', 'guru_bk'])->orderBy('name')->get();
         return view('classes.create', compact('grades', 'teachers'));
     }
 
-    /**
-     * Simpan kelas baru
-     */
-    public function storeClass(Request $request)
+    public function storeClass(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => [
-                'required',
-                'string',
-                'max:10',
+                'required', 'string', 'max:10',
                 Rule::unique('classes')->where(function ($query) use ($request) {
                     return $query->where('grade_level', $request->grade);
                 }),
             ],
             'grade' => 'required|in:X,XI,XII',
-            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
-        ], [
-            'name.unique' => 'Kelas dengan nama tersebut sudah ada di tingkat yang sama.',
-        ]);
+            'homeroom_teacher_id' => 'nullable|exists:users,id',
+        ], ['name.unique' => 'Kelas dengan nama tersebut sudah ada di tingkat yang sama.']);
 
         Classes::create([
             'name' => $validated['name'],
@@ -410,54 +355,36 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.classes')
-            ->with('success', '🌟 Kelas "' . $validated['name'] . '" berhasil ditambahkan!');
+            ->with('success', 'Kelas "' . $validated['name'] . '" berhasil ditambahkan!');
     }
 
-    /**
-     * Form edit kelas
-     */
-    public function editClass($id)
+    public function editClass(int $id): View
     {
         $class = Classes::with(['homeroomTeacher', 'students.user'])->findOrFail($id);
         $grades = ['X', 'XI', 'XII'];
-        $teachers = Teacher::orderBy('name')->get();
-        
-        // Siswa yang sudah di kelas ini
+        $teachers = User::whereIn('role', ['guru', 'guru_bk'])->orderBy('name')->get();
         $classStudents = $class->students;
-        
-        // Siswa yang belum memiliki kelas (tersedia untuk ditambahkan)
         $availableStudents = Student::whereNull('class_id')
             ->orWhere('class_id', '!=', $id)
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name')->get();
         
         return view('classes.edite', compact('class', 'grades', 'teachers', 'classStudents', 'availableStudents'));
     }
 
-    /**
-     * Update kelas
-     */
-    public function updateClass(Request $request, $id)
+    public function updateClass(Request $request, int $id): RedirectResponse
     {
-        /** @var \App\Models\Classes $class */
         $class = Classes::findOrFail($id);
         
         $validated = $request->validate([
             'name' => [
-                'required',
-                'string',
-                'max:10',
-                Rule::unique('classes')
-                    ->where(function ($query) use ($request) {
-                        return $query->where('grade_level', $request->grade);
-                    })
-                    ->ignore($id),
+                'required', 'string', 'max:10',
+                Rule::unique('classes')->where(function ($query) use ($request) {
+                    return $query->where('grade_level', $request->grade);
+                })->ignore($id),
             ],
             'grade' => 'required|in:X,XI,XII',
-            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
-        ], [
-            'name.unique' => 'Kelas dengan nama tersebut sudah ada di tingkat yang sama.',
-        ]);
+            'homeroom_teacher_id' => 'nullable|exists:users,id',
+        ], ['name.unique' => 'Kelas dengan nama tersebut sudah ada di tingkat yang sama.']);
 
         $class->update([
             'name' => $validated['name'],
@@ -466,68 +393,42 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.classes')
-            ->with('success', '✨ Kelas "' . $validated['name'] . '" berhasil diperbarui!');
+            ->with('success', 'Kelas "' . $validated['name'] . '" berhasil diperbarui!');
     }
 
-    /**
-     * Hapus kelas
-     */
-    public function deleteClass($id)
+    public function deleteClass(int $id): RedirectResponse
     {
         $class = Classes::findOrFail($id);
         $className = $class->name;
         $class->delete();
-
         return redirect()->route('admin.classes')
-            ->with('success', '🗑️ Kelas "' . $className . '" berhasil dihapus!');
+            ->with('success', 'Kelas "' . $className . '" berhasil dihapus!');
     }
 
-    /**
-     * Menambahkan siswa ke kelas
-     */
-    public function addStudentToClass(Request $request, $classId)
+    public function addStudentToClass(Request $request, int $classId): RedirectResponse
     {
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-        ]);
-        
+        $request->validate(['student_id' => 'required|exists:students,id']);
         $student = Student::findOrFail($request->student_id);
         $student->update(['class_id' => $classId]);
-        
-        if ($student->user) {
-            $student->user->update(['class_id' => $classId]);
-        }
-        
+        if ($student->user) { $student->user->update(['class_id' => $classId]); }
         $class = Classes::find($classId);
-        
         return redirect()->route('admin.classes.edit', $classId)
-            ->with('success', '🎓 ' . $student->name . ' berhasil ditambahkan ke kelas ' . $class->name . '!');
+            ->with('success', $student->name . ' berhasil ditambahkan ke kelas ' . $class->name);
     }
 
-    /**
-     * Menghapus siswa dari kelas
-     */
-    public function removeStudentFromClass($classId, $studentId)
+    public function removeStudentFromClass(int $classId, int $studentId): RedirectResponse
     {
         $student = Student::findOrFail($studentId);
         $student->update(['class_id' => null]);
-        
-        if ($student->user) {
-            $student->user->update(['class_id' => null]);
-        }
-        
+        if ($student->user) { $student->user->update(['class_id' => null]); }
         $class = Classes::find($classId);
-        
         return redirect()->route('admin.classes.edit', $classId)
-            ->with('success', '🗑️ ' . $student->name . ' berhasil dikeluarkan dari kelas ' . $class->name . '!');
+            ->with('success', $student->name . ' berhasil dikeluarkan dari kelas ' . $class->name);
     }
 
     // ==================== REPORTS ====================
 
-    /**
-     * Laporan & Statistik
-     */
-    public function reports()
+    public function reports(): View
     {
         $data = [
             'totalConsultations' => 456,
@@ -538,16 +439,77 @@ class AdminController extends Controller
             'approvedAppointments' => 67,
             'attendanceRate' => 94,
         ];
-        
         return view('admin.reports', compact('data'));
+    }
+
+    public function exportPdf()
+    {
+        $data = [
+            'totalStudents' => Student::count(),
+            'totalTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->count(),
+            'totalClasses' => Classes::count(),
+            'totalConsultations' => 456,
+            'completedConsultations' => 234,
+            'pendingConsultations' => 12,
+            'disciplineRecords' => 24,
+            'appointments' => 89,
+            'approvedAppointments' => 67,
+            'attendanceRate' => 94,
+            'recentStudents' => Student::with(['user', 'schoolClass'])->latest()->take(10)->get(),
+            'recentTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->latest()->take(10)->get(),
+            'generatedAt' => now()->isoFormat('dddd, D MMMM YYYY - HH:mm'),
+        ];
+
+        $pdf = Pdf::loadView('admin.reports-pdf', $data);
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true, 'defaultFont' => 'sans-serif']);
+        return $pdf->download('laporan-schoolify-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function exportExcel()
+    {
+        $data = [
+            'totalStudents' => Student::count(),
+            'totalTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->count(),
+            'totalClasses' => Classes::count(),
+            'totalConsultations' => 456,
+            'completedConsultations' => 234,
+            'pendingConsultations' => 12,
+            'disciplineRecords' => 24,
+            'appointments' => 89,
+            'approvedAppointments' => 67,
+            'attendanceRate' => 94,
+        ];
+
+        $filename = 'laporan-schoolify-' . now()->format('Y-m-d') . '.csv';
+        $headers = ['Content-Type' => 'text/csv; charset=UTF-8', 'Content-Disposition' => 'attachment; filename="' . $filename . '"'];
+
+        $callback = function() use ($data) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['Laporan Schoolify']);
+            fputcsv($file, ['Tanggal', now()->format('d F Y')]);
+            fputcsv($file, ['']);
+            fputcsv($file, ['Metrik', 'Nilai']);
+            fputcsv($file, ['Total Siswa', $data['totalStudents']]);
+            fputcsv($file, ['Total Guru', $data['totalTeachers']]);
+            fputcsv($file, ['Total Kelas', $data['totalClasses']]);
+            fputcsv($file, ['Total Konsultasi', $data['totalConsultations']]);
+            fputcsv($file, ['Konsultasi Selesai', $data['completedConsultations']]);
+            fputcsv($file, ['Konsultasi Pending', $data['pendingConsultations']]);
+            fputcsv($file, ['Catatan Disiplin', $data['disciplineRecords']]);
+            fputcsv($file, ['Jadwal Temu', $data['appointments']]);
+            fputcsv($file, ['Jadwal Temu Dikonfirmasi', $data['approvedAppointments']]);
+            fputcsv($file, ['Tingkat Kehadiran', $data['attendanceRate'] . '%']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     // ==================== SETTINGS ====================
 
-    /**
-     * Pengaturan
-     */
-    public function settings()
+    public function settings(): View
     {
         $settings = [
             'school_name' => 'SMA Negeri 1 Bandung',
@@ -556,36 +518,25 @@ class AdminController extends Controller
             'school_phone' => '+62-274-512345',
             'academic_year' => '2024/2025',
         ];
-        
         return view('admin.settings', compact('settings'));
     }
 
-    /**
-     * Update pengaturan
-     */
-    public function updateSettings(Request $request)
+    public function updateSettings(Request $request): RedirectResponse
     {
         return redirect()->route('admin.settings')
-            ->with('success', '⚙️ Pengaturan berhasil diupdate!');
+            ->with('success', 'Pengaturan berhasil diupdate!');
     }
 
     // ==================== PROFILE ====================
 
-    /**
-     * Profil Admin
-     */
-    public function profile()
+    public function profile(): View
     {
         $admin = Auth::user();
         return view('admin.profile', compact('admin'));
     }
 
-    /**
-     * Update Profil Admin
-     */
-    public function updateProfile(Request $request)
+    public function updateProfile(Request $request): RedirectResponse
     {
-        /** @var \App\Models\User $admin */
         $admin = Auth::user();
 
         $validated = $request->validate([
@@ -604,7 +555,6 @@ class AdminController extends Controller
         }
 
         $admin->update($validated);
-
-        return back()->with('success', '👤 Profil berhasil diupdate!');
+        return back()->with('success', 'Profil berhasil diupdate!');
     }
 }

@@ -73,23 +73,99 @@
         .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #059669; }
         .alert-error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #DC2626; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 36px; }
-        .stat-card { background: var(--bg-glass); backdrop-filter: blur(16px) saturate(180%); border-radius: 24px; padding: 22px; border: 1px solid var(--border-glass); transition: all 0.3s; position: relative; overflow: hidden; box-shadow: var(--shadow-clay), var(--shadow-diagonal); }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
-        .stat-card:nth-child(1)::before { background: var(--gradient-mint); }
-        .stat-card:nth-child(2)::before { background: var(--gradient-sky); }
-        .stat-card:nth-child(3)::before { background: var(--gradient-peach); }
-        .stat-card:nth-child(4)::before { background: var(--gradient-amber); }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl), 0 20px 30px -8px rgba(0,0,0,0.1); }
-        .stat-card-content { display: flex; align-items: center; justify-content: space-between; }
-        .stat-info h3 { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 6px; }
-        .stat-number { font-size: 34px; font-weight: 800; font-family: 'Outfit', sans-serif; color: var(--text-primary); }
-        .stat-icon { width: 52px; height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-clay); }
-        .stat-icon i { font-size: 26px; }
-        .stat-card:nth-child(1) .stat-icon { background: var(--gradient-mint); color: white; }
-        .stat-card:nth-child(2) .stat-icon { background: var(--gradient-sky); color: white; }
-        .stat-card:nth-child(3) .stat-icon { background: var(--gradient-peach); color: white; }
-        .stat-card:nth-child(4) .stat-icon { background: var(--gradient-amber); color: white; }
+        /* MODERN STATS GRID */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 36px; }
+        .stat-card { 
+            background: var(--bg-surface); 
+            border-radius: 20px; 
+            padding: 28px; 
+            border: 1px solid rgba(229, 231, 235, 0.6); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04); 
+            cursor: pointer;
+        }
+        .stat-card::before { 
+            content: ''; 
+            position: absolute; 
+            top: -100%; 
+            left: -100%; 
+            width: 200%; 
+            height: 200%; 
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transition: all 0.6s;
+            pointer-events: none;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+        }
+        .stat-card:nth-child(1)::after { color: var(--primary-mint); }
+        .stat-card:nth-child(2)::after { color: var(--primary-sky); }
+        .stat-card:nth-child(3)::after { color: var(--primary-peach); }
+        .stat-card:nth-child(4)::after { color: var(--primary-amber); }
+        .stat-card:hover { 
+            transform: translateY(-6px); 
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08); 
+            border-color: rgba(200, 220, 240, 0.8);
+        }
+        .stat-card:hover::before {
+            top: -50%;
+            left: -50%;
+        }
+        .stat-card-content { 
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: space-between; 
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-info { flex: 1; }
+        .stat-info h3 { 
+            font-size: 12px; 
+            color: #64748B; 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            font-weight: 700; 
+            margin-bottom: 14px; 
+        }
+        .stat-number { 
+            font-size: 48px; 
+            font-weight: 800; 
+            font-family: 'Outfit', sans-serif; 
+            background: linear-gradient(135deg, #0F172A 0%, #475569 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1; 
+            letter-spacing: -0.02em; 
+        }
+        .stat-icon { 
+            width: 64px; 
+            height: 64px; 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 28px; 
+            flex-shrink: 0;
+            transition: all 0.4s;
+            position: relative;
+        }
+        .stat-card:nth-child(1) .stat-icon { background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%); color: var(--primary-mint); }
+        .stat-card:nth-child(2) .stat-icon { background: linear-gradient(135deg, #DBEAFE 0%, #EFF6FF 100%); color: var(--primary-sky); }
+        .stat-card:nth-child(3) .stat-icon { background: linear-gradient(135deg, #FFEDD5 0%, #FFF7ED 100%); color: var(--primary-peach); }
+        .stat-card:nth-child(4) .stat-icon { background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%); color: var(--primary-amber); }
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
 
         .classes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
         .class-column { display: flex; flex-direction: column; gap: 16px; }
@@ -203,26 +279,38 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-card-content">
-                    <div class="stat-info"><h3>Total Kelas</h3><div class="stat-number">{{ $stats['total'] ?? 0 }}</div></div>
-                    <div class="stat-icon"><i class="fas fa-building"></i></div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-content">
-                    <div class="stat-info"><h3>Kelas X</h3><div class="stat-number">{{ $stats['gradeX'] ?? 0 }}</div></div>
+                    <div class="stat-info">
+                        <h3>Total Kelas</h3>
+                        <div class="stat-number">{{ $stats['total'] ?? 0 }}</div>
+                    </div>
                     <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-content">
-                    <div class="stat-info"><h3>Kelas XI</h3><div class="stat-number">{{ $stats['gradeXI'] ?? 0 }}</div></div>
-                    <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="stat-info">
+                        <h3>Kelas X</h3>
+                        <div class="stat-number">{{ $stats['gradeX'] ?? 0 }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-content">
-                    <div class="stat-info"><h3>Kelas XII</h3><div class="stat-number">{{ $stats['gradeXII'] ?? 0 }}</div></div>
-                    <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="stat-info">
+                        <h3>Kelas XI</h3>
+                        <div class="stat-number">{{ $stats['gradeXI'] ?? 0 }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-content">
+                    <div class="stat-info">
+                        <h3>Kelas XII</h3>
+                        <div class="stat-number">{{ $stats['gradeXII'] ?? 0 }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-book-open"></i></div>
                 </div>
             </div>
         </div>
@@ -238,7 +326,7 @@
                 <div class="class-card">
                     <div class="class-card-header">
                         <span class="class-name">{{ $class->name }}</span>
-                        <span class="badge-status">✨ Aktif</span>
+                        <span class="badge-status"> Aktif</span>
                     </div>
                     <div class="student-count">
                         <i class="fas fa-users"></i>

@@ -16,6 +16,7 @@ use App\Http\Controllers\DeteksiDiniController;
 use App\Http\Controllers\LaporanSiswaController;
 use App\Http\Controllers\AsesmenController;
 use App\Http\Controllers\CatatanKonselingController;
+use App\Http\Middleware\CheckRole;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,23 +24,21 @@ use App\Http\Controllers\CatatanKonselingController;
 |--------------------------------------------------------------------------
 */
 
-// Guest Routes (Tidak perlu login)
+// Guest Routes
 Route::middleware('guest')->group(function () {
     Route::get('/', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
-// Authenticated Routes (Harus login)
+// Authenticated Routes
 Route::middleware(['auth'])->group(function () {
     
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
-    // ========== API Agenda (bisa diakses semua role) ==========
     Route::get('/api/agendas', [AgendaController::class, 'calendarEvents'])->name('api.agendas');
     
-    // ========== STUDENT AREA ==========
-    Route::middleware(['checkRole:siswa'])->prefix('student')->name('student.')->group(function () {
+    // STUDENT AREA
+    Route::middleware([CheckRole::class.':siswa'])->prefix('student')->name('student.')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('/schedule', [StudentMenuController::class, 'schedule'])->name('schedule');
         Route::get('/assignments', [StudentMenuController::class, 'assignments'])->name('assignments');
@@ -58,8 +57,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/notifications', [StudentMenuController::class, 'notifications'])->name('notifications');
         Route::get('/notifications/fetch', [StudentMenuController::class, 'fetchNotifications'])->name('notifications.fetch');
         Route::post('/notifications/{id}/read', [StudentMenuController::class, 'markNotificationAsRead'])->name('notifications.read');
-        
-        // Asesmen mandiri siswa
         Route::prefix('asesmen')->name('asesmen.')->group(function () {
             Route::get('/', [AsesmenController::class, 'index'])->name('index');
             Route::get('/isi/{jenis}', [AsesmenController::class, 'isi'])->name('isi');
@@ -68,8 +65,8 @@ Route::middleware(['auth'])->group(function () {
         });
     });
     
-    // ========== GURU BK AREA ==========
-    Route::middleware(['checkRole:guru_bk'])->prefix('guru-bk')->name('gurubk.')->group(function () {
+    // GURU BK AREA
+    Route::middleware([CheckRole::class.':guru_bk'])->prefix('guru-bk')->name('gurubk.')->group(function () {
         Route::get('/dashboard', [GuruBkController::class, 'index'])->name('dashboard');
         Route::get('/chats', [GuruBkController::class, 'chats'])->name('chats');
         Route::post('/chats/reply', [GuruBkController::class, 'reply'])->name('reply');
@@ -85,34 +82,28 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/laporan/{laporan}/proses', [GuruBkController::class, 'laporanProses'])->name('laporan.proses');
     });
     
-    // ========== GURU MAPEL AREA ==========
-    Route::middleware(['checkRole:guru'])->prefix('guru')->name('guru.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('guru.dashboard');
-        })->name('dashboard');
+    // GURU MAPEL AREA
+    Route::middleware([CheckRole::class.':guru'])->prefix('guru')->name('guru.')->group(function () {
+        Route::get('/dashboard', function () { return view('guru.dashboard'); })->name('dashboard');
         Route::view('/jadwal', 'guru.jadwal')->name('jadwal');
         Route::view('/absensi', 'guru.absensi')->name('absensi');
         Route::view('/raport', 'guru.raport')->name('raport');
         Route::view('/profil', 'guru.profil')->name('profil');
-        
         Route::controller(GradeController::class)->group(function () {
             Route::get('/nilai', 'index')->name('nilai');
             Route::post('/nilai', 'store')->name('nilai.store');
         });
-        
         Route::controller(AssignmentController::class)->group(function () {
             Route::get('/tugas', 'index')->name('tugas');
             Route::post('/tugas', 'store')->name('tugas.store');
             Route::put('/tugas/{id}', 'update')->name('tugas.update');
             Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
         });
-        
         Route::controller(AnnouncementController::class)->group(function () {
             Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
             Route::post('/pengumuman', 'store')->name('pengumuman.store');
             Route::delete('/pengumuman/{id}', 'destroy')->name('pengumuman.destroy');
         });
-        
         Route::prefix('laporan-siswa')->name('laporan.')->group(function () {
             Route::get('/', [LaporanSiswaController::class, 'index'])->name('index');
             Route::get('/buat', [LaporanSiswaController::class, 'create'])->name('create');
@@ -121,15 +112,15 @@ Route::middleware(['auth'])->group(function () {
         });
     });
     
-    // ========== ADMIN AREA ==========
-    Route::prefix('admin')->name('admin.')->group(function () {
-        // Dashboard
+    // ADMIN AREA
+    Route::middleware([CheckRole::class.':admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         
         // Student Management
         Route::get('/students', [AdminController::class, 'students'])->name('students');
         Route::get('/students/create', [AdminController::class, 'createStudent'])->name('students.create');
         Route::post('/students', [AdminController::class, 'storeStudent'])->name('students.store');
+        Route::get('/students/{id}', [AdminController::class, 'showStudent'])->name('students.show');
         Route::get('/students/{id}/edit', [AdminController::class, 'editStudent'])->name('students.edit');
         Route::put('/students/{id}', [AdminController::class, 'updateStudent'])->name('students.update');
         Route::delete('/students/{id}', [AdminController::class, 'deleteStudent'])->name('students.delete');
@@ -158,13 +149,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/classes/{id}/edit', [AdminController::class, 'editClass'])->name('classes.edit');
         Route::put('/classes/{id}', [AdminController::class, 'updateClass'])->name('classes.update');
         Route::delete('/classes/{id}', [AdminController::class, 'deleteClass'])->name('classes.delete');
-        
-        // Class - Student Management
         Route::post('/classes/{class}/add-student', [AdminController::class, 'addStudentToClass'])->name('classes.add-student');
         Route::delete('/classes/{class}/remove-student/{student}', [AdminController::class, 'removeStudentFromClass'])->name('classes.remove-student');
         
-        // Reports & Settings
+        // Reports
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+        Route::get('/reports/export-pdf', [AdminController::class, 'exportPdf'])->name('reports.export-pdf');
+        Route::get('/reports/export-excel', [AdminController::class, 'exportExcel'])->name('reports.export-excel');
+        
+        // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
         
@@ -173,8 +166,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
     });
     
-    // ========== BK / KONSELOR - Deteksi Dini & Asesmen ==========
-    Route::middleware(['checkRole:guru_bk'])->prefix('bk')->name('bk.')->group(function () {
+    // BK / KONSELOR
+    Route::middleware([CheckRole::class.':guru_bk'])->prefix('bk')->name('bk.')->group(function () {
         Route::prefix('deteksi-dini')->name('deteksi.')->group(function () {
             Route::get('/', [DeteksiDiniController::class, 'index'])->name('index');
             Route::get('/siswa', [DeteksiDiniController::class, 'daftarSiswa'])->name('daftar-siswa');
@@ -188,7 +181,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-// API Routes
+// API Chat Routes
 Route::middleware(['auth'])->prefix('api/chat')->name('api.chat.')->group(function () {
     Route::get('/fetch/{partnerId}', [ChatController::class, 'fetch'])->name('fetch');
     Route::post('/send', [ChatController::class, 'send'])->name('send');
