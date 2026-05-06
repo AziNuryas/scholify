@@ -21,20 +21,25 @@
             <div class="neo-pressed px-4 py-2 rounded-xl">
                 <span class="text-xs font-bold text-[var(--text-muted)] flex items-center gap-2">
                     <i data-lucide="calendar" class="w-3 h-3"></i>
-                    {{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
+                    {{ \Carbon\Carbon::parse($date ?? now())->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                 </span>
             </div>
         </div>
     </div>
 
-    {{-- Statistik Cards --}}
+    {{-- Statistik Cards (Data Real) --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
         @php 
+            $hadirCount = $students->where('attendance_status', 'hadir')->count();
+            $izinCount = $students->where('attendance_status', 'izin')->count();
+            $sakitCount = $students->where('attendance_status', 'sakit')->count();
+            $alphaCount = $students->where('attendance_status', 'alpha')->count();
+            
             $stats = [
-                ['label' => 'Hadir', 'count' => 32, 'color' => 'emerald', 'icon' => 'check-circle'],
-                ['label' => 'Izin', 'count' => 2, 'color' => 'amber', 'icon' => 'file-text'],
-                ['label' => 'Sakit', 'count' => 1, 'color' => 'blue', 'icon' => 'activity'],
-                ['label' => 'Alpha', 'count' => 0, 'color' => 'rose', 'icon' => 'alert-circle'],
+                ['label' => 'Hadir', 'count' => $hadirCount, 'color' => 'emerald', 'icon' => 'check-circle'],
+                ['label' => 'Izin', 'count' => $izinCount, 'color' => 'amber', 'icon' => 'file-text'],
+                ['label' => 'Sakit', 'count' => $sakitCount, 'color' => 'blue', 'icon' => 'activity'],
+                ['label' => 'Alpha', 'count' => $alphaCount, 'color' => 'rose', 'icon' => 'alert-circle'],
             ]; 
         @endphp
         @foreach($stats as $stat)
@@ -54,22 +59,39 @@
 
     {{-- Filter Bar --}}
     <div class="neo-card p-4">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+        <form method="GET" action="{{ route('guru.absensi') }}" class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-3">
                 {{-- Pilih Kelas --}}
                 <div class="relative">
-                    <select class="neo-input appearance-none pl-10 pr-8 py-2.5 text-sm cursor-pointer">
-                        <option selected>10-IPA 1 (Matematika)</option>
-                        <option>11-IPA 2 (Fisika)</option>
-                        <option>12-IPA 1 (Matematika)</option>
+                    <select name="class_id" class="neo-input appearance-none pl-10 pr-8 py-2.5 text-sm cursor-pointer" onchange="this.form.submit()">
+                        <option value="">-- Pilih Kelas --</option>
+                        @foreach($classes as $class)
+                            <option value="{{ $class->id }}" {{ ($classId ?? '') == $class->id ? 'selected' : '' }}>
+                                {{ $class->name }}
+                            </option>
+                        @endforeach
                     </select>
                     <i data-lucide="door-open" class="absolute left-3.5 top-3 w-4 h-4 text-[var(--accent)]"></i>
                 </div>
                 
-                {{-- Tanggal --}}
-                <div class="neo-pressed px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
-                    <i data-lucide="calendar" class="w-4 h-4 text-[var(--accent)]"></i>
-                    {{ \Carbon\Carbon::now()->locale('id')->isoFormat('d MMMM Y') }}
+                {{-- Pilih Mata Pelajaran / Jadwal --}}
+                <div class="relative">
+                    <select name="schedule_id" class="neo-input appearance-none pl-10 pr-8 py-2.5 text-sm cursor-pointer" onchange="this.form.submit()">
+                        <option value="">-- Pilih Jadwal --</option>
+                        @foreach($schedules ?? [] as $schedule)
+                            <option value="{{ $schedule->id }}" {{ ($scheduleId ?? '') == $schedule->id ? 'selected' : '' }}>
+                                {{ $schedule->subject->name ?? 'Mata Pelajaran' }} ({{ $schedule->start_time ?? '' }} - {{ $schedule->end_time ?? '' }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <i data-lucide="book-open" class="absolute left-3.5 top-3 w-4 h-4 text-[var(--accent)]"></i>
+                </div>
+                
+                {{-- Pilih Tanggal --}}
+                <div class="relative">
+                    <input type="date" name="date" value="{{ $date ?? date('Y-m-d') }}" 
+                           class="neo-input pl-10 pr-4 py-2.5 text-sm cursor-pointer" onchange="this.form.submit()">
+                    <i data-lucide="calendar" class="absolute left-3.5 top-3 w-4 h-4 text-[var(--accent)]"></i>
                 </div>
             </div>
 
@@ -82,108 +104,133 @@
                 </div>
                 
                 {{-- Tombol Simpan --}}
-                <button onclick="saveAttendance()" 
+                <button type="button" onclick="saveAttendance()" 
                         class="neo-btn px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all hover:scale-105">
                     <i data-lucide="save" class="w-4 h-4"></i>
                     Simpan Presensi
                 </button>
             </div>
-        </div>
+        </form>
     </div>
 
-    {{-- Tabel Absensi --}}
-    <div class="neo-card overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--shadow-dark)]/10">
-            <div class="flex items-center gap-2">
-                <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center">
-                    <i data-lucide="users" class="w-4 h-4 text-[var(--accent)]"></i>
+    {{-- Form Absensi --}}
+    <form id="attendanceForm" action="{{ route('guru.absensi.store') }}" method="POST">
+        @csrf
+        <input type="hidden" name="class_id" value="{{ $classId ?? '' }}">
+        <input type="hidden" name="schedule_id" value="{{ $scheduleId ?? '' }}">
+        <input type="hidden" name="date" value="{{ $date ?? date('Y-m-d') }}">
+        
+        <div class="neo-card overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--shadow-dark)]/10">
+                <div class="flex items-center gap-2">
+                    <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center">
+                        <i data-lucide="users" class="w-4 h-4 text-[var(--accent)]"></i>
+                    </div>
+                    <h4 class="font-outfit font-bold text-base text-[var(--text-primary)]">Daftar Kehadiran Siswa</h4>
+                    <span class="text-xs text-[var(--text-muted)] ml-2">Total: {{ $students->count() }} siswa</span>
                 </div>
-                <h4 class="font-outfit font-bold text-base text-[var(--text-primary)]">Daftar Kehadiran Siswa</h4>
+                <button type="button" onclick="markAllPresent()" 
+                        class="neo-btn px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all">
+                    Tandai Hadir Semua
+                </button>
             </div>
-            <button onclick="markAllPresent()" 
-                    class="neo-btn px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all">
-                Tandai Hadir Semua
-            </button>
-        </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm" id="attendanceTable">
-                <thead>
-                    <tr class="border-b border-[var(--shadow-dark)]/10 bg-[var(--bg)]/50">
-                        <th class="text-left text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider py-4 px-6">
-                            <div class="flex items-center gap-1.5">
-                                <i data-lucide="user" class="w-3 h-3"></i>
-                                Identitas Siswa
-                            </div>
-                        </th>
-                        <th class="text-center text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider py-4 px-6">
-                            <div class="flex items-center justify-center gap-1.5">
-                                <i data-lucide="clipboard-list" class="w-3 h-3"></i>
-                                Status Kehadiran
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[var(--shadow-dark)]/5">
-                    @php
-                        $students = [
-                            ['name' => 'Budi Santoso', 'nisn' => '0012345678'],
-                            ['name' => 'Siti Aminah', 'nisn' => '0012345679'],
-                            ['name' => 'Rian Hidayat', 'nisn' => '0012345680'],
-                            ['name' => 'Dewi Lestari', 'nisn' => '0012345681'],
-                            ['name' => 'Ahmad Fauzan', 'nisn' => '0012345682'],
-                            ['name' => 'Nadia Putri', 'nisn' => '0012345683'],
-                        ];
-                    @endphp
-
-                    @foreach($students as $index => $student)
-                    <tr class="student-row hover:bg-[var(--bg)] transition-all duration-200 group">
-                        <td class="py-4 px-6">
-                            <div class="flex items-center gap-3">
-                                <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-[var(--accent)] flex-shrink-0 group-hover:scale-105 transition-transform">
-                                    {{ strtoupper(substr($student['name'], 0, 2)) }}
-                                </div>
-                                <div>
-                                    <span class="font-semibold text-[var(--text-primary)] text-sm group-hover:text-[var(--accent)] transition-colors">
-                                        {{ $student['name'] }}
-                                    </span>
-                                    <p class="text-[11px] text-[var(--text-muted)] font-medium flex items-center gap-1 mt-0.5">
-                                        <i data-lucide="id-card" class="w-2.5 h-2.5"></i>
-                                        NISN: {{ $student['nisn'] }}
-                                    </p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-4 px-6">
-                            <div class="flex justify-center items-center gap-2">
-                                @php
-                                    $statuses = [
-                                        ['code' => 'h', 'label' => 'Hadir', 'color' => 'emerald', 'icon' => 'check'],
-                                        ['code' => 'i', 'label' => 'Izin', 'color' => 'amber', 'icon' => 'file-text'],
-                                        ['code' => 's', 'label' => 'Sakit', 'color' => 'blue', 'icon' => 'activity'],
-                                        ['code' => 'a', 'label' => 'Alpha', 'color' => 'rose', 'icon' => 'x'],
-                                    ];
-                                @endphp
-                                @foreach($statuses as $status)
-                                    <input type="radio" name="status_{{$index}}" id="{{$status['code']}}_{{$index}}" 
-                                           value="{{$status['code']}}" class="hidden status-radio"
-                                           {{ $status['code'] == 'h' ? 'checked' : '' }}>
-                                    <label for="{{$status['code']}}_{{$index}}" 
-                                           class="status-label cursor-pointer w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200
-                                                  bg-[var(--bg)] text-[var(--text-muted)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)]"
-                                           data-status="{{$status['code']}}" data-color="{{$status['color']}}"
-                                           title="{{$status['label']}}">
-                                        <i data-lucide="{{$status['icon']}}" class="w-4 h-4"></i>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            @if(empty($classId))
+                <div class="text-center py-12 text-[var(--text-muted)]">
+                    <i data-lucide="inbox" class="w-16 h-16 mx-auto mb-4 opacity-30"></i>
+                    <p class="text-base font-medium">Belum ada kelas dipilih</p>
+                    <p class="text-sm mt-1">Silakan pilih kelas terlebih dahulu untuk memulai absensi</p>
+                </div>
+            @elseif($students->isEmpty())
+                <div class="text-center py-12 text-[var(--text-muted)]">
+                    <i data-lucide="users" class="w-16 h-16 mx-auto mb-4 opacity-30"></i>
+                    <p class="text-base font-medium">Belum ada siswa di kelas ini</p>
+                    <p class="text-sm mt-1">Silakan tambahkan siswa terlebih dahulu</p>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" id="attendanceTable">
+                        <thead>
+                            <tr class="border-b border-[var(--shadow-dark)]/10 bg-[var(--bg)]/50">
+                                <th class="text-left text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider py-4 px-6">
+                                    <div class="flex items-center gap-1.5">
+                                        <i data-lucide="user" class="w-3 h-3"></i>
+                                        Identitas Siswa
+                                    </div>
+                                </th>
+                                <th class="text-center text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider py-4 px-6">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <i data-lucide="clipboard-list" class="w-3 h-3"></i>
+                                        Status Kehadiran
+                                    </div>
+                                </th>
+                                <th class="text-left text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider py-4 px-6">
+                                    <div class="flex items-center gap-1.5">
+                                        <i data-lucide="file-text" class="w-3 h-3"></i>
+                                        Keterangan
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--shadow-dark)]/5">
+                            @foreach($students as $index => $student)
+                            <tr class="student-row hover:bg-[var(--bg)] transition-all duration-200 group">
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-[var(--accent)] flex-shrink-0 group-hover:scale-105 transition-transform">
+                                            {{ strtoupper(substr($student->name ?? 'Siswa', 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <span class="font-semibold text-[var(--text-primary)] text-sm group-hover:text-[var(--accent)] transition-colors">
+                                                {{ $student->name ?? 'Siswa' }}
+                                            </span>
+                                            <p class="text-[11px] text-[var(--text-muted)] font-medium flex items-center gap-1 mt-0.5">
+                                                <i data-lucide="id-card" class="w-2.5 h-2.5"></i>
+                                                NIS: {{ $student->nis ?? '-' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="flex justify-center items-center gap-2">
+                                        @php
+                                            $statuses = [
+                                                'hadir' => ['label' => 'Hadir', 'color' => 'emerald', 'icon' => 'check'],
+                                                'izin' => ['label' => 'Izin', 'color' => 'amber', 'icon' => 'file-text'],
+                                                'sakit' => ['label' => 'Sakit', 'color' => 'blue', 'icon' => 'activity'],
+                                                'alpha' => ['label' => 'Alpha', 'color' => 'rose', 'icon' => 'x'],
+                                            ];
+                                            $currentStatus = $student->attendance_status ?? 'hadir';
+                                        @endphp
+                                        @foreach($statuses as $key => $status)
+                                            <input type="radio" name="attendance[{{ $student->id }}]" 
+                                                   id="{{ $key }}_{{ $student->id }}" 
+                                                   value="{{ $key }}" 
+                                                   class="hidden status-radio"
+                                                   {{ $currentStatus == $key ? 'checked' : '' }}>
+                                            <label for="{{ $key }}_{{ $student->id }}" 
+                                                   class="status-label cursor-pointer w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200
+                                                          bg-[var(--bg)] text-[var(--text-muted)] hover:bg-{{ $status['color'] }}-500/10 hover:text-{{ $status['color'] }}-500"
+                                                   title="{{ $status['label'] }}">
+                                                <i data-lucide="{{ $status['icon'] }}" class="w-4 h-4"></i>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <input type="text" name="notes[{{ $student->id }}]" 
+                                           value="{{ $student->attendance_notes ?? '' }}"
+                                           placeholder="Keterangan (opsional)"
+                                           class="neo-input w-48 px-3 py-2 text-sm rounded-xl">
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
-    </div>
+    </form>
 </div>
 
 <style>
@@ -205,18 +252,6 @@
         background-size: 1rem;
     }
     
-    /* Animations */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Hover effects */
-    .group-hover\:scale-105:hover {
-        transform: scale(1.05);
-    }
-    
-    /* Status label hover */
     .status-label:hover {
         transform: translateY(-2px);
     }
@@ -232,56 +267,48 @@
     
     // Mark all students as present
     function markAllPresent() {
-        const presentRadios = document.querySelectorAll('input[type="radio"][id^="h_"]');
+        const presentRadios = document.querySelectorAll('input[type="radio"][value="hadir"]');
         presentRadios.forEach(radio => {
             radio.checked = true;
-            // Trigger change event to update UI
             const event = new Event('change', { bubbles: true });
             radio.dispatchEvent(event);
         });
         
-        // Show notification (optional)
         showToast('Semua siswa ditandai hadir', 'success');
     }
     
     // Save attendance function
     function saveAttendance() {
-        // Get all selected statuses
-        const selectedStatuses = [];
-        const radioGroups = document.querySelectorAll('input[type="radio"]:checked');
-        radioGroups.forEach(radio => {
-            selectedStatuses.push({
-                name: radio.name,
-                status: radio.value
-            });
-        });
+        const form = document.getElementById('attendanceForm');
         
-        // Show success notification
-        showToast('Presensi berhasil disimpan!', 'success');
+        // Validasi minimal pilih kelas dan jadwal
+        const classId = document.querySelector('input[name="class_id"]')?.value;
+        const scheduleId = document.querySelector('input[name="schedule_id"]')?.value;
         
-        // Here you can add AJAX call to save to database
-        console.log('Saved attendance:', selectedStatuses);
+        if (!classId || !scheduleId) {
+            showToast('Silakan pilih kelas dan jadwal terlebih dahulu!', 'error');
+            return;
+        }
+        
+        // Submit form
+        form.submit();
     }
     
     // Toast notification function
     function showToast(message, type = 'success') {
-        // Remove existing toast
         const existingToast = document.querySelector('.toast-notification');
         if (existingToast) existingToast.remove();
         
-        // Create toast element
         const toast = document.createElement('div');
-        toast.className = `toast-notification fixed bottom-6 right-6 neo-card px-5 py-3 rounded-xl flex items-center gap-2 z-50 animate-fadeIn`;
+        toast.className = `toast-notification fixed bottom-6 right-6 neo-card px-5 py-3 rounded-xl flex items-center gap-2 z-50`;
         toast.innerHTML = `
-            <i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" class="w-4 h-4 text-emerald-500"></i>
+            <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 text-${type === 'success' ? 'emerald' : 'rose'}-500"></i>
             <span class="text-sm font-medium text-[var(--text-primary)]">${message}</span>
         `;
         document.body.appendChild(toast);
         
-        // Re-initialize icon
         if (typeof lucide !== 'undefined') lucide.createIcons();
         
-        // Auto remove after 3 seconds
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateY(-10px)';
@@ -301,7 +328,7 @@
         });
     });
     
-    // Add animation to radio labels when clicked
+    // Animation for radio labels
     document.querySelectorAll('.status-radio').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {

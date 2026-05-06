@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="space-y-6">
-    {{-- Welcome Hero dengan Neumorphism --}}
+    {{-- Welcome Hero --}}
     <div class="neo-flat p-6 md:p-8 relative overflow-hidden">
         <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -20,7 +20,7 @@
                 <h1 class="font-outfit text-3xl md:text-4xl font-bold text-[var(--text-primary)]">
                     Halo, 
                     <span class="bg-gradient-to-r from-[#4F46E5] to-[#818CF8] bg-clip-text text-transparent">
-                        {{ auth()->user()->name ?? 'Guru' }}
+                        {{ Auth::user()->name ?? 'Guru' }}
                     </span>
                 </h1>
                 <p class="text-[var(--text-secondary)] mt-2 flex items-center gap-2">
@@ -32,50 +32,84 @@
                 <i data-lucide="graduation-cap" class="w-12 h-12 text-[var(--accent)]"></i>
             </div>
         </div>
-        
-        <!-- Decorative orbs -->
         <div class="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)]/5 rounded-full blur-3xl -z-0"></div>
         <div class="absolute bottom-0 left-0 w-48 h-48 bg-[var(--accent-light)]/5 rounded-full blur-2xl -z-0"></div>
     </div>
 
-    {{-- Statistik Cards --}}
+    {{-- Statistik Cards (BISA DITEKAN) --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        @php
-            $stats = [
-                ['icon' => 'book-open', 'label' => 'Kelas Aktif', 'value' => '3', 'unit' => 'Kelas', 'trend' => '+8%', 'trend_up' => true, 'color' => 'text-indigo-500'],
-                ['icon' => 'clock', 'label' => 'Jam Mengajar', 'value' => '24', 'unit' => 'Jam/Mgg', 'trend' => '+2%', 'trend_up' => true, 'color' => 'text-emerald-500'],
-                ['icon' => 'clipboard-list', 'label' => 'Perlu Dinilai', 'value' => '12', 'unit' => 'Tugas', 'trend' => '-3', 'trend_up' => false, 'color' => 'text-amber-500'],
-                ['icon' => 'users', 'label' => 'Siswa Binaan', 'value' => '124', 'unit' => 'Siswa', 'trend' => '+5%', 'trend_up' => true, 'color' => 'text-purple-500'],
-            ];
-        @endphp
-
-        @foreach($stats as $stat)
-        <div class="neo-card p-5 neo-card-hover cursor-pointer group">
-            <div class="flex justify-between items-start mb-3">
-                <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center group-hover:neo-flat transition-all">
-                    <i data-lucide="{{ $stat['icon'] }}" class="w-5 h-5 {{ $stat['color'] }}"></i>
-                </div>
-                <span class="text-xs font-bold {{ $stat['trend_up'] ? 'text-emerald-500' : 'text-red-500' }} bg-white/30 dark:bg-black/20 px-2 py-1 rounded-full flex items-center gap-0.5">
-                    <i data-lucide="{{ $stat['trend_up'] ? 'trending-up' : 'trending-down' }}" class="w-3 h-3"></i>
-                    {{ $stat['trend'] }}
-                </span>
+        {{-- Kelas Aktif - Arah ke halaman jadwal --}}
+        <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
+             onclick="window.location.href='{{ route('guru.jadwal') }}'">
+            <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <i data-lucide="book-open" class="w-5 h-5 text-indigo-500"></i>
             </div>
-            <p class="text-[var(--text-muted)] text-sm font-medium">{{ $stat['label'] }}</p>
-            <div class="flex items-baseline gap-1 mt-1">
-                <h3 class="text-3xl font-bold text-[var(--text-primary)]">{{ $stat['value'] }}</h3>
-                <span class="text-sm text-[var(--text-muted)]">{{ $stat['unit'] }}</span>
-            </div>
-            <div class="mt-3 neo-pressed h-1.5 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] rounded-full" style="width: {{ rand(60, 95) }}%"></div>
-            </div>
+            <p class="text-[var(--text-muted)] text-sm font-medium">Kelas Aktif</p>
+            <h3 class="text-3xl font-bold text-[var(--text-primary)]">{{ number_format($jumlahKelas ?? 0) }}</h3>
+            <span class="text-sm text-[var(--text-muted)]">Kelas</span>
+            @if(($jumlahKelas ?? 0) == 0)
+            <p class="text-xs text-amber-500 mt-2 flex items-center gap-1">
+                <i data-lucide="info" class="w-3 h-3"></i>
+                Menunggu input dari admin
+            </p>
+            @endif
         </div>
-        @endforeach
+        
+        {{-- Jam Mengajar - Arah ke halaman jadwal --}}
+        <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
+             onclick="window.location.href='{{ route('guru.jadwal') }}'">
+            <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <i data-lucide="clock" class="w-5 h-5 text-emerald-500"></i>
+            </div>
+            <p class="text-[var(--text-muted)] text-sm font-medium">Jam Mengajar</p>
+            <h3 class="text-3xl font-bold text-[var(--text-primary)]">{{ number_format($totalJam ?? 0) }}</h3>
+            <span class="text-sm text-[var(--text-muted)]">Jam/Minggu</span>
+            @if(($totalJam ?? 0) < 10 && ($totalJam ?? 0) > 0)
+            <p class="text-xs text-amber-500 mt-2 flex items-center gap-1">
+                <i data-lucide="info" class="w-3 h-3"></i>
+                Jadwal masih sedikit, hubungi admin
+            </p>
+            @elseif(($totalJam ?? 0) == 0)
+            <p class="text-xs text-red-500 mt-2 flex items-center gap-1">
+                <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                Belum ada jadwal dari admin
+            </p>
+            @endif
+        </div>
+        
+        {{-- Perlu Dinilai - Arah ke halaman tugas --}}
+        <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
+             onclick="window.location.href='{{ route('guru.tugas') }}'">
+            <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <i data-lucide="clipboard-list" class="w-5 h-5 text-amber-500"></i>
+            </div>
+            <p class="text-[var(--text-muted)] text-sm font-medium">Perlu Dinilai</p>
+            <h3 class="text-3xl font-bold text-[var(--text-primary)]">{{ number_format($tugasPerluDinilai ?? 0) }}</h3>
+            <span class="text-sm text-[var(--text-muted)]">Tugas</span>
+        </div>
+        
+        {{-- Siswa Binaan - Arah ke halaman raport --}}
+        <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
+             onclick="window.location.href='{{ route('guru.raport') }}'">
+            <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <i data-lucide="users" class="w-5 h-5 text-purple-500"></i>
+            </div>
+            <p class="text-[var(--text-muted)] text-sm font-medium">Siswa Binaan</p>
+            <h3 class="text-3xl font-bold text-[var(--text-primary)]">{{ number_format($totalSiswa ?? 0) }}</h3>
+            <span class="text-sm text-[var(--text-muted)]">Siswa</span>
+            @if(($totalSiswa ?? 0) == 0)
+            <p class="text-xs text-amber-500 mt-2 flex items-center gap-1">
+                <i data-lucide="info" class="w-3 h-3"></i>
+                Belum ada siswa di kelas ini
+            </p>
+            @endif
+        </div>
     </div>
 
     {{-- Grid 2 Kolom Utama --}}
     <div class="grid grid-cols-12 gap-6">
         
-        {{-- Jadwal Mengajar --}}
+        {{-- Jadwal Mengajar Hari Ini --}}
         <div class="col-span-12 lg:col-span-7">
             <div class="neo-card p-6">
                 <div class="flex justify-between items-center mb-5">
@@ -85,96 +119,139 @@
                         </div>
                         <h3 class="font-outfit font-bold text-xl text-[var(--text-primary)]">Jadwal Mengajar Hari Ini</h3>
                     </div>
-                    <a href="{{ route('guru.jadwal') }}" class="neo-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1">
+                    <a href="{{ route('guru.jadwal') }}" class="neo-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
                         <span>Lihat Semua</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
                 </div>
 
                 <div class="space-y-3">
-                    @php
-                        $schedules = [
-                            ['time' => '07:30 - 09:00', 'subject' => 'Matematika', 'class' => 'X IPA 1', 'room' => 'Ruang 01', 'color' => 'indigo'],
-                            ['time' => '09:15 - 10:45', 'subject' => 'Fisika', 'class' => 'XI IPA 2', 'room' => 'Lab Fisika', 'color' => 'emerald'],
-                            ['time' => '11:00 - 12:30', 'subject' => 'Kalkulus', 'class' => 'XII IPA 1', 'room' => 'Ruang 03', 'color' => 'purple'],
-                            ['time' => '13:30 - 15:00', 'subject' => 'Statistika', 'class' => 'XII IPS 2', 'room' => 'Ruang 05', 'color' => 'orange'],
-                        ];
-                    @endphp
-
-                    @foreach($schedules as $schedule)
-                    <div class="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg)] hover:neo-flat transition-all duration-300 cursor-pointer">
+                    @forelse(($jadwal ?? [])->take(4) as $item)
+                    <div class="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg)] hover:neo-flat transition-all duration-300 cursor-pointer"
+                         onclick="window.location.href='{{ route('guru.absensi') }}?class_id={{ $item->class_id }}'">
                         <div class="neo-pressed rounded-xl px-4 py-2 text-center min-w-[100px]">
                             <i data-lucide="clock" class="w-3 h-3 text-[var(--text-muted)] mx-auto mb-1"></i>
-                            <span class="text-xs font-bold text-[var(--text-primary)]">{{ $schedule['time'] }}</span>
+                            <span class="text-xs font-bold text-[var(--text-primary)]">
+                                {{ \Carbon\Carbon::parse($item->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($item->end_time)->format('H:i') }}
+                            </span>
                         </div>
                         <div class="flex-1">
                             <h4 class="font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
-                                {{ $schedule['subject'] }}
+                                {{ $item->subject->name ?? 'Mata Pelajaran' }}
                             </h4>
                             <p class="text-xs text-[var(--text-muted)] flex items-center gap-2 mt-0.5">
-                                <span class="flex items-center gap-1"><i data-lucide="users" class="w-3 h-3"></i> {{ $schedule['class'] }}</span>
-                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ $schedule['room'] }}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="users" class="w-3 h-3"></i> {{ $item->schoolClass->name ?? 'Kelas' }}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ $item->room ?? 'Ruang ' . ($item->schoolClass->name ?? '') }}</span>
                             </p>
                         </div>
                         <div class="neo-btn p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all">
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-center py-8 text-[var(--text-muted)]">
+                        <i data-lucide="calendar-off" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                        <p>Tidak ada jadwal mengajar hari ini.</p>
+                        <p class="text-xs mt-1">Silahkan hubungi admin untuk mengisi jadwal mengajar 📅</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
 
-        {{-- Ringkasan Kehadiran --}}
+        {{-- Ringkasan Aktivitas Mengajar --}}
         <div class="col-span-12 lg:col-span-5">
             <div class="neo-card p-6 h-full">
                 <div class="flex items-center gap-3 mb-5">
                     <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
-                        <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-500"></i>
+                        <i data-lucide="activity" class="w-5 h-5 text-emerald-500"></i>
                     </div>
-                    <h3 class="font-outfit font-bold text-xl text-[var(--text-primary)]">Statistik Kehadiran</h3>
+                    <h3 class="font-outfit font-bold text-xl text-[var(--text-primary)]">Aktivitas Hari Ini</h3>
                 </div>
-
-                @php
-                    $attendance = [
-                        ['status' => 'Hadir', 'count' => 108, 'icon' => 'check-circle', 'color' => 'emerald', 'percentage' => 87],
-                        ['status' => 'Izin', 'count' => 8, 'icon' => 'file-text', 'color' => 'amber', 'percentage' => 6.5],
-                        ['status' => 'Sakit', 'count' => 5, 'icon' => 'activity', 'color' => 'blue', 'percentage' => 4],
-                        ['status' => 'Alpha', 'count' => 3, 'icon' => 'alert-circle', 'color' => 'red', 'percentage' => 2.5],
-                    ];
-                @endphp
 
                 <div class="space-y-4">
-                    @foreach($attendance as $item)
-                    <div>
-                        <div class="flex justify-between text-sm mb-1.5">
-                            <span class="flex items-center gap-1.5 text-[var(--text-secondary)]">
-                                <i data-lucide="{{ $item['icon'] }}" class="w-4 h-4 text-{{ $item['color'] }}-500"></i>
-                                <span class="font-medium">{{ $item['status'] }}</span>
-                            </span>
-                            <span class="text-[var(--text-primary)] font-semibold">{{ $item['count'] }} Siswa</span>
+                    {{-- Jam Mengajar Hari Ini --}}
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-[var(--bg)]">
+                        <div class="flex items-center gap-3">
+                            <div class="neo-pressed w-10 h-10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-[var(--text-primary)]">Jam Mengajar</p>
+                                <p class="text-xs text-[var(--text-muted)]">Total durasi hari ini</p>
+                            </div>
                         </div>
-                        <div class="neo-pressed h-2 rounded-full overflow-hidden">
-                            <div class="h-full bg-{{ $item['color'] }}-500 rounded-full" style="width: {{ $item['percentage'] }}%"></div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-[var(--accent)]">{{ number_format($totalJamHariIni ?? 0) }}</p>
+                            <p class="text-xs text-[var(--text-muted)]">Jam</p>
                         </div>
                     </div>
-                    @endforeach
+
+                    {{-- Kelas yang Diajar --}}
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-[var(--bg)]">
+                        <div class="flex items-center gap-3">
+                            <div class="neo-pressed w-10 h-10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="school" class="w-4 h-4 text-purple-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-[var(--text-primary)]">Kelas yang Diajar</p>
+                                <p class="text-xs text-[var(--text-muted)]">Hari ini</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-[var(--accent)]">{{ number_format($jumlahKelasHariIni ?? 0) }}</p>
+                            <p class="text-xs text-[var(--text-muted)]">Kelas</p>
+                        </div>
+                    </div>
+
+                    {{-- Total Pertemuan --}}
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-[var(--bg)]">
+                        <div class="flex items-center gap-3">
+                            <div class="neo-pressed w-10 h-10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="book-open" class="w-4 h-4 text-indigo-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-[var(--text-primary)]">Total Pertemuan</p>
+                                <p class="text-xs text-[var(--text-muted)]">Mata pelajaran hari ini</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-[var(--accent)]">{{ number_format($totalPertemuanHariIni ?? 0) }}</p>
+                            <p class="text-xs text-[var(--text-muted)]">Pertemuan</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mt-6 neo-flat p-4 rounded-xl text-center">
-                    <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
-                        <i data-lucide="trophy" class="w-6 h-6 text-amber-500"></i>
+                {{-- Progress Hari Ini --}}
+                @if(($totalJamHariIni ?? 0) > 0)
+                <div class="mt-6 neo-flat p-4 rounded-xl">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Progress Mengajar Hari Ini</p>
+                        <p class="text-xs font-bold text-[var(--accent)]">{{ $progressMengajar ?? 0 }}%</p>
                     </div>
-                    <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Total Kehadiran</p>
-                    <p class="text-2xl font-bold text-[var(--text-primary)]">92.5%</p>
-                    <div class="neo-pressed h-1.5 rounded-full mt-2 overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full" style="width: 92.5%"></div>
+                    <div class="neo-pressed h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style="width: {{ $progressMengajar ?? 0 }}%"></div>
                     </div>
-                    <p class="text-xs text-[var(--text-muted)] mt-2">Dari 124 total siswa</p>
+                    <p class="text-xs text-[var(--text-muted)] text-center mt-2">
+                        @php
+                            $jamSelesai = $progressMengajar ?? 0;
+                            $jamSelesaiInt = ($jamSelesai * ($totalJamHariIni ?? 0)) / 100;
+                        @endphp
+                        {{ number_format($jamSelesaiInt, 1) }} dari {{ number_format($totalJamHariIni ?? 0, 1) }} jam selesai
+                    </p>
                 </div>
+                @endif
+
+                {{-- Catatan jika belum ada jadwal --}}
+                @if(($totalJamHariIni ?? 0) == 0)
+                <div class="mt-6 neo-flat p-4 rounded-xl text-center">
+                    <i data-lucide="sun" class="w-8 h-8 mx-auto mb-2 text-amber-500"></i>
+                    <p class="text-sm font-medium text-[var(--text-primary)]">Tidak Ada Jadwal Hari Ini</p>
+                    <p class="text-xs text-[var(--text-muted)] mt-1">Selamat beristirahat! 🎉</p>
+                </div>
+                @endif
             </div>
         </div>
-
     </div>
 
     {{-- Grid Baris Kedua --}}
@@ -191,55 +268,61 @@
                         <h3 class="font-outfit font-bold text-xl text-[var(--text-primary)]">Tugas Perlu Dinilai</h3>
                     </div>
                     <span class="neo-badge-orange px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                        <i data-lucide="clock" class="w-3 h-3"></i> {{ rand(5, 12) }} Tertunda
+                        <i data-lucide="clock" class="w-3 h-3"></i> 
+                        {{ number_format($tugasPerluDinilai ?? 0) }} Tertunda
                     </span>
                 </div>
 
                 <div class="space-y-3">
-                    @php
-                        $assignments = [
-                            ['title' => 'Kalkulus Dasar', 'deadline' => 'Besok, 23:59', 'submitted' => 28, 'total' => 32, 'color' => 'orange'],
-                            ['title' => 'Eksperimen Gravitasi', 'deadline' => '22 April 2026', 'submitted' => 15, 'total' => 30, 'color' => 'blue'],
-                            ['title' => 'Pemrograman Dasar', 'deadline' => '25 April 2026', 'submitted' => 20, 'total' => 28, 'color' => 'emerald'],
-                            ['title' => 'Statistika Inferensial', 'deadline' => '28 April 2026', 'submitted' => 10, 'total' => 26, 'color' => 'purple'],
-                        ];
-                    @endphp
-
-                    @foreach($assignments as $task)
-                    <div class="group flex items-center justify-between p-4 rounded-2xl bg-[var(--bg)] hover:neo-flat transition-all cursor-pointer">
+                    @forelse(($tugas ?? [])->take(4) as $task)
+                    <div class="group flex items-center justify-between p-4 rounded-2xl bg-[var(--bg)] hover:neo-flat transition-all cursor-pointer"
+                         onclick="window.location.href='{{ route('guru.nilai') }}?assignment_id={{ $task->id }}'">
                         <div class="flex items-center gap-3 flex-1">
                             <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
-                                <i data-lucide="file-text" class="w-4 h-4 text-{{ $task['color'] }}-500"></i>
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
                             </div>
                             <div class="flex-1">
                                 <h4 class="font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
-                                    {{ $task['title'] }}
+                                    {{ $task->title }}
                                 </h4>
                                 <div class="flex items-center gap-3 mt-1">
                                     <span class="text-xs text-[var(--text-muted)] flex items-center gap-0.5">
-                                        <i data-lucide="calendar" class="w-3 h-3"></i> {{ $task['deadline'] }}
+                                        <i data-lucide="calendar" class="w-3 h-3"></i> 
+                                        {{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->locale('id')->isoFormat('D MMM YYYY') : 'Tidak ada deadline' }}
                                     </span>
                                     <span class="text-xs text-[var(--text-muted)] flex items-center gap-0.5">
-                                        <i data-lucide="users" class="w-3 h-3"></i> {{ $task['submitted'] }}/{{ $task['total'] }}
+                                        <i data-lucide="users" class="w-3 h-3"></i> 
+                                        {{ number_format($task->submitted_count ?? 0) }}/{{ number_format($task->total_siswa ?? 0) }}
+                                    </span>
+                                    <span class="text-xs text-[var(--text-muted)] flex items-center gap-0.5">
+                                        <i data-lucide="school" class="w-3 h-3"></i>
+                                        {{ $task->class_name ?? 'Kelas' }}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        <button class="neo-btn px-4 py-2 rounded-xl text-sm font-semibold opacity-0 group-hover:opacity-100 transition-all">
+                        <button class="neo-btn px-4 py-2 rounded-xl text-sm font-semibold opacity-0 group-hover:opacity-100 transition-all"
+                                onclick="event.stopPropagation(); window.location.href='{{ route('guru.nilai') }}?assignment_id={{ $task->id }}'">
                             Nilai
                         </button>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-center py-8 text-[var(--text-muted)]">
+                        <i data-lucide="check-circle" class="w-12 h-12 mx-auto mb-3 text-emerald-500"></i>
+                        <p>Semua tugas sudah dinilai. Bagus!</p>
+                        <p class="text-xs mt-1">Pertahankan prestasimu! ✨</p>
+                    </div>
+                    @endforelse
                 </div>
 
-                <button class="w-full mt-5 neo-btn py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                <a href="{{ route('guru.tugas.create') }}" class="w-full mt-5 neo-btn py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:gap-3">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Buat Tugas Baru
-                </button>
+                </a>
             </div>
         </div>
 
-        {{-- Siswa Berprestasi & Peringatan --}}
+        {{-- Siswa Berprestasi & Pengumuman --}}
         <div class="col-span-12 lg:col-span-6">
             <div class="space-y-6">
                 {{-- Siswa Berprestasi --}}
@@ -252,38 +335,30 @@
                     </div>
 
                     <div class="space-y-3">
-                        @php
-                            $topStudents = [
-                                ['name' => 'Ahmad Fauzan', 'score' => 96, 'subject' => 'Matematika', 'avatar' => 'AF', 'trend' => 'up'],
-                                ['name' => 'Siti Nurhaliza', 'score' => 94, 'subject' => 'Fisika', 'avatar' => 'SN', 'trend' => 'up'],
-                                ['name' => 'Budi Santoso', 'score' => 92, 'subject' => 'Kalkulus', 'avatar' => 'BS', 'trend' => 'stable'],
-                                ['name' => 'Dewi Sartika', 'score' => 91, 'subject' => 'Statistika', 'avatar' => 'DS', 'trend' => 'up'],
-                            ];
-                        @endphp
-
-                        @foreach($topStudents as $student)
-                        <div class="flex items-center justify-between p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer">
+                        @forelse(($siswaBerprestasi ?? [])->take(5) as $siswa)
+                        <div class="flex items-center justify-between p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer"
+                             onclick="window.location.href='{{ route('guru.raport') }}?student_id={{ $siswa->id }}'">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 neo-flat rounded-full flex items-center justify-center font-bold text-[var(--accent)]">
-                                    {{ $student['avatar'] }}
+                                    {{ substr($siswa->name ?? 'Siswa', 0, 2) }}
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-[var(--text-primary)]">{{ $student['name'] }}</p>
-                                    <p class="text-xs text-[var(--text-muted)]">{{ $student['subject'] }}</p>
+                                    <p class="font-semibold text-[var(--text-primary)]">{{ $siswa->name ?? 'Siswa' }}</p>
+                                    <p class="text-xs text-[var(--text-muted)]">{{ $siswa->class->name ?? 'Kelas' }}</p>
                                 </div>
                             </div>
-                            <div class="text-right">
-                                <div class="neo-pressed px-3 py-1 rounded-lg">
-                                    <span class="font-bold text-[var(--accent)]">{{ $student['score'] }}</span>
-                                </div>
-                                @if($student['trend'] == 'up')
-                                <i data-lucide="trending-up" class="w-3 h-3 text-emerald-500 mt-1"></i>
-                                @else
-                                <i data-lucide="minus" class="w-3 h-3 text-amber-500 mt-1"></i>
-                                @endif
+                            <div class="neo-pressed px-3 py-1 rounded-lg">
+                                <span class="font-bold text-[var(--accent)]">{{ round($siswa->average_score ?? 0) }}</span>
+                                <span class="text-[10px] text-[var(--text-muted)]">/100</span>
                             </div>
                         </div>
-                        @endforeach
+                        @empty
+                        <div class="text-center py-8 text-[var(--text-muted)]">
+                            <i data-lucide="award" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                            <p>Belum ada data prestasi.</p>
+                            <p class="text-xs mt-1">Segera nilai tugas siswa untuk melihat prestasi 🏆</p>
+                        </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -297,45 +372,46 @@
                     </div>
 
                     <div class="space-y-3">
-                        <div class="p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer">
+                        @forelse(($pengumumanTerbaru ?? [])->take(3) as $pengumuman)
+                        <div class="p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer"
+                             onclick="window.location.href='{{ route('guru.pengumuman') }}'">
                             <div class="flex items-start gap-3">
                                 <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="bell" class="w-4 h-4 text-[var(--accent)]"></i>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-[var(--text-primary)] text-sm">Rapat Guru</p>
-                                    <p class="text-xs text-[var(--text-muted)] mt-0.5">Jum'at, 17 April 2026 pukul 14:00 di Ruang Guru</p>
-                                    <span class="text-[10px] text-[var(--text-muted)] mt-1 block">2 jam yang lalu</span>
+                                    <p class="font-semibold text-[var(--text-primary)] text-sm">{{ $pengumuman->title }}</p>
+                                    <p class="text-xs text-[var(--text-muted)] mt-0.5">{{ Str::limit($pengumuman->content, 60) }}</p>
+                                    <span class="text-[10px] text-[var(--text-muted)] mt-1 block">
+                                        {{ \Carbon\Carbon::parse($pengumuman->created_at)->locale('id')->diffForHumans() }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                        <div class="p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer">
-                            <div class="flex items-start gap-3">
-                                <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="calendar" class="w-4 h-4 text-emerald-500"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-[var(--text-primary)] text-sm">Ujian Tengah Semester</p>
-                                    <p class="text-xs text-[var(--text-muted)] mt-0.5">Dimulai 2 Mei 2026. Persiapkan materi ajar.</p>
-                                    <span class="text-[10px] text-[var(--text-muted)] mt-1 block">Kemarin</span>
-                                </div>
-                            </div>
+                        @empty
+                        <div class="text-center py-8 text-[var(--text-muted)]">
+                            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                            <p>Tidak ada pengumuman terbaru.</p>
                         </div>
+                        @endforelse
                     </div>
 
-                    <button class="w-full mt-4 neo-btn py-2 rounded-xl text-sm font-semibold">
+                    <a href="{{ route('guru.pengumuman') }}" class="w-full mt-4 neo-btn py-2 rounded-xl text-sm font-semibold text-center block transition-all hover:gap-2">
                         Lihat Semua Pengumuman
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-    lucide.createIcons();
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
 </script>
 @endpush

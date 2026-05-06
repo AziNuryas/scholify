@@ -27,49 +27,6 @@
         </div>
     </div>
 
-    @php
-        $currentTime = date('H:i');
-        
-        $schedules = [
-            [
-                'id' => 1,
-                'time_start' => '07:30',
-                'time_end' => '09:00',
-                'subject' => 'Matematika Aljabar',
-                'class' => '10-IPA 1',
-                'room' => 'Ruang 04 - Lt. 2',
-                'material' => 'Bab 3: Logaritma',
-                'students_count' => 32
-            ],
-            [
-                'id' => 2,
-                'time_start' => '09:15',
-                'time_end' => '14:45',
-                'subject' => 'Fisika Dasar',
-                'class' => '11-IPA 2',
-                'room' => 'Lab Fisika Utama',
-                'material' => 'Hukum Newton II',
-                'students_count' => 30
-            ],
-            [
-                'id' => 3,
-                'time_start' => '15:00',
-                'time_end' => '16:30',
-                'subject' => 'Matematika Peminatan',
-                'class' => '12-IPA 1',
-                'room' => 'Ruang 02 - Lt. 1',
-                'material' => 'Turunan Trigonometri',
-                'students_count' => 28
-            ],
-        ];
-
-        function getStatus($start, $end, $current) {
-            if ($current >= $start && $current <= $end) return 'ongoing';
-            if ($current < $start) return 'upcoming';
-            return 'completed';
-        }
-    @endphp
-
     {{-- Statistik Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {{-- Card Total Jam --}}
@@ -81,33 +38,24 @@
                     </div>
                     <div>
                         <p class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Jam</p>
-                        <p class="text-2xl font-bold text-[var(--text-primary)]">18 Jam</p>
+                        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ $totalJam }} Jam</p>
                     </div>
-                </div>
-                <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-500"></i>
                 </div>
             </div>
         </div>
 
-        {{-- Card Kehadiran Guru --}}
+        {{-- Card Total Kelas --}}
         <div class="neo-card p-5 group">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="neo-pressed w-11 h-11 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <i data-lucide="user-check" class="w-5 h-5 text-emerald-500"></i>
+                        <i data-lucide="book-open" class="w-5 h-5 text-emerald-500"></i>
                     </div>
                     <div>
-                        <p class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Kehadiran Guru</p>
-                        <p class="text-2xl font-bold text-[var(--text-primary)]">98%</p>
+                        <p class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Kelas</p>
+                        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ $totalKelas }} Kelas</p>
                     </div>
                 </div>
-                <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-500"></i>
-                </div>
-            </div>
-            <div class="mt-3 neo-pressed h-1.5 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full" style="width: 98%"></div>
             </div>
         </div>
 
@@ -121,11 +69,15 @@
                     </div>
                     <div>
                         <p class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Kelas Berikutnya</p>
-                        <p class="text-xl font-bold text-[var(--text-primary)]">11-IPA 2</p>
-                        <p class="text-[11px] text-amber-500 flex items-center gap-1 mt-0.5">
-                            <i data-lucide="timer" class="w-3 h-3"></i>
-                            15 Menit Lagi
-                        </p>
+                        @if($nextSchedule)
+                            <p class="text-xl font-bold text-[var(--text-primary)]">{{ $nextSchedule->schoolClass->name ?? 'Kelas' }}</p>
+                            <p class="text-[11px] text-amber-500 flex items-center gap-1 mt-0.5">
+                                <i data-lucide="timer" class="w-3 h-3"></i>
+                                {{ $nextClassTime }}
+                            </p>
+                        @else
+                            <p class="text-sm text-[var(--text-muted)]">Tidak ada jadwal</p>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -133,9 +85,10 @@
     </div>
 
     {{-- Filter Hari --}}
-    <div class="neo-flat p-2 inline-flex rounded-xl">
-        @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as $hari)
-            <button class="filter-hari neo-btn px-5 py-2 rounded-lg text-xs font-semibold transition-all {{ $loop->first ? 'active' : '' }}">
+    <div class="neo-flat p-2 inline-flex rounded-xl flex-wrap gap-1">
+        @foreach($hariList as $hari)
+            <button class="filter-hari neo-btn px-5 py-2 rounded-lg text-xs font-semibold transition-all {{ $selectedDay == $hari ? 'active' : '' }}"
+                    data-day="{{ $hari }}">
                 {{ $hari }}
             </button>
         @endforeach
@@ -143,20 +96,38 @@
 
     {{-- Daftar Jadwal --}}
     <div class="space-y-4" id="scheduleList">
-        @forelse($schedules as $item)
-            @php $status = getStatus($item['time_start'], $item['time_end'], $currentTime); @endphp
+        @forelse($jadwalPerHari[$selectedDay] ?? [] as $item)
+            @php 
+                $now = \Carbon\Carbon::now();
+                
+                // Parse waktu mulai dan selesai
+                $startTime = \Carbon\Carbon::parse($item->start_time);
+                $endTime = \Carbon\Carbon::parse($item->end_time);
+                
+                // Buat datetime lengkap untuk hari ini dengan jam dari jadwal
+                $todayStart = \Carbon\Carbon::today()->setTime($startTime->hour, $startTime->minute, $startTime->second);
+                $todayEnd = \Carbon\Carbon::today()->setTime($endTime->hour, $endTime->minute, $endTime->second);
+                
+                // Tentukan status
+                if ($now->between($todayStart, $todayEnd)) {
+                    $status = 'ongoing';
+                } elseif ($now->lt($todayStart)) {
+                    $status = 'upcoming';
+                } else {
+                    $status = 'completed';
+                }
+            @endphp
             
             <div class="schedule-card neo-card p-5 transition-all duration-300 hover:neo-pressed group 
-                        {{ $status == 'ongoing' ? 'border-l-4 border-l-rose-500' : '' }}"
-                 data-status="{{ $status }}">
+                        {{ $status == 'ongoing' ? 'border-l-4 border-l-rose-500' : '' }}">
                 <div class="flex flex-wrap md:flex-nowrap gap-5">
                     {{-- Time Column --}}
                     <div class="md:w-32 flex-shrink-0">
                         <div class="neo-pressed rounded-xl px-4 py-2 text-center">
                             <i data-lucide="clock" class="w-3.5 h-3.5 text-[var(--text-muted)] mx-auto mb-1"></i>
-                            <p class="text-sm font-bold text-[var(--text-primary)]">{{ $item['time_start'] }}</p>
+                            <p class="text-sm font-bold text-[var(--text-primary)]">{{ \Carbon\Carbon::parse($item->start_time)->format('H:i') }}</p>
                             <p class="text-[10px] text-[var(--text-muted)]">s/d</p>
-                            <p class="text-sm font-bold text-[var(--text-primary)]">{{ $item['time_end'] }}</p>
+                            <p class="text-sm font-bold text-[var(--text-primary)]">{{ \Carbon\Carbon::parse($item->end_time)->format('H:i') }}</p>
                         </div>
                     </div>
 
@@ -166,7 +137,7 @@
                             <div>
                                 <div class="flex items-center gap-2 mb-1">
                                     <h3 class="font-outfit font-bold text-lg text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
-                                        {{ $item['subject'] }}
+                                        {{ $item->subject->name ?? 'Mata Pelajaran' }}
                                     </h3>
                                     @if($status == 'ongoing')
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-500 text-white animate-pulse">
@@ -175,7 +146,10 @@
                                         </span>
                                     @endif
                                 </div>
-                                <p class="text-sm text-[var(--text-secondary)]">{{ $item['class'] }} • {{ $item['students_count'] }} Siswa</p>
+                                <p class="text-sm text-[var(--text-secondary)]">
+                                    {{ $item->schoolClass->name ?? 'Kelas' }} • 
+                                    {{ $item->schoolClass->students->count() ?? 0 }} Siswa
+                                </p>
                             </div>
                         </div>
 
@@ -186,7 +160,7 @@
                                 </div>
                                 <div>
                                     <p class="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Ruangan</p>
-                                    <p class="text-xs font-medium text-[var(--text-primary)]">{{ $item['room'] }}</p>
+                                    <p class="text-xs font-medium text-[var(--text-primary)]">{{ $item->room ?? 'Ruang ' . ($item->schoolClass->name ?? '') }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 p-2.5 rounded-lg bg-[var(--bg)]">
@@ -195,18 +169,20 @@
                                 </div>
                                 <div>
                                     <p class="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Materi</p>
-                                    <p class="text-xs font-medium text-[var(--text-primary)]">{{ $item['material'] }}</p>
+                                    <p class="text-xs font-medium text-[var(--text-primary)]">{{ $item->material ?? 'Belum diatur' }}</p>
                                 </div>
                             </div>
                         </div>
 
                         @if($status == 'ongoing')
                             <div class="mt-4 pt-3 border-t border-[var(--shadow-dark)]/10 flex gap-3">
-                                <a href="{{ route('guru.absensi') }}" class="neo-btn flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2">
+                                <a href="{{ route('guru.absensi') }}?class_id={{ $item->class_id }}&schedule_id={{ $item->id }}" 
+                                   class="neo-btn flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2">
                                     <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                                     Buka Absensi
                                 </a>
-                                <button class="neo-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2">
+                                <button onclick="showMaterial({{ $item->id }})" 
+                                        class="neo-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2">
                                     <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
                                     Materi
                                 </button>
@@ -221,14 +197,14 @@
                     <i data-lucide="calendar-x" class="w-10 h-10 text-[var(--text-muted)]"></i>
                 </div>
                 <p class="text-[var(--text-primary)] font-semibold text-base">Tidak ada jadwal</p>
-                <p class="text-sm text-[var(--text-muted)] mt-1">Santai dulu, tidak ada jadwal untuk hari ini.</p>
+                <p class="text-sm text-[var(--text-muted)] mt-1">Tidak ada jadwal mengajar untuk hari {{ $selectedDay }}.</p>
             </div>
         @endforelse
     </div>
 
     {{-- Tombol Unduh PDF --}}
     <div class="flex justify-center">
-        <button class="neo-btn px-6 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all hover:scale-105">
+        <button onclick="downloadPDF()" class="neo-btn px-6 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all hover:scale-105">
             <i data-lucide="printer" class="w-4 h-4"></i>
             Unduh Jadwal PDF
         </button>
@@ -236,15 +212,14 @@
 </div>
 
 <style>
-    /* Schedule card styles */
     .schedule-card {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    /* Filter button styles */
     .filter-hari {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         color: var(--text-secondary);
+        cursor: pointer;
     }
     
     .filter-hari.active {
@@ -260,7 +235,6 @@
                     -6px -6px 12px rgba(var(--shadow-light), 0.9);
     }
     
-    /* Pulse animation */
     @keyframes pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.6; }
@@ -268,45 +242,6 @@
     
     .animate-pulse {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    
-    /* Animations */
-    @keyframes slideInLeft {
-        from { opacity: 0; transform: translateX(-20px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    
-    @keyframes slideInRight {
-        from { opacity: 0; transform: translateX(20px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    
-    .animate-slideInLeft {
-        animation: slideInLeft 0.4s ease-out forwards;
-    }
-    
-    .animate-slideInRight {
-        animation: slideInRight 0.4s ease-out forwards;
-    }
-    
-    /* Custom scrollbar */
-    .custom-scroll::-webkit-scrollbar {
-        width: 4px;
-    }
-    
-    .custom-scroll::-webkit-scrollbar-track {
-        background: rgba(var(--shadow-dark), 0.08);
-        border-radius: 10px;
-    }
-    
-    .custom-scroll::-webkit-scrollbar-thumb {
-        background: rgba(var(--shadow-dark), 0.2);
-        border-radius: 10px;
-    }
-    
-    /* Hover effects */
-    .group-hover\:scale-105:hover {
-        transform: scale(1.05);
     }
 </style>
 
@@ -316,15 +251,22 @@
             lucide.createIcons();
         }
         
-        // Filter by day functionality (simulasi)
+        // Filter by day functionality
         const filterButtons = document.querySelectorAll('.filter-hari');
         filterButtons.forEach(btn => {
             btn.addEventListener('click', function() {
-                filterButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                // Di sini bisa tambahkan logic filter jadwal berdasarkan hari
+                const selectedDay = this.getAttribute('data-day');
+                window.location.href = '{{ route("guru.jadwal") }}?day=' + selectedDay;
             });
         });
     });
+    
+    function showMaterial(scheduleId) {
+        alert('Fitur materi untuk jadwal ID: ' + scheduleId);
+    }
+    
+    function downloadPDF() {
+        alert('Fitur unduh PDF akan segera hadir');
+    }
 </script>
 @endsection
