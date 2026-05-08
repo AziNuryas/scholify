@@ -54,15 +54,15 @@ return [
         /*
          * Package Service Providers...
          */
-        Barryvdh\DomPDF\ServiceProvider::class,
+        // Barryvdh\DomPDF\ServiceProvider::class,
 
         /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
-        // App\Providers\AuthServiceProvider::class,      // ← HAPUS JIKA TIDAK ADA
-        // App\Providers\EventServiceProvider::class,     // ← HAPUS JIKA TIDAK ADA
-        // App\Providers\RouteServiceProvider::class,     // ← HAPUS JIKA TIDAK ADA
+        // App\Providers\AuthServiceProvider::class,
+        // App\Providers\EventServiceProvider::class,
+        // App\Providers\RouteServiceProvider::class,
 
     ],
 
@@ -116,7 +116,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         
         // Custom Aliases
-        'PDF' => Barryvdh\DomPDF\Facade\Pdf::class,
+        // 'PDF' => Barryvdh\DomPDF\Facade\Pdf::class,
 
     ],
 

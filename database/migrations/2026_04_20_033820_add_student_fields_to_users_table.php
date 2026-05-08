@@ -12,12 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('gender', ['L', 'P'])->nullable()->after('nip');
-            $table->string('birth_place')->nullable()->after('gender');
-            $table->date('birth_date')->nullable()->after('birth_place');
-            $table->string('phone')->nullable()->after('birth_date');
-            $table->text('address')->nullable()->after('phone');
-            $table->foreignId('class_id')->nullable()->after('address')->constrained('classes')->onDelete('set null');
+            // Cek apakah kolom sudah ada sebelum menambahkan
+            if (!Schema::hasColumn('users', 'gender')) {
+                $table->enum('gender', ['L', 'P'])->nullable()->after('nip');
+            }
+            if (!Schema::hasColumn('users', 'birth_place')) {
+                $table->string('birth_place')->nullable()->after('gender');
+            }
+            if (!Schema::hasColumn('users', 'birth_date')) {
+                $table->date('birth_date')->nullable()->after('birth_place');
+            }
+            if (!Schema::hasColumn('users', 'phone')) {
+                $table->string('phone')->nullable()->after('birth_date');
+            }
+            if (!Schema::hasColumn('users', 'address')) {
+                $table->text('address')->nullable()->after('phone');
+            }
+            if (!Schema::hasColumn('users', 'class_id')) {
+                $table->foreignId('class_id')->nullable()->after('address')->constrained('classes')->onDelete('set null');
+            }
         });
     }
 

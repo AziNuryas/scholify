@@ -17,12 +17,15 @@ class Attendance extends Model
         'date',
         'status',
         'notes',
+        'recorded_by',
+        'recorded_at',
         'created_at',
         'updated_at'
     ];
 
     protected $casts = [
         'date' => 'date',
+        'recorded_at' => 'datetime',
     ];
 
     // Relasi ke Student
@@ -35,5 +38,11 @@ class Attendance extends Model
     public function class()
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+    
+    // Relasi ke guru yang merekam
+    public function recordedBy()
+    {
+        return $this->belongsTo(Teacher::class, 'recorded_by');
     }
 }

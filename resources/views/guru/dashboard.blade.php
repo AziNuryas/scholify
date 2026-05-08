@@ -16,6 +16,13 @@
                             {{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                         </span>
                     </div>
+                    <div class="neo-pressed rounded-full px-4 py-1" style="background: var(--accent); color: white;">
+                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="clock" class="w-3 h-3"></i>
+                            <span id="jamDigital" class="font-mono tracking-wider">--:--:--</span>
+                            <span class="text-[10px] opacity-80">WIB</span>
+                        </span>
+                    </div>
                 </div>
                 <h1 class="font-outfit text-3xl md:text-4xl font-bold text-[var(--text-primary)]">
                     Halo, 
@@ -36,9 +43,9 @@
         <div class="absolute bottom-0 left-0 w-48 h-48 bg-[var(--accent-light)]/5 rounded-full blur-2xl -z-0"></div>
     </div>
 
-    {{-- Statistik Cards (BISA DITEKAN) --}}
+    {{-- Statistik Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {{-- Kelas Aktif - Arah ke halaman jadwal --}}
+        {{-- Kelas Aktif --}}
         <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
              onclick="window.location.href='{{ route('guru.jadwal') }}'">
             <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
@@ -55,7 +62,7 @@
             @endif
         </div>
         
-        {{-- Jam Mengajar - Arah ke halaman jadwal --}}
+        {{-- Jam Mengajar --}}
         <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
              onclick="window.location.href='{{ route('guru.jadwal') }}'">
             <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
@@ -77,7 +84,7 @@
             @endif
         </div>
         
-        {{-- Perlu Dinilai - Arah ke halaman tugas --}}
+        {{-- Perlu Dinilai --}}
         <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
              onclick="window.location.href='{{ route('guru.tugas') }}'">
             <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
@@ -88,7 +95,7 @@
             <span class="text-sm text-[var(--text-muted)]">Tugas</span>
         </div>
         
-        {{-- Siswa Binaan - Arah ke halaman raport --}}
+        {{-- Siswa Binaan --}}
         <div class="neo-card p-5 group cursor-pointer transition-all duration-300 hover:scale-105" 
              onclick="window.location.href='{{ route('guru.raport') }}'">
             <div class="neo-pressed w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
@@ -405,6 +412,34 @@
     </div>
 </div>
 @endsection
+
+<script>
+    // Real Time Clock - Simple and Clean
+    (function() {
+        function updateDigitalClock() {
+            var now = new Date();
+            var jam = now.getHours();
+            var menit = now.getMinutes();
+            var detik = now.getSeconds();
+            
+            // Format dengan leading zero
+            jam = jam < 10 ? '0' + jam : jam;
+            menit = menit < 10 ? '0' + menit : menit;
+            detik = detik < 10 ? '0' + detik : detik;
+            
+            var waktu = jam + ':' + menit + ':' + detik;
+            
+            var element = document.getElementById('jamDigital');
+            if (element) {
+                element.textContent = waktu;
+            }
+        }
+        
+        // Jalankan setiap 1 detik
+        updateDigitalClock();
+        setInterval(updateDigitalClock, 1000);
+    })();
+</script>
 
 @push('scripts')
 <script>

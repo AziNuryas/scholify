@@ -117,7 +117,7 @@
                         </div>
                     @endforelse
 
-                    @if($siswaBerisiko->hasPages())
+                    @if(method_exists($siswaBerisiko, 'hasPages') && $siswaBerisiko->hasPages())
                         <div class="px-6 py-3">{{ $siswaBerisiko->links() }}</div>
                     @endif
                 </div>

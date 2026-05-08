@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Student extends Model
 {
@@ -54,11 +55,27 @@ class Student extends Model
     }
 
     /**
-     * Relasi ke Kelas (Classes, bukan SchoolClass)
+     * Relasi ke Kelas (SchoolClass)
      */
     public function schoolClass(): BelongsTo
     {
-        return $this->belongsTo(Classes::class, 'class_id');
+        return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    /**
+     * Relasi ke Submission (Tugas yang dikumpulkan)
+     */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class, 'student_id');
+    }
+
+    /**
+     * Relasi ke Attendance (Absensi)
+     */
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class, 'student_id');
     }
 
     /**
@@ -70,5 +87,16 @@ class Student extends Model
             return $this->first_name . ' ' . $this->last_name;
         }
         return $this->name ?? 'Tanpa Nama';
+    }
+
+    /**
+     * Accessor untuk nama (jika menggunakan name)
+     */
+    public function getNameAttribute($value)
+    {
+        if ($this->first_name && $this->last_name) {
+            return $this->first_name . ' ' . $this->last_name;
+        }
+        return $value;
     }
 }

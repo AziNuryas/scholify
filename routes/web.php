@@ -84,19 +84,28 @@ Route::middleware(['auth'])->group(function () {
     
     // GURU BK AREA
     Route::middleware([CheckRole::class . ':guru_bk'])->prefix('guru-bk')->name('gurubk.')->group(function () {
-        Route::get('/dashboard', [GuruBkController::class, 'index'])->name('dashboard');
-        Route::get('/chats', [GuruBkController::class, 'chats'])->name('chats');
-        Route::post('/chats/reply', [GuruBkController::class, 'reply'])->name('reply');
-        Route::get('/profile', [GuruBkController::class, 'profile'])->name('profile');
-        Route::post('/profile', [GuruBkController::class, 'updateProfile'])->name('profile.update');
-        Route::get('/appointments', [GuruBkController::class, 'appointments'])->name('appointments');
-        Route::post('/appointments/{id}/status', [GuruBkController::class, 'updateAppointmentStatus'])->name('appointments.status');
-        Route::get('/discipline', [GuruBkController::class, 'discipline'])->name('discipline');
-        Route::post('/discipline', [GuruBkController::class, 'storeDiscipline'])->name('discipline.store');
-        Route::resource('catatan-konseling', CatatanKonselingController::class);
-        Route::get('/deteksi-asesmen', [GuruBkController::class, 'deteksiAsesmen'])->name('deteksi-asesmen.index');
-        Route::get('/laporan', [GuruBkController::class, 'laporanIndex'])->name('laporan.index');
-        Route::patch('/laporan/{laporan}/proses', [GuruBkController::class, 'laporanProses'])->name('laporan.proses');
+    Route::get('/dashboard', [GuruBkController::class, 'index'])->name('dashboard');
+    Route::get('/chats', [GuruBkController::class, 'chats'])->name('chats');
+    Route::post('/chats/reply', [GuruBkController::class, 'replyChat'])->name('reply');
+    Route::get('/profile', [GuruBkController::class, 'profile'])->name('profile');
+    Route::post('/profile', [GuruBkController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/appointments', [GuruBkController::class, 'appointments'])->name('appointments');
+    Route::post('/appointments/{id}/status', [GuruBkController::class, 'updateAppointmentStatus'])->name('appointments.status');
+    Route::get('/discipline', [GuruBkController::class, 'discipline'])->name('discipline');
+    Route::post('/discipline', [GuruBkController::class, 'storeDiscipline'])->name('discipline.store');
+    Route::resource('catatan-konseling', CatatanKonselingController::class);
+    
+    // Deteksi Asesmen
+    Route::get('/deteksi-asesmen', [GuruBkController::class, 'deteksiAsesmen'])->name('deteksi-asesmen.index');
+    Route::get('/deteksi-asesmen/{id}', [GuruBkController::class, 'deteksiAsesmenShow'])->name('deteksi-asesmen.show');
+    Route::patch('/asesmen/{id}/catatan', [GuruBkController::class, 'catatanAsesmen'])->name('asesmen.catatan');
+    
+    // Laporan Siswa
+    Route::get('/laporan', [GuruBkController::class, 'laporanIndex'])->name('laporan.index');
+    Route::get('/laporan/{id}', [GuruBkController::class, 'laporanShow'])->name('laporan.show');
+    Route::patch('/laporan/{id}/proses', [GuruBkController::class, 'laporanProses'])->name('laporan.proses');
+    Route::patch('/laporan/{id}/complete', [GuruBkController::class, 'laporanComplete'])->name('laporan.complete');
+    Route::patch('/laporan/{laporan}/status', [GuruBkController::class, 'updateLaporanStatus'])->name('laporan.status');
     });
     
     // GURU MAPEL AREA (VERSI GABUNGAN)

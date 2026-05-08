@@ -152,7 +152,7 @@
                                     @endif
                                 </div>
 
-                                <form action="{{ route('gurubk.laporan.proses', $item) }}" method="POST">
+                                <form action="{{ route('gurubk.laporan.proses', $item->id) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
                                     <div class="mb-4">
