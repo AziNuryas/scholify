@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->foreignId('schedule_id')->nullable()->after('class_id')->constrained('schedules')->onDelete('cascade');
             }
             if (!Schema::hasColumn('attendances', 'recorded_by')) {
-                $table->foreignId('recorded_by')->nullable()->after('notes')->constrained('teachers')->onDelete('set null');
+                $table->foreignId('recorded_by')->nullable()->after('schedule_id')->constrained('teachers')->onDelete('set null');
             }
             if (!Schema::hasColumn('attendances', 'recorded_at')) {
                 $table->timestamp('recorded_at')->nullable()->after('recorded_by');

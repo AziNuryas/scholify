@@ -20,7 +20,7 @@
     <style>
         :root {
             --bg: #e6edf3;
-            --shadow-dark: #b8c6d6;
+            --shadow-dark: 184, 198, 214;
             --shadow-light: 255, 255, 255;
             --text-primary: #1e293b;
             --text-secondary: #475569;
