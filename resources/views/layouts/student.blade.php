@@ -235,9 +235,10 @@
                     ];
                     $lainnya = [
                         ['route' => 'student.assignments', 'icon' => 'clipboard-list', 'label' => 'Tugas', 'color' => 'text-blue-500'],
+                        ['route' => 'student.materials', 'icon' => 'folder-open', 'label' => 'Materi', 'color' => 'text-cyan-500'],
                         ['route' => 'student.absensi', 'icon' => 'user-check', 'label' => 'Absensi', 'color' => 'text-orange-500'],
                         ['route' => 'student.appointments', 'icon' => 'users', 'label' => 'Konseling', 'color' => 'text-pink-500'],
-                        ['route' => 'student.discipline', 'icon' => 'alert-triangle', 'label' => 'Pelanggaran', 'color' => 'text-rose-500'],
+                        ['route' => 'student.agenda', 'icon' => 'book-text', 'label' => 'Agenda', 'color' => 'text-teal-500'],
                         ['route' => 'student.notifications', 'icon' => 'bell', 'label' => 'Notifikasi', 'color' => 'text-red-500'],
                     ];
                     $pengaturan = [

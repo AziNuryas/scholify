@@ -62,6 +62,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile', [StudentMenuController::class, 'updateProfile'])->name('profile.update.put');
         Route::get('/settings', [StudentMenuController::class, 'settings'])->name('settings');
         Route::post('/settings', [StudentMenuController::class, 'updateSettings'])->name('settings.update');
+        Route::get('/materials', [StudentMenuController::class, 'materials'])->name('materials');
+        Route::get('/agenda', [StudentMenuController::class, 'agenda'])->name('agenda');
         Route::get('/appointments', [StudentMenuController::class, 'appointments'])->name('appointments');
         Route::post('/appointments', [StudentMenuController::class, 'storeAppointment'])->name('appointments.store');
         Route::get('/discipline', [StudentMenuController::class, 'discipline'])->name('discipline');

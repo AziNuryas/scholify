@@ -573,4 +573,34 @@ class StudentMenuController extends Controller
 
         return back()->with('success', 'Pengaturan berhasil disimpan!');
     }
+    public function materials()
+    {
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+        $classId = $studentData->class_id ?? null;
+
+        $materials = collect([]);
+        if ($classId) {
+            try {
+                $materials = \App\Models\LearningMaterial::with(['subject', 'teacher'])
+                    ->where('class_id', $classId)
+                    ->latest()
+                    ->get();
+            } catch (\Exception $e) {}
+        }
+
+        return view('student.materials', compact('student', 'materials'));
+    }
+
+    public function agenda()
+    {
+        $studentData = $this->getStudent();
+        $student = $this->formatStudent($studentData);
+
+        $agendas = \App\Models\Agenda::where('is_active', true)
+            ->orderBy('start_date')
+            ->get();
+
+        return view('student.agenda', compact('student', 'agendas'));
+    }
 }
