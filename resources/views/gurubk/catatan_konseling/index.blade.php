@@ -38,13 +38,36 @@
         color: var(--accent-light) !important;
     }
     .ts-wrapper .placeholder { color: var(--text-muted) !important; }
+
+    #form-tambah {
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition: max-height 0.35s ease, opacity 0.25s ease;
+    }
+    #form-tambah.show {
+        max-height: 2000px;
+        opacity: 1;
+    }
 </style>
 
 <div class="animate-fadeInUp space-y-6">
 
-    <div>
-        <h1 class="text-xl font-semibold" style="color: var(--text-primary)">Catatan Konseling</h1>
-        <p class="text-sm mt-1" style="color: var(--text-secondary)">Rekam dan pantau sesi konseling siswa secara terstruktur.</p>
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-xl font-semibold" style="color: var(--text-primary)">Catatan Konseling</h1>
+            <p class="text-sm mt-1" style="color: var(--text-secondary)">Rekam dan pantau sesi konseling siswa secara terstruktur.</p>
+        </div>
+        <button onclick="toggleForm()"
+                class="flex items-center gap-2 px-4 py-2 text-sm text-white rounded-lg font-medium transition"
+                style="background: var(--accent)"
+                onmouseover="this.style.background='var(--accent-hover)'"
+                onmouseout="this.style.background='var(--accent)'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Buat Catatan
+        </button>
     </div>
 
     @if(session('success'))
@@ -55,87 +78,89 @@
     @endif
 
     {{-- ===== FORM TAMBAH ===== --}}
-    <div class="neo-flat rounded-2xl p-6">
-        <h2 class="text-sm font-semibold mb-4 pb-3" style="color: var(--text-primary); border-bottom: 1px solid var(--border)">
-            Tambah catatan konseling baru
-        </h2>
-        <form action="{{ route('gurubk.catatan-konseling.store') }}" method="POST">
-            @csrf
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Nama siswa</label>
-                    <select id="siswa-select" name="siswa_id" placeholder="Ketik nama atau kelas...">
-                        <option value="">Ketik nama atau kelas untuk mencari...</option>
-                        @foreach($siswaList as $siswa)
-                            <option value="{{ $siswa->id }}" {{ old('siswa_id') == $siswa->id ? 'selected' : '' }}>
-                                {{ $siswa->name }} — {{ $siswa->kelas }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('siswa_id')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+    <div id="form-tambah" class="{{ $errors->any() || old('masalah') ? 'show' : '' }}">
+        <div class="neo-flat rounded-2xl p-6 mb-2">
+            <h2 class="text-sm font-semibold mb-4 pb-3" style="color: var(--text-primary); border-bottom: 1px solid var(--border)">
+                Tambah catatan konseling baru
+            </h2>
+            <form action="{{ route('gurubk.catatan-konseling.store') }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Nama siswa</label>
+                        <select id="siswa-select" name="siswa_id">
+                            <option value="">Ketik nama atau kelas untuk mencari...</option>
+                            @foreach($siswaList as $siswa)
+                                <option value="{{ $siswa->id }}" {{ old('siswa_id') == $siswa->id ? 'selected' : '' }}>
+                                    {{ $siswa->name }} — {{ $siswa->kelas }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('siswa_id')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Tanggal sesi</label>
+                        <input type="date" name="tanggal_sesi" value="{{ old('tanggal_sesi', date('Y-m-d')) }}"
+                               class="w-full text-sm rounded-lg px-3 py-2 outline-none"
+                               style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)"/>
+                        @error('tanggal_sesi')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Jenis konseling</label>
+                        <select name="jenis_konseling"
+                                class="w-full text-sm rounded-lg px-3 py-2 outline-none"
+                                style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+                            <option value="">Pilih jenis...</option>
+                            @foreach(\App\Models\CatatanKonseling::$jenisLabels as $value => $label)
+                                <option value="{{ $value }}" {{ old('jenis_konseling') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('jenis_konseling')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Status</label>
+                        <select name="status"
+                                class="w-full text-sm rounded-lg px-3 py-2 outline-none"
+                                style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+                            @foreach(\App\Models\CatatanKonseling::$statusLabels as $value => $label)
+                                <option value="{{ $value }}" {{ old('status', 'berjalan') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Tanggal sesi</label>
-                    <input type="date" name="tanggal_sesi" value="{{ old('tanggal_sesi', date('Y-m-d')) }}"
+                <div class="mb-4">
+                    <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Masalah / topik yang dibahas</label>
+                    <textarea name="masalah" rows="3" placeholder="Tuliskan masalah atau topik yang disampaikan siswa..."
+                              class="w-full text-sm rounded-lg px-3 py-2 outline-none"
+                              style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">{{ old('masalah') }}</textarea>
+                    @error('masalah')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Tindakan / intervensi guru BK</label>
+                    <textarea name="tindakan" rows="3" placeholder="Tuliskan tindakan atau saran yang diberikan..."
+                              class="w-full text-sm rounded-lg px-3 py-2 outline-none"
+                              style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">{{ old('tindakan') }}</textarea>
+                    @error('tindakan')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div class="mb-5">
+                    <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Rencana tindak lanjut</label>
+                    <input type="text" name="rencana_tindak_lanjut" value="{{ old('rencana_tindak_lanjut') }}"
+                           placeholder="Contoh: jadwal pertemuan berikutnya, tugas siswa, dll"
                            class="w-full text-sm rounded-lg px-3 py-2 outline-none"
                            style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)"/>
-                    @error('tanggal_sesi')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
                 </div>
-                <div>
-                    <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Jenis konseling</label>
-                    <select name="jenis_konseling"
-                            class="w-full text-sm rounded-lg px-3 py-2 outline-none"
-                            style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
-                        <option value="">Pilih jenis...</option>
-                        @foreach(\App\Models\CatatanKonseling::$jenisLabels as $value => $label)
-                            <option value="{{ $value }}" {{ old('jenis_konseling') === $value ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('jenis_konseling')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="toggleForm()"
+                            class="px-4 py-2 text-sm rounded-lg transition"
+                            style="border: 1px solid var(--border); color: var(--text-secondary)">Batal</button>
+                    <button type="submit"
+                            class="px-5 py-2 text-sm text-white rounded-lg font-medium transition"
+                            style="background: var(--accent)"
+                            onmouseover="this.style.background='var(--accent-hover)'"
+                            onmouseout="this.style.background='var(--accent)'">Simpan catatan</button>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Status</label>
-                    <select name="status"
-                            class="w-full text-sm rounded-lg px-3 py-2 outline-none"
-                            style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
-                        @foreach(\App\Models\CatatanKonseling::$statusLabels as $value => $label)
-                            <option value="{{ $value }}" {{ old('status', 'berjalan') === $value ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="mb-4">
-                <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Masalah / topik yang dibahas</label>
-                <textarea name="masalah" rows="3" placeholder="Tuliskan masalah atau topik yang disampaikan siswa..."
-                          class="w-full text-sm rounded-lg px-3 py-2 outline-none"
-                          style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">{{ old('masalah') }}</textarea>
-                @error('masalah')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
-            </div>
-            <div class="mb-4">
-                <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Tindakan / intervensi guru BK</label>
-                <textarea name="tindakan" rows="3" placeholder="Tuliskan tindakan atau saran yang diberikan..."
-                          class="w-full text-sm rounded-lg px-3 py-2 outline-none"
-                          style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">{{ old('tindakan') }}</textarea>
-                @error('tindakan')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
-            </div>
-            <div class="mb-5">
-                <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">Rencana tindak lanjut</label>
-                <input type="text" name="rencana_tindak_lanjut" value="{{ old('rencana_tindak_lanjut') }}"
-                       placeholder="Contoh: jadwal pertemuan berikutnya, tugas siswa, dll"
-                       class="w-full text-sm rounded-lg px-3 py-2 outline-none"
-                       style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)"/>
-            </div>
-            <div class="flex justify-end gap-2">
-                <a href="{{ route('gurubk.catatan-konseling.index') }}"
-                   class="px-4 py-2 text-sm rounded-lg transition"
-                   style="border: 1px solid var(--border); color: var(--text-secondary)">Batal</a>
-                <button type="submit"
-                        class="px-5 py-2 text-sm text-white rounded-lg font-medium transition"
-                        style="background: var(--accent)"
-                        onmouseover="this.style.background='var(--accent-hover)'"
-                        onmouseout="this.style.background='var(--accent)'">Simpan catatan</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     {{-- ===== TABEL RIWAYAT ===== --}}
@@ -216,7 +241,7 @@
                                 <a href="{{ route('gurubk.catatan-konseling.edit', $catatan) }}"
                                    class="text-xs hover:opacity-70 transition" style="color: var(--text-muted)">Edit</a>
                                 <form action="{{ route('gurubk.catatan-konseling.destroy', $catatan) }}" method="POST"
-                                      onsubmit="return confirm('Hapus catatan ini?')">
+                                      onsubmit="return confirm('Hapus catatan konseling {{ $catatan->siswa->name }}?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-xs text-red-400 hover:text-red-500 transition">Hapus</button>
                                 </form>
@@ -241,10 +266,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
-    new TomSelect('#siswa-select', {
-        placeholder: 'Ketik nama atau kelas untuk mencari...',
-        searchField: ['text'], maxOptions: 200, create: false, allowEmptyOption: true,
-        render: { no_results: function() { return '<div style="padding:.5rem .75rem;color:var(--text-muted);font-size:.875rem;">Siswa tidak ditemukan</div>'; } }
+    // Init TomSelect langsung saat DOM ready — elemen ada di DOM meski tersembunyi via max-height
+    document.addEventListener('DOMContentLoaded', function () {
+        new TomSelect('#siswa-select', {
+            placeholder: 'Ketik nama atau kelas untuk mencari...',
+            searchField: ['text'], maxOptions: 200, create: false, allowEmptyOption: true,
+            render: { no_results: function() { return '<div style="padding:.5rem .75rem;color:var(--text-muted);font-size:.875rem;">Siswa tidak ditemukan</div>'; } }
+        });
     });
+
+    function toggleForm() {
+        const form = document.getElementById('form-tambah');
+        form.classList.toggle('show');
+        if (form.classList.contains('show')) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 </script>
 @endsection

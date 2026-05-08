@@ -77,7 +77,7 @@
                         <td class="px-6 py-4 text-center">
                             @if($appt->status === 'pending')
                             <div class="flex items-center justify-center gap-2">
-                                <form action="{{ route('gurubk.appointment.status', $appt->id) }}" method="POST">
+                                <form action="{{ route('gurubk.appointments.status', $appt->id) }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="status" value="approved">
                                     <button class="w-8 h-8 rounded-xl flex items-center justify-center transition"
@@ -86,7 +86,7 @@
                                             onmouseout="this.style.background='rgba(168,85,247,.15)';this.style.color='var(--accent-light)'"
                                             title="Setujui"><i class='bx bx-check'></i></button>
                                 </form>
-                                <form action="{{ route('gurubk.appointment.status', $appt->id) }}" method="POST">
+                                <form action="{{ route('gurubk.appointments.status', $appt->id) }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="status" value="rejected">
                                     <button class="w-8 h-8 rounded-xl bg-red-100 text-red-600 hover:bg-red-600 hover:text-white flex items-center justify-center transition"
@@ -94,7 +94,7 @@
                                 </form>
                             </div>
                             @elseif($appt->status === 'approved')
-                            <form action="{{ route('gurubk.appointment.status', $appt->id) }}" method="POST">
+                            <form action="{{ route('gurubk.appointments.status', $appt->id) }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="status" value="completed">
                                 <button class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center gap-1 text-xs font-bold transition">
