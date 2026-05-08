@@ -434,7 +434,7 @@ class StudentMenuController extends Controller
             'teacher_id' => 'required',
             'date' => 'required|date',
             'time' => 'required',
-            'notes' => 'required'
+            'notes' => 'nullable'
         ]);
 
         $studentData = $this->getStudent();
