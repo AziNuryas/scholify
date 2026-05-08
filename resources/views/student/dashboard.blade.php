@@ -137,39 +137,24 @@
     <!-- Kolom Kanan (1/3) -->
     <div class="space-y-6">
         
-        <!-- Profil Singkat -->
+        <!-- Profil Singkat (Standardized Header & Real Data) -->
         <div class="neo-flat rounded-2xl p-6 neo-card-hover">
             <div class="flex items-center gap-3 mb-5">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/30 flex items-center justify-center">
-                    <i data-lucide="award" class="w-5 h-5 text-white"></i>
+                    <i data-lucide="user" class="w-5 h-5 text-white"></i>
                 </div>
                 <h3 class="font-outfit font-extrabold text-lg text-[var(--text-primary)]">Profil Singkat</h3>
             </div>
             
-            <div class="space-y-4">
-                <div class="neo-pressed rounded-xl p-4 flex items-center gap-4 border border-transparent hover-glow transition-all">
-                    <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center border border-emerald-200 shadow-sm">
-                        <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Peringkat Kelas</p>
-                        <p class="font-extrabold text-lg text-[var(--text-primary)]">{{ $rank ?? '-' }}</p>
-                    </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="neo-pressed rounded-xl p-3 text-center border border-transparent hover:border-indigo-200 transition-colors">
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Tugas Selesai</p>
+                    <p class="font-extrabold text-sm text-[var(--text-primary)]">{{ $attendanceStats['completed_assignments'] ?? 0 }}</p>
                 </div>
-                
-                <div class="neo-pressed rounded-xl p-4 flex items-center gap-4 border border-transparent hover-glow transition-all">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center border border-blue-200 shadow-sm">
-                        <i data-lucide="check-square" class="w-5 h-5 text-blue-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Kehadiran</p>
-                        <p class="font-extrabold text-lg text-[var(--text-primary)]">{{ $attendanceStats['percentage'] ?? '100%' }}</p>
-                    </div>
+                <div class="neo-pressed rounded-xl p-3 text-center border border-transparent hover:border-emerald-200 transition-colors">
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Kehadiran</p>
+                    <p class="font-extrabold text-sm text-emerald-500">{{ $attendanceStats['percentage'] ?? '100%' }}</p>
                 </div>
-                
-                <a href="{{ route('student.profile') }}" class="block w-full text-indigo-600 neo-btn transition-all duration-300 text-center py-2.5 text-xs font-bold">
-                    Lihat Profil Lengkap
-                </a>
             </div>
         </div>
 
@@ -221,6 +206,51 @@
             @endif
         </div>
 
+        <!-- Kalender Mini -->
+        <div class="neo-flat rounded-2xl p-5 neo-card-hover">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="font-outfit font-extrabold text-sm text-[var(--text-primary)]">Kalender</h3>
+                </div>
+                <p class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">{{ now()->locale('id')->isoFormat('MMMM Y') }}</p>
+            </div>
+            
+            <div class="neo-pressed rounded-xl p-3">
+                <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                    @foreach(['S', 'S', 'R', 'K', 'J', 'S', 'M'] as $day)
+                        <span class="text-[8px] font-extrabold text-[var(--text-muted)]">{{ $day }}</span>
+                    @endforeach
+                </div>
+                <div class="grid grid-cols-7 gap-1">
+                    @php
+                        $startOfMonth = now()->startOfMonth();
+                        $endOfMonth = now()->endOfMonth();
+                        $daysInMonth = now()->daysInMonth;
+                        $firstDayOfWeek = $startOfMonth->dayOfWeekIso; // 1 (Mon) to 7 (Sun)
+                        $today = now()->day;
+                    @endphp
+
+                    @for($i = 1; $i < $firstDayOfWeek; $i++)
+                        <div class="h-6"></div>
+                    @endfor
+
+                    @for($day = 1; $day <= $daysInMonth; $day++)
+                        @php
+                            $currentDate = $startOfMonth->copy()->day($day);
+                            $isSunday = $currentDate->dayOfWeekIso == 7;
+                            $isToday = $day == $today;
+                        @endphp
+                        <div class="h-6 flex items-center justify-center text-[10px] font-bold rounded-lg transition-all
+                            {{ $isToday ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : ($isSunday ? 'text-red-500' : 'text-[var(--text-primary)] hover:bg-[var(--shadow-dark)]/5') }}">
+                            {{ $day }}
+                        </div>
+                    @endfor
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

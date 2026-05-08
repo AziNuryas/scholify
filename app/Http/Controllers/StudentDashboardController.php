@@ -87,29 +87,26 @@ class StudentDashboardController extends Controller
 
             // 3. Statistik Absensi (Attendance)
             $attendanceStats = [
-                'present' => 0,
-                'absent' => 0,
-                'total' => 0,
-                'percentage' => '0%'
+                'percentage' => '0%',
+                'completed_assignments' => 0
             ];
             
             if ($studentModel->id) {
                 try {
+                    // Hitung Kehadiran
                     $totalAttendances = \App\Models\Attendance::where('student_id', $studentModel->id)->count();
                     if ($totalAttendances > 0) {
                         $presentCount = \App\Models\Attendance::where('student_id', $studentModel->id)
                             ->where('status', 'hadir')
                             ->count();
-                        
-                        $attendanceStats = [
-                            'present' => $presentCount,
-                            'absent' => $totalAttendances - $presentCount,
-                            'total' => $totalAttendances,
-                            'percentage' => round(($presentCount / $totalAttendances) * 100) . '%'
-                        ];
+                        $attendanceStats['percentage'] = round(($presentCount / $totalAttendances) * 100) . '%';
                     } else {
-                        $attendanceStats['percentage'] = '100%'; // Default jika belum ada data
+                        $attendanceStats['percentage'] = '100%';
                     }
+
+                    // Hitung Tugas Selesai
+                    $attendanceStats['completed_assignments'] = \App\Models\Submission::where('student_id', $studentModel->id)->count();
+                    
                 } catch (\Exception $e) {}
             }
 
