@@ -512,17 +512,33 @@ class AdminController extends Controller
     public function settings(): View
     {
         $settings = [
-            'school_name' => 'SMA Negeri 1 Bandung',
-            'school_address' => 'Jl. Pendidikan No. 123, Bandung',
-            'school_email' => 'sekolah@example.com',
-            'school_phone' => '+62-274-512345',
-            'academic_year' => '2024/2025',
+            'school_name' => \App\Models\Setting::get('school_name', 'Scholify High School'),
+            'school_address' => \App\Models\Setting::get('school_address', 'Jl. Pendidikan No. 123, Bandung'),
+            'school_email' => \App\Models\Setting::get('school_email', 'sekolah@example.com'),
+            'school_phone' => \App\Models\Setting::get('school_phone', '+62-274-512345'),
+            'academic_year' => \App\Models\Setting::get('academic_year', '2024/2025'),
+            'school_lat' => \App\Models\Setting::get('school_lat', '-6.1950'),
+            'school_lng' => \App\Models\Setting::get('school_lng', '106.8230'),
+            'absensi_radius' => \App\Models\Setting::get('absensi_radius', '100'),
         ];
         return view('admin.settings', compact('settings'));
     }
 
     public function updateSettings(Request $request): RedirectResponse
     {
+        $validated = $request->validate([
+            'school_name' => 'required|string',
+            'school_address' => 'required|string',
+            'school_email' => 'required|email',
+            'school_lat' => 'required|numeric',
+            'school_lng' => 'required|numeric',
+            'absensi_radius' => 'required|numeric',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            \App\Models\Setting::set($key, $value, str_contains($key, 'school_') ? 'location' : 'general');
+        }
+
         return redirect()->route('admin.settings')
             ->with('success', 'Pengaturan berhasil diupdate!');
     }

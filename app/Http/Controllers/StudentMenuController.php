@@ -8,7 +8,7 @@ use App\Models\Schedule;
 use App\Models\Assignment;
 use App\Models\User;
 use App\Models\Chat;
-use App\Models\Absensi;
+use App\Models\Attendance;
 use App\Models\Submission;
 use App\Models\UserNotification;
 use Illuminate\Support\Facades\DB;
@@ -224,19 +224,19 @@ class StudentMenuController extends Controller
         
         if ($studentData && $studentData->id) {
             try {
-                $absensi = Absensi::where('siswa_id', $studentData->id)
-                    ->orderBy('tanggal', 'desc')
+                $absensi = Attendance::where('student_id', $studentData->id)
+                    ->orderBy('date', 'desc')
                     ->paginate(10);
                 
                 $statistik = [
-                    'hadir' => Absensi::where('siswa_id', $studentData->id)->where('status', 'hadir')->count(),
-                    'izin' => Absensi::where('siswa_id', $studentData->id)->where('status', 'izin')->count(),
-                    'sakit' => Absensi::where('siswa_id', $studentData->id)->where('status', 'sakit')->count(),
-                    'alpha' => Absensi::where('siswa_id', $studentData->id)->where('status', 'alpha')->count(),
+                    'hadir' => Attendance::where('student_id', $studentData->id)->where('status', 'hadir')->count(),
+                    'izin' => Attendance::where('student_id', $studentData->id)->where('status', 'izin')->count(),
+                    'sakit' => Attendance::where('student_id', $studentData->id)->where('status', 'sakit')->count(),
+                    'alpha' => Attendance::where('student_id', $studentData->id)->where('status', 'alpha')->count(),
                 ];
                 
-                $todayAbsen = Absensi::where('siswa_id', $studentData->id)
-                    ->where('tanggal', date('Y-m-d'))
+                $todayAbsen = Attendance::where('student_id', $studentData->id)
+                    ->where('date', date('Y-m-d'))
                     ->first();
                     
             } catch (\Exception $e) {
@@ -264,8 +264,8 @@ class StudentMenuController extends Controller
         }
         
         try {
-            $existing = Absensi::where('siswa_id', $studentData->id)
-                ->where('tanggal', $request->tanggal)
+            $existing = Attendance::where('student_id', $studentData->id)
+                ->where('date', $request->tanggal)
                 ->first();
                 
             if ($existing) {
@@ -278,13 +278,10 @@ class StudentMenuController extends Controller
                     return back()->with('error', 'Akses lokasi (GPS) wajib diizinkan untuk melakukan absensi Hadir!');
                 }
                 
-                // Koordinat Sekolah (Contoh: Bundaran HI Jakarta untuk demo)
-                // Dalam aplikasi nyata, koordinat ini diambil dari database Settings/Sekolah
-                $schoolLat = -6.1950;
-                $schoolLng = 106.8230;
-                
-                // Radius toleransi dalam meter
-                $maxRadius = 100;
+                // Koordinat Sekolah & Radius diambil dari Pengaturan Admin
+                $schoolLat = \App\Models\Setting::get('school_lat', -6.1950);
+                $schoolLng = \App\Models\Setting::get('school_lng', 106.8230);
+                $maxRadius = \App\Models\Setting::get('absensi_radius', 100);
                 
                 // Hitung jarak dengan Haversine formula
                 $earthRadius = 6371000; // Radius bumi dalam meter
@@ -304,12 +301,12 @@ class StudentMenuController extends Controller
                 }
             }
             
-            Absensi::create([
-                'siswa_id' => $studentData->id,
-                'kelas_id' => $studentData->class_id,
-                'tanggal' => $request->tanggal,
+            Attendance::create([
+                'student_id' => $studentData->id,
+                'class_id' => $studentData->class_id,
+                'date' => $request->tanggal,
                 'status' => $request->status,
-                'keterangan' => $request->keterangan,
+                'notes' => $request->keterangan,
             ]);
             
             return back()->with('success', '✅ Absensi berhasil direkam! Terima kasih.');

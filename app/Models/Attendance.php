@@ -45,4 +45,20 @@ class Attendance extends Model
     {
         return $this->belongsTo(Teacher::class, 'recorded_by');
     }
+
+    /**
+     * Scope untuk filter berdasarkan status
+     */
+    public function scopeStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope untuk filter berdasarkan tanggal
+     */
+    public function scopeDate($query, $date)
+    {
+        return $query->whereDate('date', $date);
+    }
 }

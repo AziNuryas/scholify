@@ -85,7 +85,35 @@ class StudentDashboardController extends Controller
                 ];
             }
 
-            return view('student.dashboard', compact('student', 'todaySchedules', 'urgentAssignments'));
+            // 3. Statistik Absensi (Attendance)
+            $attendanceStats = [
+                'present' => 0,
+                'absent' => 0,
+                'total' => 0,
+                'percentage' => '0%'
+            ];
+            
+            if ($studentModel->id) {
+                try {
+                    $totalAttendances = \App\Models\Attendance::where('student_id', $studentModel->id)->count();
+                    if ($totalAttendances > 0) {
+                        $presentCount = \App\Models\Attendance::where('student_id', $studentModel->id)
+                            ->where('status', 'hadir')
+                            ->count();
+                        
+                        $attendanceStats = [
+                            'present' => $presentCount,
+                            'absent' => $totalAttendances - $presentCount,
+                            'total' => $totalAttendances,
+                            'percentage' => round(($presentCount / $totalAttendances) * 100) . '%'
+                        ];
+                    } else {
+                        $attendanceStats['percentage'] = '100%'; // Default jika belum ada data
+                    }
+                } catch (\Exception $e) {}
+            }
+
+            return view('student.dashboard', compact('student', 'todaySchedules', 'urgentAssignments', 'attendanceStats'));
 
         } catch (\Exception $e) {
             // Jika koneksi DB / struktur tabel error total

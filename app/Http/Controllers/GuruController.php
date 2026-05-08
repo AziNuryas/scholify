@@ -402,6 +402,8 @@ class GuruController extends Controller
                     'status' => $status,
                     'notes' => $request->notes[$studentId] ?? null,
                     'class_id' => $request->class_id,
+                    'recorded_by' => $teacher ? $teacher->id : null,
+                    'recorded_at' => now(),
                 ]
             );
         }

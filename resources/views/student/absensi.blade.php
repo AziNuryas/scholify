@@ -53,8 +53,8 @@
                         </div>
                         <p class="font-bold text-[var(--text-primary)]">Sudah Absen</p>
                         <p class="text-sm font-semibold text-emerald-500 mt-1 uppercase tracking-wide">{{ ucfirst($todayAbsen->status) }}</p>
-                        @if($todayAbsen->keterangan) 
-                            <p class="text-xs text-[var(--text-muted)] mt-2 italic">"{{ $todayAbsen->keterangan }}"</p>
+                        @if($todayAbsen->notes) 
+                            <p class="text-xs text-[var(--text-muted)] mt-2 italic">"{{ $todayAbsen->notes }}"</p>
                         @endif
                     </div>
                 @else
@@ -90,8 +90,8 @@
                             @forelse($absensi as $item)
                             <tr class="hover:bg-white/40 transition-colors">
                                 <td class="px-4 py-3">
-                                    <p class="text-sm font-bold text-[var(--text-primary)]">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</p>
-                                    <p class="text-xs text-[var(--text-secondary)]">{{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->isoFormat('dddd') }}</p>
+                                    <p class="text-sm font-bold text-[var(--text-primary)]">{{ \Carbon\Carbon::parse($item->date)->translatedFormat('d F Y') }}</p>
+                                    <p class="text-xs text-[var(--text-secondary)]">{{ \Carbon\Carbon::parse($item->date)->locale('id')->isoFormat('dddd') }}</p>
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     @php
@@ -108,7 +108,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-xs font-medium text-[var(--text-secondary)]">
-                                    {{ $item->keterangan ?: '-' }}
+                                    {{ $item->notes ?: '-' }}
                                 </td>
                             </tr>
                             @empty

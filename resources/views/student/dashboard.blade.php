@@ -163,7 +163,7 @@
                     </div>
                     <div>
                         <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Kehadiran</p>
-                        <p class="font-extrabold text-lg text-[var(--text-primary)]">{{ $attendancePercentage ?? '100%' }}</p>
+                        <p class="font-extrabold text-lg text-[var(--text-primary)]">{{ $attendanceStats['percentage'] ?? '100%' }}</p>
                     </div>
                 </div>
                 
