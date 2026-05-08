@@ -78,7 +78,6 @@ class GuruBkController extends Controller
         $guru     = collect($guruData ? $guruData->toArray() : []);
 
         $appointments = \App\Models\Appointment::with(['student.schoolClass'])
-            ->where('teacher_id', auth()->id())
             ->orderBy('date', 'desc')
             ->orderBy('time', 'desc')
             ->get();
@@ -92,13 +91,11 @@ class GuruBkController extends Controller
 
         try {
             $appointment = \App\Models\Appointment::findOrFail($id);
-            if ($appointment->teacher_id == auth()->id()) {
-                $appointment->update(['status' => $request->status]);
-                return back()->with('success', 'Status jadwal temu diperbarui.');
-            }
-        } catch (\Exception $e) {}
-
-        return back()->with('error', 'Gagal memperbarui status jadwal temu.');
+            $appointment->update(['status' => $request->status]);
+            return back()->with('success', 'Status jadwal temu diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui status jadwal temu.');
+        }
     }
 
     public function discipline()
