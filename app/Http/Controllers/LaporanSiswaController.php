@@ -86,6 +86,8 @@ class LaporanSiswaController extends Controller
     public function show(LaporanGuru $laporan)
     {
         abort_unless($laporan->guru_id === Auth::id(), 403);
+        
+        // Load relasi yang diperlukan (penanggungjawab sudah ada di model)
         $laporan->load(['siswa.schoolClass', 'penanggungjawab']);
 
         return view('guru.laporan.show', compact('laporan'));

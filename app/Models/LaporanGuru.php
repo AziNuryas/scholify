@@ -65,6 +65,12 @@ class LaporanGuru extends Model
         return $this->belongsTo(User::class, 'ditangani_oleh');
     }
     
+    // Alias untuk penanggungjawab (untuk kompatibilitas dengan LaporanSiswaController)
+    public function penanggungjawab(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'ditangani_oleh');
+    }
+    
     // ========== ACCESSORS ==========
     
     // Untuk kompatibilitas view
