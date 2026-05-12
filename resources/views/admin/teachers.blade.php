@@ -32,13 +32,14 @@
         body::before { content: ''; position: fixed; top: -50%; right: -20%; width: 80%; height: 150%; background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
         body::after { content: ''; position: fixed; bottom: -30%; left: -10%; width: 70%; height: 120%; background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%); pointer-events: none; z-index: 0; }
 
-        .sidebar { position: fixed; left: 24px; top: 24px; bottom: 24px; width: var(--sidebar-width); background: var(--bg-glass); backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--border-glass); border-radius: 32px; z-index: 1000; padding: 24px 16px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: var(--shadow-xl), var(--shadow-diagonal); }
+        /* ==================== SIDEBAR DESKTOP ==================== */
+        .sidebar { position: fixed; left: 24px; top: 24px; bottom: 24px; width: var(--sidebar-width); background: var(--bg-glass); backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--border-glass); border-radius: 32px; z-index: 1000; padding: 24px 16px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: var(--shadow-xl), var(--shadow-diagonal); transition: all 0.3s ease; }
         .sidebar-header { display: flex; align-items: center; gap: 12px; padding: 0 12px 32px; }
         .sidebar-header .logo-icon { width: 44px; height: 44px; background: var(--gradient-lavender); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: var(--shadow-md), 0 4px 12px rgba(139,92,246,0.3); }
         .sidebar-header h2 { font-size: 24px; font-weight: 800; font-family: 'Outfit', sans-serif; background: var(--gradient-lavender); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; }
         .menu-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; margin: 24px 12px 10px; }
         .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
-        .menu-item { padding: 12px 16px; border-radius: 18px; display: flex; align-items: center; gap: 14px; color: var(--text-secondary); text-decoration: none; transition: all 0.3s; font-weight: 600; font-size: 15px; }
+        .menu-item { padding: 12px 16px; border-radius: 18px; display: flex; align-items: center; gap: 14px; color: var(--text-secondary); text-decoration: none; transition: all 0.3s; font-weight: 600; font-size: 15px; cursor: pointer; }
         .menu-item i { font-size: 20px; width: 24px; color: var(--text-muted); }
         .menu-item:hover { background: var(--bg-glass-hover); color: var(--primary-sky); box-shadow: var(--shadow-sm); }
         .menu-item:hover i { color: var(--primary-sky); }
@@ -58,6 +59,44 @@
         .btn-logout { width: 100%; padding: 14px; background: rgba(248,113,113,0.1); color: var(--primary-rose); border: 1px solid rgba(248,113,113,0.2); border-radius: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s; font-size: 15px; backdrop-filter: blur(10px); }
         .btn-logout:hover { background: rgba(248,113,113,0.2); color: #E11D48; border-color: rgba(248,113,113,0.4); box-shadow: var(--shadow-sm); }
 
+        /* ==================== MOBILE NAVBAR ==================== */
+        .mobile-navbar { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: var(--bg-glass); backdrop-filter: blur(20px) saturate(180%); border-top: 1px solid var(--border-glass); z-index: 999; padding: 12px 0; box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1); }
+        .mobile-navbar-content { display: flex; justify-content: space-around; align-items: center; height: 100%; padding: 0 8px; }
+        .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 16px; color: var(--text-muted); text-decoration: none; font-size: 11px; font-weight: 600; transition: all 0.3s ease; cursor: pointer; flex: 1; max-width: 60px; }
+        .mobile-nav-item i { font-size: 24px; }
+        .mobile-nav-item:hover, .mobile-nav-item.active { color: var(--primary-sky); background: rgba(59, 130, 246, 0.12); }
+        .mobile-menu-toggle { width: 44px; height: 44px; background: var(--gradient-sky); border: none; border-radius: 14px; color: white; font-size: 20px; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 1001; box-shadow: var(--shadow-md); transition: all 0.3s ease; }
+        .mobile-menu-toggle:active { transform: scale(0.95); }
+
+        /* ==================== MOBILE MENU PANEL ==================== */
+        .mobile-menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); z-index: 998; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .mobile-menu-overlay.show { display: block; opacity: 1; }
+        .mobile-menu-panel { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; background: var(--bg-glass); backdrop-filter: blur(20px) saturate(180%); border-right: 1px solid var(--border-glass); z-index: 999; padding: 20px 16px; display: flex; flex-direction: column; box-shadow: var(--shadow-xl); transform: translateX(-100%); transition: transform 0.3s ease; overflow-y: auto; }
+        .mobile-menu-panel.show { transform: translateX(0); }
+        .mobile-menu-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-glass); }
+        .mobile-menu-header-logo { display: flex; align-items: center; gap: 12px; }
+        .mobile-menu-header-logo .logo-icon { width: 40px; height: 40px; background: var(--gradient-lavender); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
+        .mobile-menu-header-logo h2 { font-size: 20px; font-weight: 800; font-family: 'Outfit', sans-serif; background: var(--gradient-lavender); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .mobile-menu-close { width: 36px; height: 36px; background: white; border: 1px solid var(--border-glass); border-radius: 10px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s; }
+        .mobile-menu-close:active { background: rgba(139, 92, 246, 0.1); }
+        .mobile-sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
+        .mobile-menu-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; margin: 16px 12px 8px; }
+        .mobile-menu-item { padding: 12px 16px; border-radius: 16px; display: flex; align-items: center; gap: 14px; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .mobile-menu-item i { font-size: 18px; width: 24px; }
+        .mobile-menu-item:active { background: var(--bg-glass-hover); }
+        .mobile-menu-item.active { background: var(--gradient-sky); color: white; }
+        .mobile-menu-item.has-submenu .chevron { margin-left: auto; font-size: 14px; transition: transform 0.3s; }
+        .mobile-menu-item.has-submenu.expanded .chevron { transform: rotate(90deg); }
+        .mobile-submenu { margin-left: 20px; padding-left: 16px; border-left: 2px solid var(--border-glass); display: none; flex-direction: column; gap: 4px; margin-top: 4px; margin-bottom: 4px; }
+        .mobile-submenu.show { display: flex; }
+        .mobile-submenu-item { padding: 10px 16px 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; font-weight: 500; font-size: 13px; }
+        .mobile-submenu-item:active { background: rgba(59, 130, 246, 0.1); }
+        .mobile-submenu-item.active { color: var(--primary-sky); font-weight: 600; }
+        .mobile-logout-section { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-glass); }
+        .mobile-btn-logout { width: 100%; padding: 12px; background: rgba(248, 113, 113, 0.1); color: var(--primary-rose); border: 1px solid rgba(248, 113, 113, 0.2); border-radius: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s; font-size: 13px; }
+        .mobile-btn-logout:active { background: rgba(248, 113, 113, 0.2); }
+
+        /* ==================== MAIN CONTENT ==================== */
         .main-content { margin-left: calc(var(--sidebar-width) + 48px); padding: 24px 32px 32px 8px; position: relative; z-index: 1; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
         .page-title h1 { font-size: 32px; font-weight: 800; font-family: 'Outfit', sans-serif; color: var(--text-primary); display: flex; align-items: center; gap: 12px; letter-spacing: -0.02em; }
@@ -98,7 +137,6 @@
         .btn-secondary { padding: 10px 18px; background: white; border: 1px solid var(--border-glass); border-radius: 12px; color: var(--text-secondary); font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: var(--shadow-sm); text-decoration: none; }
         .btn-secondary:hover { border-color: var(--primary-sky); color: var(--primary-sky); }
 
-        /* Filter Section */
         .filter-container { padding: 20px 28px; background: transparent; border-bottom: 1px solid var(--border-glass); position: relative; z-index: 1; }
         .filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         .filter-group { position: relative; }
@@ -127,21 +165,17 @@
         .teacher-info { display: flex; align-items: center; gap: 14px; }
         .teacher-avatar { width: 44px; height: 44px; border-radius: 14px; border: 2px solid white; box-shadow: var(--shadow-sm); object-fit: cover; }
         .teacher-name { font-weight: 700; color: var(--text-primary); }
-        
         .badge-role { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
         .badge-guru { background: rgba(59,130,246,0.12); color: var(--primary-sky); }
         .badge-bk { background: rgba(16,185,129,0.12); color: var(--primary-mint); }
         .badge-wali { background: rgba(245,158,11,0.12); color: var(--primary-amber); }
         .badge-active { padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 600; background: rgba(16,185,129,0.12); color: var(--primary-mint); border: 1px solid rgba(16,185,129,0.2); }
-
         .action-buttons { display: flex; gap: 8px; justify-content: center; }
         .btn-action { width: 38px; height: 38px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-glass); background: white; color: var(--text-secondary); cursor: pointer; transition: 0.2s; box-shadow: var(--shadow-sm); }
         .btn-action:hover { border-color: var(--primary-sky); color: var(--primary-sky); background: var(--bg-glass-hover); }
         .btn-delete:hover { border-color: var(--primary-rose); color: var(--primary-rose); background: rgba(244,63,94,0.08); }
-
         .empty-state { text-align: center; padding: 60px; color: var(--text-muted); }
-        .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.4; background: var(--gradient-sky); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
+        .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
         .pagination { display: flex; justify-content: space-between; align-items: center; padding: 20px 28px; border-top: 1px solid var(--border-glass); }
         .pagination-info { color: var(--text-secondary); font-size: 14px; }
         .pagination-buttons { display: flex; gap: 10px; }
@@ -155,12 +189,47 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border-glass); border-radius: 10px; }
 
+        /* ==================== RESPONSIVE ==================== */
         @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .sidebar { transform: translateX(-120%); } .main-content { margin-left: 24px; padding: 20px; } .stats-grid { grid-template-columns: 1fr; } .top-bar { flex-direction: column; gap: 16px; align-items: flex-start; } .card-header { flex-direction: column; gap: 16px; align-items: flex-start; } .filter-row { flex-direction: column; } .filter-select { width: 100%; } .search-box { max-width: 100%; } }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-120%); }
+            .main-content { margin-left: 24px; padding: 20px; padding-bottom: 100px; }
+            .mobile-menu-toggle { display: flex; position: fixed; bottom: 24px; right: 24px; }
+            .mobile-navbar { display: block; }
+            .top-bar { padding: 16px 20px; }
+            .page-title h1 { font-size: 24px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .card-header { padding: 18px 24px; flex-direction: column; gap: 16px; align-items: flex-start; }
+        }
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; padding: 16px; padding-bottom: 100px; }
+            .top-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
+            .page-title h1 { font-size: 22px; }
+            .page-title p { font-size: 13px; margin-left: 0; }
+            .user-actions { width: 100%; justify-content: space-between; }
+            .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+            .stat-card { padding: 18px; }
+            .stat-number { font-size: 28px; }
+            .filter-row { flex-direction: column; }
+            .filter-select { width: 100%; }
+            .search-box { max-width: 100%; }
+        }
+        @media (max-width: 480px) {
+            .main-content { padding: 12px; padding-bottom: 100px; }
+            .stat-card { padding: 14px; }
+            .stat-icon { width: 44px; height: 44px; }
+            .stat-icon i { font-size: 20px; }
+            .stat-number { font-size: 24px; }
+            .data-table td { padding: 12px 12px; font-size: 12px; }
+            .mobile-navbar { height: 72px; padding: 8px 0; }
+            .mobile-nav-item { max-width: 50px; font-size: 10px; }
+            .mobile-nav-item i { font-size: 20px; }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <!-- SIDEBAR DESKTOP -->
+    <div class="sidebar" id="desktopSidebar">
         <div class="sidebar-header">
             <div class="logo-icon"><i class="fas fa-cloud"></i></div>
             <h2>Schoolify</h2>
@@ -171,35 +240,69 @@
             <a href="{{ route('admin.students') }}" class="menu-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
             <a href="{{ route('admin.teachers') }}" class="menu-item active"><i class="fas fa-chalkboard-user"></i><span>Data Guru</span></a>
             <a href="{{ route('admin.agendas.index') }}" class="menu-item"><i class="fas fa-calendar-alt"></i><span>Agenda</span></a>
-            
-            <div class="menu-item has-submenu" onclick="toggleSubmenu(this)">
-                <i class="fas fa-door-open"></i><span>Manajemen Kelas</span>
-                <i class="fas fa-chevron-right chevron"></i>
-            </div>
+            <div class="menu-item has-submenu" onclick="toggleSubmenu(this)"><i class="fas fa-door-open"></i><span>Manajemen Kelas</span><i class="fas fa-chevron-right chevron"></i></div>
             <div class="submenu" id="classesSubmenu">
                 <a href="{{ route('admin.classes') }}" class="submenu-item"><i class="fas fa-list"></i><span>Daftar Kelas</span></a>
                 <a href="{{ route('admin.classes.create') }}" class="submenu-item"><i class="fas fa-plus-circle"></i><span>Tambah Kelas</span><span class="badge-new">New</span></a>
             </div>
-            
             <p class="menu-label">Lainnya</p>
             <a href="{{ route('admin.reports') }}" class="menu-item"><i class="fas fa-chart-bar"></i><span>Laporan</span></a>
             <a href="{{ route('admin.settings') }}" class="menu-item"><i class="fas fa-cog"></i><span>Pengaturan</span></a>
             <a href="{{ route('admin.profile') }}" class="menu-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
         </div>
         <div class="logout-container">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</button>
-            </form>
+            <form action="{{ route('logout') }}" method="POST">@csrf<button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</button></form>
         </div>
     </div>
 
+    <!-- MOBILE MENU OVERLAY -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- MOBILE MENU PANEL -->
+    <div class="mobile-menu-panel" id="mobileMenuPanel">
+        <div class="mobile-menu-header">
+            <div class="mobile-menu-header-logo">
+                <div class="logo-icon"><i class="fas fa-cloud"></i></div>
+                <h2>Schoolify</h2>
+            </div>
+            <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mobile-sidebar-menu">
+            <p class="mobile-menu-label">Menu Utama</p>
+            <a href="{{ route('admin.dashboard') }}" class="mobile-menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+            <a href="{{ route('admin.students') }}" class="mobile-menu-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
+            <a href="{{ route('admin.teachers') }}" class="mobile-menu-item active"><i class="fas fa-chalkboard-user"></i><span>Data Guru</span></a>
+            <a href="{{ route('admin.agendas.index') }}" class="mobile-menu-item"><i class="fas fa-calendar-alt"></i><span>Agenda</span></a>
+            <div class="mobile-menu-item has-submenu" onclick="toggleMobileSubmenu(this)"><i class="fas fa-door-open"></i><span>Manajemen Kelas</span><i class="fas fa-chevron-right chevron"></i></div>
+            <div class="mobile-submenu"><a href="{{ route('admin.classes') }}" class="mobile-submenu-item">Daftar Kelas</a><a href="{{ route('admin.classes.create') }}" class="mobile-submenu-item">Tambah Kelas</a></div>
+            <p class="mobile-menu-label">Lainnya</p>
+            <a href="{{ route('admin.reports') }}" class="mobile-menu-item"><i class="fas fa-chart-bar"></i><span>Laporan</span></a>
+            <a href="{{ route('admin.settings') }}" class="mobile-menu-item"><i class="fas fa-cog"></i><span>Pengaturan</span></a>
+            <a href="{{ route('admin.profile') }}" class="mobile-menu-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+        </div>
+        <div class="mobile-logout-section">
+            <form action="{{ route('logout') }}" method="POST" style="width: 100%;">@csrf<button type="submit" class="mobile-btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</button></form>
+        </div>
+    </div>
+
+    <!-- MOBILE TOGGLE -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="openMobileMenu()"><i class="fas fa-bars"></i></button>
+
+    <!-- MOBILE NAVBAR -->
+    <div class="mobile-navbar" id="mobileNavbar">
+        <div class="mobile-navbar-content">
+            <a href="{{ route('admin.dashboard') }}" class="mobile-nav-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+            <a href="{{ route('admin.students') }}" class="mobile-nav-item"><i class="fas fa-user-graduate"></i><span>Siswa</span></a>
+            <a href="{{ route('admin.teachers') }}" class="mobile-nav-item active"><i class="fas fa-chalkboard-user"></i><span>Guru</span></a>
+            <a href="{{ route('admin.agendas.index') }}" class="mobile-nav-item"><i class="fas fa-calendar-alt"></i><span>Agenda</span></a>
+            <button class="mobile-nav-item" onclick="openMobileMenu()" style="border: none; background: none; cursor: pointer;"><i class="fas fa-ellipsis-h"></i><span>Lebih</span></button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
     <div class="main-content">
         <div class="top-bar">
-            <div class="page-title">
-                <h1><i class="fas fa-chalkboard-user"></i>Data Guru</h1>
-                <p>Kelola data seluruh guru (BK & Mata Pelajaran)</p>
-            </div>
+            <div class="page-title"><h1><i class="fas fa-chalkboard-user"></i>Data Guru</h1><p>Kelola data seluruh guru (BK & Mata Pelajaran)</p></div>
             <div class="user-actions">
                 <span class="date-badge"><i class="far fa-calendar-alt" style="margin-right: 8px;"></i>{{ date('l, d F Y') }}</span>
                 <div class="user-avatar">{{ substr(Auth::user()->name ?? 'A', 0, 1) }}</div>
@@ -210,18 +313,10 @@
         @if(session('error'))<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i>{{ session('error') }}</div>@endif
 
         <div class="stats-grid">
-            <a href="{{ route('admin.teachers') }}" class="stat-card">
-                <div class="stat-card-content"><div class="stat-info"><h3>Total Guru</h3><div class="stat-number">{{ \App\Models\User::whereIn('role', ['guru', 'guru_bk'])->count() }}</div></div><div class="stat-icon"><i class="fas fa-user-tie"></i></div></div>
-            </a>
-            <a href="{{ route('admin.teachers') }}?role=guru_bk" class="stat-card">
-                <div class="stat-card-content"><div class="stat-info"><h3>Guru BK</h3><div class="stat-number">{{ \App\Models\User::where('role', 'guru_bk')->count() }}</div></div><div class="stat-icon"><i class="fas fa-comments"></i></div></div>
-            </a>
-            <a href="{{ route('admin.teachers') }}?role=guru" class="stat-card">
-                <div class="stat-card-content"><div class="stat-info"><h3>Guru Mapel</h3><div class="stat-number">{{ \App\Models\User::where('role', 'guru')->count() }}</div></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
-            </a>
-            <a href="{{ route('admin.classes') }}" class="stat-card">
-                <div class="stat-card-content"><div class="stat-info"><h3>Wali Kelas</h3><div class="stat-number">{{ \App\Models\User::whereIn('role', ['guru', 'guru_bk'])->has('homeroomClass')->count() }}</div></div><div class="stat-icon"><i class="fas fa-users"></i></div></div>
-            </a>
+            <a href="{{ route('admin.teachers') }}" class="stat-card"><div class="stat-card-content"><div class="stat-info"><h3>Total Guru</h3><div class="stat-number">{{ \App\Models\User::whereIn('role', ['guru', 'guru_bk'])->count() }}</div></div><div class="stat-icon"><i class="fas fa-user-tie"></i></div></div></a>
+            <a href="{{ route('admin.teachers') }}?role=guru_bk" class="stat-card"><div class="stat-card-content"><div class="stat-info"><h3>Guru BK</h3><div class="stat-number">{{ \App\Models\User::where('role', 'guru_bk')->count() }}</div></div><div class="stat-icon"><i class="fas fa-comments"></i></div></div></a>
+            <a href="{{ route('admin.teachers') }}?role=guru" class="stat-card"><div class="stat-card-content"><div class="stat-info"><h3>Guru Mapel</h3><div class="stat-number">{{ \App\Models\User::where('role', 'guru')->count() }}</div></div><div class="stat-icon"><i class="fas fa-book"></i></div></div></a>
+            <a href="{{ route('admin.classes') }}" class="stat-card"><div class="stat-card-content"><div class="stat-info"><h3>Wali Kelas</h3><div class="stat-number">{{ \App\Models\User::whereIn('role', ['guru', 'guru_bk'])->has('homeroomClass')->count() }}</div></div><div class="stat-icon"><i class="fas fa-users"></i></div></div></a>
         </div>
 
         <div class="content-card">
@@ -233,11 +328,9 @@
                 </div>
             </div>
             
-            <!-- Filter Section -->
             <div class="filter-container">
                 <form method="GET" action="{{ route('admin.teachers') }}" id="filterForm">
                     <div class="filter-row">
-                        <!-- Filter Role -->
                         <div class="filter-group">
                             <select name="role" class="filter-select" onchange="this.form.submit()">
                                 <option value="">Semua Role</option>
@@ -246,8 +339,6 @@
                             </select>
                             <i class="fas fa-chevron-down"></i>
                         </div>
-                        
-                        <!-- Filter Gender -->
                         <div class="filter-group">
                             <select name="gender" class="filter-select" onchange="this.form.submit()">
                                 <option value="">Semua Gender</option>
@@ -256,116 +347,33 @@
                             </select>
                             <i class="fas fa-chevron-down"></i>
                         </div>
-                        
-                        <!-- Filter Status -->
-                        <div class="filter-group">
-                            <select name="status" class="filter-select" onchange="this.form.submit()">
-                                <option value="">Semua Status</option>
-                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
-                                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Nonaktif</option>
-                            </select>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        
-                        <!-- Search -->
                         <div class="search-box">
                             <i class="fas fa-search"></i>
                             <input type="text" name="search" placeholder="Cari nama, NIP, atau email..." value="{{ request('search') }}">
                         </div>
-                        
-                        <button type="submit" class="btn-primary" style="padding: 10px 16px; font-size: 13px;">
-                            <i class="fas fa-search"></i> Cari
-                        </button>
-                        
-                        <a href="{{ route('admin.teachers') }}" class="btn-reset">
-                            <i class="fas fa-times"></i> Reset Filter
-                        </a>
+                        <button type="submit" class="btn-primary" style="padding: 10px 16px; font-size: 13px;"><i class="fas fa-search"></i> Cari</button>
+                        <a href="{{ route('admin.teachers') }}" class="btn-reset"><i class="fas fa-times"></i> Reset Filter</a>
                     </div>
-                    
-                    <!-- Active Filters -->
-                    @if(request('role') || request('gender') || request('status') || request('search'))
-                    <div class="active-filters">
-                        <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Filter aktif:</span>
-                        @if(request('role'))
-                            <span class="filter-badge">
-                                Role: {{ request('role') == 'guru_bk' ? 'Guru BK' : 'Guru Mapel' }}
-                                <a href="{{ route('admin.teachers', array_merge(request()->except('role'), ['page' => null])) }}"><i class="fas fa-times"></i></a>
-                            </span>
-                        @endif
-                        @if(request('gender'))
-                            <span class="filter-badge">
-                                Gender: {{ request('gender') == 'L' ? 'Laki-laki' : 'Perempuan' }}
-                                <a href="{{ route('admin.teachers', array_merge(request()->except('gender'), ['page' => null])) }}"><i class="fas fa-times"></i></a>
-                            </span>
-                        @endif
-                        @if(request('status'))
-                            <span class="filter-badge">
-                                Status: {{ request('status') == 'active' ? 'Aktif' : 'Nonaktif' }}
-                                <a href="{{ route('admin.teachers', array_merge(request()->except('status'), ['page' => null])) }}"><i class="fas fa-times"></i></a>
-                            </span>
-                        @endif
-                        @if(request('search'))
-                            <span class="filter-badge">
-                                Pencarian: "{{ request('search') }}"
-                                <a href="{{ route('admin.teachers', array_merge(request()->except('search'), ['page' => null])) }}"><i class="fas fa-times"></i></a>
-                            </span>
-                        @endif
-                    </div>
-                    @endif
                 </form>
             </div>
             
             <div class="table-wrapper">
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>NIP</th>
-                            <th>Nama Guru</th>
-                            <th>Jenis</th>
-                            <th>Wali Kelas</th>
-                            <th>Email</th>
-                            <th>No. HP</th>
-                            <th>Status</th>
-                            <th style="text-align: center;">Aksi</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>NIP</th><th>Nama Guru</th><th>Jenis</th><th>Wali Kelas</th><th>Email</th><th>No. HP</th><th>Status</th><th style="text-align: center;">Aksi</th></tr></thead>
                     <tbody>
                         @forelse($teachers as $teacher)
                         <tr>
                             <td style="font-weight: 600; color: var(--primary-sky);">{{ $teacher->nip ?? '-' }}</td>
-                            <td>
-                                <div class="teacher-info">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($teacher->name) }}&background=3B82F6&color=fff&bold=true" class="teacher-avatar">
-                                    <span class="teacher-name">{{ $teacher->name }}</span>
-                                </div>
-                            </td>
-                            <td>
-                                @if($teacher->role === 'guru_bk')
-                                    <span class="badge-role badge-bk">Guru BK</span>
-                                @else
-                                    <span class="badge-role badge-guru">Guru Mapel</span>
-                                    @if($teacher->subject)
-                                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">{{ $teacher->subject }}</div>
-                                    @endif
-                                @endif
-                            </td>
-                            <td>
-                                @if($teacher->homeroomClass)
-                                    <span class="badge-role badge-wali">{{ $teacher->homeroomClass->name }}</span>
-                                @else
-                                    <span style="color: var(--text-muted);">-</span>
-                                @endif
-                            </td>
+                            <td><div class="teacher-info"><img src="https://ui-avatars.com/api/?name={{ urlencode($teacher->name) }}&background=3B82F6&color=fff&bold=true" class="teacher-avatar"><span class="teacher-name">{{ $teacher->name }}</span></div></td>
+                            <td>@if($teacher->role === 'guru_bk')<span class="badge-role badge-bk">Guru BK</span>@else<span class="badge-role badge-guru">Guru Mapel</span>@endif</td>
+                            <td>@if($teacher->homeroomClass)<span class="badge-role badge-wali">{{ $teacher->homeroomClass->name }}</span>@else<span style="color: var(--text-muted);">-</span>@endif</td>
                             <td>{{ $teacher->email }}</td>
                             <td>{{ $teacher->phone ?? '-' }}</td>
                             <td><span class="badge-active">Aktif</span></td>
                             <td style="text-align: center;">
                                 <div class="action-buttons">
                                     <a href="{{ route('admin.teachers.edit', $teacher->id) }}" class="btn-action"><i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('admin.teachers.delete', $teacher->id) }}" method="POST" onsubmit="return confirm('Hapus guru {{ $teacher->name }}?')" style="display: inline;">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn-action btn-delete"><i class="fas fa-trash"></i></button>
-                                    </form>
+                                    <form action="{{ route('admin.teachers.delete', $teacher->id) }}" method="POST" onsubmit="return confirm('Hapus guru {{ $teacher->name }}?')" style="display: inline;">@csrf @method('DELETE')<button type="submit" class="btn-action btn-delete"><i class="fas fa-trash"></i></button></form>
                                 </div>
                             </td>
                         </tr>
@@ -375,30 +383,27 @@
                     </tbody>
                 </table>
             </div>
-            
             @if($teachers->hasPages())
             <div class="pagination">
                 <div class="pagination-info">Menampilkan {{ $teachers->firstItem() }} - {{ $teachers->lastItem() }} dari {{ $teachers->total() }} guru</div>
                 <div class="pagination-buttons">
-                    @if($teachers->onFirstPage())
-                        <button class="pagination-btn" disabled>Sebelumnya</button>
-                    @else
-                        <a href="{{ $teachers->appends(request()->query())->previousPageUrl() }}" class="pagination-btn">Sebelumnya</a>
-                    @endif
-                    
-                    @if($teachers->hasMorePages())
-                        <a href="{{ $teachers->appends(request()->query())->nextPageUrl() }}" class="pagination-btn">Berikutnya</a>
-                    @else
-                        <button class="pagination-btn" disabled>Berikutnya</button>
-                    @endif
+                    @if($teachers->onFirstPage())<button class="pagination-btn" disabled>Sebelumnya</button>@else<a href="{{ $teachers->appends(request()->query())->previousPageUrl() }}" class="pagination-btn">Sebelumnya</a>@endif
+                    @if($teachers->hasMorePages())<a href="{{ $teachers->appends(request()->query())->nextPageUrl() }}" class="pagination-btn">Berikutnya</a>@else<button class="pagination-btn" disabled>Berikutnya</button>@endif
                 </div>
             </div>
             @endif
         </div>
     </div>
-    
+
     <script>
-        function toggleSubmenu(e){const s=e.nextElementSibling;e.classList.toggle('expanded');s.classList.toggle('show');}
+        // Desktop sidebar
+        function toggleSubmenu(e) { const s = e.nextElementSibling; e.classList.toggle('expanded'); s.classList.toggle('show'); }
+        // Mobile menu
+        function openMobileMenu() { document.getElementById('mobileMenuPanel').classList.add('show'); document.getElementById('mobileMenuOverlay').classList.add('show'); document.body.style.overflow = 'hidden'; }
+        function closeMobileMenu() { document.getElementById('mobileMenuPanel').classList.remove('show'); document.getElementById('mobileMenuOverlay').classList.remove('show'); document.body.style.overflow = 'auto'; }
+        function toggleMobileSubmenu(e) { const s = e.nextElementSibling; e.classList.toggle('expanded'); s.classList.toggle('show'); }
+        document.getElementById('mobileMenuOverlay').addEventListener('click', closeMobileMenu);
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeMobileMenu(); });
     </script>
 </body>
 </html>
