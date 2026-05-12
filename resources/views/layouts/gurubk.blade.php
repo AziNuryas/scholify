@@ -45,7 +45,6 @@
             --shadow-dark:    35, 39, 53;
         }
 
-        /* ── RESET ── */
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -54,7 +53,6 @@
             color: var(--text-primary);
         }
 
-        /* ── SMOOTH TRANSITION ── */
         body, body * {
             transition:
                 background-color .25s ease,
@@ -62,7 +60,6 @@
                 color .25s ease,
                 box-shadow .25s ease;
         }
-        /* Jangan transisi transform (bisa bikin layout flash) */
         body *[class*="transition"],
         body *[class*="duration"] {
             transition-property: color, background-color, border-color, box-shadow, opacity, transform;
@@ -70,13 +67,6 @@
 
         .font-outfit { font-family: 'Outfit', sans-serif; }
 
-        /* ─────────────────────────────────────────
-           GLOBAL DARK MODE OVERRIDE
-           Semua kelas Tailwind hardcoded warna akan
-           otomatis di-override saat html.dark aktif
-        ───────────────────────────────────────── */
-
-        /* TEXT — dark/strong */
         html.dark .text-gray-900,
         html.dark .text-gray-800,
         html.dark .text-gray-700,
@@ -86,20 +76,17 @@
         html.dark .text-\[\#1E293B\],
         html.dark .text-\[\#334155\] { color: var(--text-primary) !important; }
 
-        /* TEXT — medium */
         html.dark .text-gray-600,
         html.dark .text-gray-500,
         html.dark .text-slate-600,
         html.dark .text-slate-500,
         html.dark .text-\[\#475569\] { color: var(--text-secondary) !important; }
 
-        /* TEXT — muted */
         html.dark .text-gray-400,
         html.dark .text-gray-300,
         html.dark .text-slate-400,
         html.dark .text-slate-300 { color: var(--text-muted) !important; }
 
-        /* BACKGROUND — putih & abu terang → bg variable */
         html.dark .bg-white           { background-color: var(--bg-card) !important; }
         html.dark .bg-gray-50,
         html.dark .bg-gray-50\/50     { background-color: var(--bg) !important; }
@@ -107,7 +94,6 @@
         html.dark .bg-slate-50,
         html.dark .bg-slate-100       { background-color: var(--bg) !important; }
 
-        /* BACKGROUND — teal → purple */
         html.dark .bg-teal-50    { background-color: rgba(168,85,247,0.12) !important; }
         html.dark .bg-teal-100   { background-color: rgba(168,85,247,0.18) !important; }
         html.dark .bg-teal-600   { background-color: var(--accent) !important; }
@@ -116,32 +102,27 @@
               .bg-teal-700       { background-color: var(--accent-hover) !important; }
               .hover\:bg-teal-700:hover { background-color: var(--accent-hover) !important; }
 
-        /* TEXT — teal → purple */
         .text-teal-600,
         .text-teal-700 { color: var(--accent) !important; }
         html.dark .text-teal-600,
         html.dark .text-teal-700 { color: var(--accent-light) !important; }
         html.dark .text-teal-800 { color: var(--accent-light) !important; }
 
-        /* BORDER — teal → purple */
         .border-teal-200 { border-color: rgba(139,92,246,0.35) !important; }
         html.dark .border-teal-200 { border-color: rgba(168,85,247,0.3) !important; }
         html.dark .border-teal-100 { border-color: rgba(168,85,247,0.2) !important; }
 
-        /* BORDER — abu terang */
         html.dark .border-gray-50,
         html.dark .border-gray-100,
         html.dark .border-gray-200,
         html.dark .border-slate-100,
         html.dark .border-slate-200 { border-color: var(--border) !important; }
 
-        /* RING FOCUS — teal → purple */
         .focus\:ring-teal-500:focus,
         .focus\:ring-teal-400:focus {
             --tw-ring-color: rgba(139,92,246,0.4) !important;
         }
 
-        /* INPUT / SELECT / TEXTAREA — bg putih jadi var(--bg-card) di dark */
         html.dark input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
         html.dark select,
         html.dark textarea {
@@ -150,30 +131,24 @@
             border-color: var(--border) !important;
         }
 
-        /* SHADOW — teal → purple */
         .shadow-teal-200 { box-shadow: 0 4px 14px rgba(139,92,246,0.25) !important; }
         .shadow-teal-100 { box-shadow: 0 2px 8px rgba(139,92,246,0.15) !important; }
 
-        /* TABLE hover rows */
         html.dark .hover\:bg-teal-50\/30:hover { background-color: rgba(168,85,247,0.06) !important; }
         html.dark .hover\:bg-gray-50:hover      { background-color: rgba(var(--shadow-dark),0.3) !important; }
 
-        /* STATUS BADGES — teal */
         html.dark .bg-teal-50.text-teal-700,
         html.dark .bg-teal-50.text-teal-800 {
             background-color: rgba(168,85,247,0.15) !important;
             color: var(--accent-light) !important;
         }
-        /* Inline bg-teal-50 + text-teal-700/800 combo */
         html.dark [class*="bg-teal-50"] { background-color: rgba(168,85,247,0.12) !important; }
         html.dark [class*="text-teal-7"],
         html.dark [class*="text-teal-8"] { color: var(--accent-light) !important; }
 
-        /* AVATAR default bg teal → purple */
         html.dark .bg-teal-600.text-white:not(button):not(a) { background-color: var(--accent) !important; }
               .bg-teal-600.text-white:not(button):not(a)     { background-color: var(--accent) !important; }
 
-        /* GLASS CARD */
         .glass-card {
             background: rgba(255,255,255,0.7);
             backdrop-filter: blur(20px);
@@ -183,7 +158,6 @@
             backdrop-filter: blur(20px);
         }
 
-        /* ── NEUMORPHISM ── */
         .neo-flat {
             background: var(--bg);
             border-radius: 20px;
@@ -232,13 +206,11 @@
                         0 0 15px rgba(124,58,237,.2);
         }
 
-        /* ── SCROLLBAR ── */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(var(--shadow-dark),.8); border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
 
-        /* ── ANIMATIONS ── */
         @keyframes fadeInUp {
             from { opacity:0; transform:translateY(12px); }
             to   { opacity:1; transform:translateY(0); }
@@ -249,7 +221,6 @@
     </style>
 
     <script>
-        /* Default: dark mode. Key terpisah dari student agar tidak bentrok. */
         (function () {
             if (localStorage.getItem('themeBK') === 'light') {
                 document.documentElement.classList.remove('dark');
@@ -298,13 +269,14 @@
                    style="color: var(--text-muted)">Menu Utama</p>
 
                 @php
+                    $pendingAppointments = \App\Models\Appointment::where('status', 'pending')->count();
                     $menus = [
-                        ['route' => 'gurubk.dashboard',               'icon' => 'bxs-dashboard',   'label' => 'Dashboard'],
-                        ['route' => 'gurubk.profile',                 'icon' => 'bx-user',         'label' => 'Profil Saya'],
-                        ['route' => 'gurubk.discipline',              'icon' => 'bx-error-circle', 'label' => 'Catatan Disiplin'],
-                        ['route' => 'gurubk.appointments',            'icon' => 'bx-calendar',     'label' => 'Jadwal Temu'],
-                        ['route' => 'gurubk.catatan-konseling.index', 'icon' => 'bx-book-open',    'label' => 'Catatan Konseling'],
-                        ['route' => 'gurubk.deteksi-asesmen.index',   'icon' => 'bx-search-alt',   'label' => 'Deteksi Dini & Asesmen'],
+                        ['route' => 'gurubk.dashboard',               'icon' => 'bxs-dashboard',   'label' => 'Dashboard',              'badge' => null],
+                        ['route' => 'gurubk.profile',                 'icon' => 'bx-user',         'label' => 'Profil Saya',            'badge' => null],
+                        ['route' => 'gurubk.discipline',              'icon' => 'bx-error-circle', 'label' => 'Catatan Disiplin',       'badge' => null],
+                        ['route' => 'gurubk.appointments',            'icon' => 'bx-calendar',     'label' => 'Jadwal Temu',            'badge' => $pendingAppointments],
+                        ['route' => 'gurubk.catatan-konseling.index', 'icon' => 'bx-book-open',    'label' => 'Catatan Konseling',      'badge' => null],
+                        ['route' => 'gurubk.deteksi-asesmen.index',   'icon' => 'bx-search-alt',   'label' => 'Deteksi Dini & Asesmen', 'badge' => null],
                     ];
                 @endphp
 
@@ -319,10 +291,17 @@
                                    style="color: {{ $active ? 'var(--accent)' : 'var(--text-muted)' }}"></i>
                             </div>
                             <span>{{ $m['label'] }}</span>
-                            @if($active)
-                                <span class="ml-auto w-1.5 h-1.5 rounded-full flex-shrink-0"
-                                      style="background: var(--accent)"></span>
-                            @endif
+                            <div class="ml-auto flex items-center gap-1">
+                                @if(!empty($m['badge']) && $m['badge'] > 0)
+                                    <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full text-white"
+                                          style="background: #ef4444; min-width: 18px; text-align: center;">
+                                        {{ $m['badge'] }}
+                                    </span>
+                                @elseif($active)
+                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                          style="background: var(--accent)"></span>
+                                @endif
+                            </div>
                         </a>
                     @endforeach
                 </div>
@@ -448,7 +427,6 @@
     </main>
 
     <script>
-        /* Sync ikon saat halaman load */
         (function () {
             var isDark = document.documentElement.classList.contains('dark');
             document.getElementById('icon-moon').style.display = isDark ? 'none'  : 'block';

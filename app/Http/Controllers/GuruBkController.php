@@ -35,10 +35,32 @@ class GuruBkController extends Controller
             'total_students'     => DB::table('students')->count(),
             'active_cases'       => DB::table('chats')->where('receiver_id', auth()->id())->distinct('sender_id')->count(),
             'unread_messages'    => DB::table('chats')->where('receiver_id', auth()->id())->where('is_read', false)->count(),
-            'appointments_today' => 0,
+            'appointments_today' => \App\Models\Appointment::whereDate('date', today())->count(),
         ];
 
-        return view('gurubk.dashboard', compact('guru', 'stats'));
+        $filter = request('agenda_filter', 'today');
+
+        $appointmentsQuery = \App\Models\Appointment::with(['student.schoolClass'])
+            ->whereIn('status', ['pending', 'approved']);
+
+        if ($filter === 'week') {
+            $appointmentsQuery->whereBetween('date', [today(), today()->endOfWeek()]);
+        } else {
+            $appointmentsQuery->whereDate('date', today());
+        }
+
+        $appointments = $appointmentsQuery->orderBy('date', 'asc')->orderBy('time', 'asc')->get()->map(function ($appt) {
+            return [
+                'name'  => $appt->student->name ?? '-',
+                'class' => $appt->student->schoolClass->name ?? '-',
+                'topic' => $appt->notes ?: 'Konseling',
+                'time'  => \Carbon\Carbon::parse($appt->time)->format('H:i') . ' WIB',
+                'date'  => \Carbon\Carbon::parse($appt->date)->format('d M'),
+                'type'  => $appt->status === 'pending' ? 'alert' : 'normal',
+            ];
+        });
+
+        return view('gurubk.dashboard', compact('guru', 'stats', 'appointments', 'filter'));
     }
 
     public function profile()
@@ -137,8 +159,6 @@ class GuruBkController extends Controller
         }
     }
 
-    // ── Deteksi Dini & Asesmen ────────────────────────────────────────────────
-
     public function deteksiAsesmen(Request $request)
     {
         $tahunAjaran = config('bk.tahun_ajaran_aktif');
@@ -188,8 +208,6 @@ class GuruBkController extends Controller
             'statistik', 'siswaBerisiko', 'laporanBaru', 'tahunAjaran', 'semester', 'asesmenList'
         ));
     }
-
-    // ── Laporan dari Guru ─────────────────────────────────────────────────────
 
     public function laporanIndex(Request $request)
     {

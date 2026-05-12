@@ -44,7 +44,11 @@ class AssignmentController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('guru.tugas', compact('assignments'));
+        // ✅ AMBIL SEMUA KELAS DAN MATA PELAJARAN UNTUK FORM
+        $classes = SchoolClass::orderBy('name')->get();
+        $subjects = Subject::orderBy('name')->get();
+
+        return view('guru.tugas', compact('assignments', 'classes', 'subjects'));
     }
 
     /**
@@ -58,13 +62,9 @@ class AssignmentController extends Controller
             abort(403, 'User bukan guru');
         }
         
-        // Ambil kelas yang diajar oleh guru ini
-        $classIds = \App\Models\Schedule::where('teacher_id', $teacher->id)
-            ->distinct('class_id')
-            ->pluck('class_id');
-        
-        $classes = SchoolClass::whereIn('id', $classIds)->get();
-        $subjects = Subject::all();
+        // AMBIL SEMUA KELAS (tidak hanya yang ada di schedules)
+        $classes = SchoolClass::orderBy('name')->get();
+        $subjects = Subject::orderBy('name')->get();
         
         return view('guru.tugas-create', compact('classes', 'subjects'));
     }
@@ -142,13 +142,9 @@ class AssignmentController extends Controller
             ->where('id', $id)
             ->firstOrFail();
         
-        // Ambil kelas yang diajar oleh guru ini
-        $classIds = \App\Models\Schedule::where('teacher_id', $teacher->id)
-            ->distinct('class_id')
-            ->pluck('class_id');
-        
-        $classes = SchoolClass::whereIn('id', $classIds)->get();
-        $subjects = Subject::all();
+        // AMBIL SEMUA KELAS (tidak hanya yang ada di schedules)
+        $classes = SchoolClass::orderBy('name')->get();
+        $subjects = Subject::orderBy('name')->get();
         
         return view('guru.tugas-edit', compact('assignment', 'classes', 'subjects'));
     }
