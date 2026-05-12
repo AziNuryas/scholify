@@ -16,6 +16,7 @@ use App\Http\Controllers\LaporanSiswaController;
 use App\Http\Controllers\AsesmenController;
 use App\Http\Controllers\CatatanKonselingController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\JadwalPelajaranController; // <-- PERBAIKAN: nama controller yang benar
 use App\Http\Middleware\CheckRole;
 
 /*
@@ -167,6 +168,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/classes/{id}', [AdminController::class, 'deleteClass'])->name('classes.delete');
         Route::post('/classes/{class}/add-student', [AdminController::class, 'addStudentToClass'])->name('classes.add-student');
         Route::delete('/classes/{class}/remove-student/{student}', [AdminController::class, 'removeStudentFromClass'])->name('classes.remove-student');
+        
+        // ==================== JADWAL PELAJARAN MANAGEMENT ====================
+        Route::resource('jadwal', JadwalPelajaranController::class);
+        Route::get('/jadwal/export-pdf', [JadwalPelajaranController::class, 'exportPdf'])->name('jadwal.export-pdf');
+        Route::get('/jadwal/export-excel', [JadwalPelajaranController::class, 'exportExcel'])->name('jadwal.export-excel');
+        Route::post('/jadwal/{id}/toggle-status', [JadwalPelajaranController::class, 'toggleStatus'])->name('jadwal.toggle-status');
         
         // Reports
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
