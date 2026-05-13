@@ -28,8 +28,14 @@ class AdminController extends Controller
             'totalTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->count(),
             'totalClasses' => Classes::count(),
             'totalAdmins' => User::where('role', 'admin')->count(),
-            'recentStudents' => Student::with('user')->latest()->take(5)->get(),
+            'recentStudents' => Student::with(['user', 'schoolClass'])->latest()->take(5)->get(),
             'recentTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->latest()->take(5)->get(),
+            'allClasses' => Classes::withCount('students')->with('homeroomTeacher')->get(),
+            'upcomingAgendas' => \App\Models\Agenda::where('is_active', true)
+                ->where('start_date', '>=', now()->toDateString())
+                ->orderBy('start_date', 'asc')
+                ->take(10)
+                ->get(),
         ];
         
         return view('admin.dashboard', compact('data'));
@@ -85,42 +91,44 @@ class AdminController extends Controller
     public function storeStudent(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-            'nisn' => 'nullable|string|unique:students,nisn',
-            'nis' => 'nullable|string|unique:students,nis',
-            'gender' => 'nullable|in:L,P',
-            'birth_place' => 'nullable|string|max:100',
+            'name'       => 'required|string|max:255',
+            'email'      => 'required|email|unique:users,email',
+            'password'   => 'required|min:6|confirmed',
+            'nisn'       => 'nullable|string|unique:students,nisn',
+            'nis'        => 'nullable|string|unique:students,nis',
+            'birth_place'=> 'nullable|string|max:100',
             'birth_date' => 'nullable|date',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'class_id' => 'nullable|exists:classes,id',
+            'phone'      => 'nullable|string|max:20',
+            'address'    => 'nullable|string',
+            'class_id'   => 'nullable|exists:classes,id',
         ]);
 
+        // handle gender manually (Laravel 11 no longer auto-converts empty→null)
+        $gender = in_array($request->input('gender'), ['L', 'P']) ? $request->input('gender') : null;
+
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'siswa',
-            'gender' => $validated['gender'] ?? null,
+            'name'        => $validated['name'],
+            'email'       => $validated['email'],
+            'password'    => Hash::make($validated['password']),
+            'role'        => 'siswa',
+            'gender'      => $gender,
             'birth_place' => $validated['birth_place'] ?? null,
-            'birth_date' => $validated['birth_date'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'class_id' => $validated['class_id'] ?? null,
+            'birth_date'  => $validated['birth_date'] ?? null,
+            'phone'       => $validated['phone'] ?? null,
+            'address'     => $validated['address'] ?? null,
+            'class_id'    => $validated['class_id'] ?? null,
         ]);
 
         Student::create([
-            'user_id' => $user->id,
-            'class_id' => $validated['class_id'] ?? null,
-            'nisn' => $validated['nisn'] ?? null,
-            'nis' => $validated['nis'] ?? null,
-            'name' => $validated['name'],
+            'user_id'     => $user->id,
+            'class_id'    => $validated['class_id'] ?? null,
+            'nisn'        => $validated['nisn'] ?? null,
+            'nis'         => $validated['nis'] ?? null,
+            'name'        => $validated['name'],
             'birth_place' => $validated['birth_place'] ?? null,
-            'birth_date' => $validated['birth_date'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'phone' => $validated['phone'] ?? null,
+            'birth_date'  => $validated['birth_date'] ?? null,
+            'address'     => $validated['address'] ?? null,
+            'phone'       => $validated['phone'] ?? null,
         ]);
 
         return redirect()->route('admin.students')
@@ -130,37 +138,39 @@ class AdminController extends Controller
     public function editStudent(int $id): View
     {
         $student = Student::with('user')->findOrFail($id);
-        $classes = Classes::orderBy('grade_level')->orderBy('name')->get();
+        $classes  = Classes::orderBy('grade_level')->orderBy('name')->get();
         return view('admin.students-edit', compact('student', 'classes'));
     }
 
     public function updateStudent(Request $request, int $id): RedirectResponse
     {
         $student = Student::with('user')->findOrFail($id);
-        $user = $student->user;
-        
+        $user    = $student->user;
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'nisn' => 'nullable|string|unique:students,nisn,' . $id,
-            'nis' => 'nullable|string|unique:students,nis,' . $id,
-            'gender' => 'nullable|in:L,P',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|unique:users,email,' . $user->id,
+            'nisn'        => 'nullable|string|unique:students,nisn,' . $id,
+            'nis'         => 'nullable|string|unique:students,nis,' . $id,
             'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'class_id' => 'nullable|exists:classes,id',
+            'birth_date'  => 'nullable|date',
+            'phone'       => 'nullable|string|max:20',
+            'address'     => 'nullable|string',
+            'class_id'    => 'nullable|exists:classes,id',
         ]);
 
+        // handle gender (empty string → null)
+        $gender = in_array($request->input('gender'), ['L', 'P']) ? $request->input('gender') : null;
+
         $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'gender' => $validated['gender'] ?? $user->gender,
-            'birth_place' => $validated['birth_place'] ?? $user->birth_place,
-            'birth_date' => $validated['birth_date'] ?? $user->birth_date,
-            'phone' => $validated['phone'] ?? $user->phone,
-            'address' => $validated['address'] ?? $user->address,
-            'class_id' => $validated['class_id'] ?? $user->class_id,
+            'name'        => $validated['name'],
+            'email'       => $validated['email'],
+            'gender'      => $gender,
+            'birth_place' => $validated['birth_place'] ?? null,
+            'birth_date'  => $validated['birth_date'] ?? null,
+            'phone'       => $validated['phone'] ?? null,
+            'address'     => $validated['address'] ?? null,
+            'class_id'    => $validated['class_id'] ?? null,
         ]);
 
         if ($request->filled('password')) {
@@ -169,18 +179,18 @@ class AdminController extends Controller
         }
 
         $student->update([
-            'class_id' => $validated['class_id'] ?? $student->class_id,
-            'nisn' => $validated['nisn'] ?? $student->nisn,
-            'nis' => $validated['nis'] ?? $student->nis,
-            'name' => $validated['name'],
-            'birth_place' => $validated['birth_place'] ?? $student->birth_place,
-            'birth_date' => $validated['birth_date'] ?? $student->birth_date,
-            'address' => $validated['address'] ?? $student->address,
-            'phone' => $validated['phone'] ?? $student->phone,
+            'class_id'    => $validated['class_id'] ?? null,
+            'nisn'        => $validated['nisn'] ?? null,
+            'nis'         => $validated['nis'] ?? null,
+            'name'        => $validated['name'],
+            'birth_place' => $validated['birth_place'] ?? null,
+            'birth_date'  => $validated['birth_date'] ?? null,
+            'address'     => $validated['address'] ?? null,
+            'phone'       => $validated['phone'] ?? null,
         ]);
 
         return redirect()->route('admin.students')
-            ->with('success', 'Siswa berhasil diperbarui!');
+            ->with('success', 'Data siswa berhasil diperbarui!');
     }
 
     public function deleteStudent(int $id): RedirectResponse
@@ -218,35 +228,40 @@ class AdminController extends Controller
 
     public function createTeacher(): View
     {
-        return view('admin.teachers-create');
+        $subjects = \App\Models\Subject::orderBy('name')->get();
+        return view('admin.teachers-create', compact('subjects'));
     }
 
     public function storeTeacher(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'role' => 'required|in:guru,guru_bk',
-            'nip' => 'nullable|string|unique:users,nip',
-            'gender' => 'nullable|in:L,P',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|unique:users',
+            'password'    => 'required|min:6|confirmed',
+            'role'        => 'required|in:guru,guru_bk',
+            'nip'         => 'nullable|string|unique:users,nip',
+            'subject'     => 'nullable|string|max:255',
             'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+            'birth_date'  => 'nullable|date',
+            'phone'       => 'nullable|string|max:20',
+            'address'     => 'nullable|string',
         ]);
 
+        // handle gender
+        $gender = in_array($request->input('gender'), ['L', 'P']) ? $request->input('gender') : null;
+
         User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-            'nip' => $validated['nip'] ?? null,
-            'gender' => $validated['gender'] ?? null,
+            'name'        => $validated['name'],
+            'email'       => $validated['email'],
+            'password'    => Hash::make($validated['password']),
+            'role'        => $validated['role'],
+            'nip'         => $validated['nip'] ?? null,
+            'subject'     => $validated['role'] === 'guru' ? ($validated['subject'] ?? null) : null,
+            'gender'      => $gender,
             'birth_place' => $validated['birth_place'] ?? null,
-            'birth_date' => $validated['birth_date'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
+            'birth_date'  => $validated['birth_date'] ?? null,
+            'phone'       => $validated['phone'] ?? null,
+            'address'     => $validated['address'] ?? null,
         ]);
 
         $roleLabel = $validated['role'] === 'guru_bk' ? 'Guru BK' : 'Guru Mapel';
@@ -256,25 +271,29 @@ class AdminController extends Controller
 
     public function editTeacher(int $id): View
     {
-        $teacher = User::whereIn('role', ['guru', 'guru_bk'])->findOrFail($id);
-        return view('admin.teachers-edit', compact('teacher'));
+        $teacher  = User::whereIn('role', ['guru', 'guru_bk'])->findOrFail($id);
+        $subjects = \App\Models\Subject::orderBy('name')->get();
+        return view('admin.teachers-edit', compact('teacher', 'subjects'));
     }
 
     public function updateTeacher(Request $request, int $id): RedirectResponse
     {
         $teacher = User::whereIn('role', ['guru', 'guru_bk'])->findOrFail($id);
-        
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'role' => 'required|in:guru,guru_bk',
-            'nip' => 'nullable|string|unique:users,nip,' . $id,
-            'gender' => 'nullable|in:L,P',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|unique:users,email,' . $id,
+            'role'        => 'required|in:guru,guru_bk',
+            'nip'         => 'nullable|string|unique:users,nip,' . $id,
+            'subject'     => 'nullable|string|max:255',
             'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+            'birth_date'  => 'nullable|date',
+            'phone'       => 'nullable|string|max:20',
+            'address'     => 'nullable|string',
         ]);
+
+        // handle gender
+        $gender = in_array($request->input('gender'), ['L', 'P']) ? $request->input('gender') : null;
 
         if ($request->filled('password')) {
             $request->validate(['password' => 'min:6|confirmed']);
@@ -282,15 +301,16 @@ class AdminController extends Controller
         }
 
         $teacher->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'role' => $validated['role'],
-            'nip' => $validated['nip'] ?? $teacher->nip,
-            'gender' => $validated['gender'] ?? $teacher->gender,
-            'birth_place' => $validated['birth_place'] ?? $teacher->birth_place,
-            'birth_date' => $validated['birth_date'] ?? $teacher->birth_date,
-            'phone' => $validated['phone'] ?? $teacher->phone,
-            'address' => $validated['address'] ?? $teacher->address,
+            'name'        => $validated['name'],
+            'email'       => $validated['email'],
+            'role'        => $validated['role'],
+            'nip'         => $validated['nip'] ?? null,
+            'subject'     => $validated['role'] === 'guru' ? ($validated['subject'] ?? null) : null,
+            'gender'      => $gender,
+            'birth_place' => $validated['birth_place'] ?? null,
+            'birth_date'  => $validated['birth_date'] ?? null,
+            'phone'       => $validated['phone'] ?? null,
+            'address'     => $validated['address'] ?? null,
         ]);
 
         $roleLabel = $validated['role'] === 'guru_bk' ? 'Guru BK' : 'Guru Mapel';
@@ -530,6 +550,8 @@ class AdminController extends Controller
             'school_name' => 'required|string',
             'school_address' => 'required|string',
             'school_email' => 'required|email',
+            'school_phone' => 'nullable|string',
+            'academic_year' => 'required|string',
             'school_lat' => 'required|numeric',
             'school_lng' => 'required|numeric',
             'absensi_radius' => 'required|numeric',

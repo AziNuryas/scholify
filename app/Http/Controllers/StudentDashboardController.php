@@ -110,7 +110,48 @@ class StudentDashboardController extends Controller
                 } catch (\Exception $e) {}
             }
 
-            return view('student.dashboard', compact('student', 'todaySchedules', 'urgentAssignments', 'attendanceStats'));
+            // 4. Statistik Nilai (Grades Chart Data)
+            $chartData = [
+                'categories' => [],
+                'series' => []
+            ];
+
+            if ($studentModel->id) {
+                try {
+                    // Ambil 7 nilai terbaru dari tabel grades untuk siswa ini, urutkan berdasarkan id agar terurut kronologis
+                    $recentGrades = \App\Models\Grade::with('subject')
+                        ->where('student_id', $studentModel->id)
+                        ->latest('id')
+                        ->take(7)
+                        ->get()
+                        ->reverse() // Balik agar yang terlama di sebelah kiri grafik
+                        ->values();
+
+                    foreach ($recentGrades as $grade) {
+                        // Singkat nama mata pelajaran agar pas di grafik
+                        $subjectName = $grade->subject->name ?? 'Mapel';
+                        // Ambil kata pertama saja jika terlalu panjang
+                        $shortName = explode(' ', trim($subjectName))[0];
+                        
+                        $chartData['categories'][] = $shortName;
+                        $chartData['series'][] = (int) ($grade->score ?? 0);
+                    }
+
+                    // Jika tidak ada data nilai, set fallback agar grafik tidak error
+                    if (empty($chartData['categories'])) {
+                        $chartData['categories'] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                        $chartData['series'] = [0, 0, 0, 0, 0, 0, 0];
+                    }
+                } catch (\Exception $e) {
+                    $chartData['categories'] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                    $chartData['series'] = [0, 0, 0, 0, 0, 0, 0];
+                }
+            } else {
+                $chartData['categories'] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                $chartData['series'] = [0, 0, 0, 0, 0, 0, 0];
+            }
+
+            return view('student.dashboard', compact('student', 'todaySchedules', 'urgentAssignments', 'attendanceStats', 'chartData'));
 
         } catch (\Exception $e) {
             // Jika koneksi DB / struktur tabel error total

@@ -257,10 +257,13 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        var chartDataCategories = {!! json_encode($chartData['categories'] ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']) !!};
+        var chartDataSeries = {!! json_encode($chartData['series'] ?? [0, 0, 0, 0, 0, 0, 0]) !!};
+
         var options = {
             series: [{
-                name: 'Nilai Rata-rata',
-                data: [78, 82, 80, 85, 88, 86, 90] // Dummy data for chart
+                name: 'Nilai Terbaru',
+                data: chartDataSeries
             }],
             chart: {
                 height: 250,
@@ -289,7 +292,7 @@
             dataLabels: { enabled: false },
             stroke: { curve: 'smooth', width: 3 },
             xaxis: {
-                categories: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                categories: chartDataCategories,
                 axisBorder: { show: false },
                 axisTicks: { show: false },
                 labels: {
