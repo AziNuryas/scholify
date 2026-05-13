@@ -119,7 +119,7 @@
                                         <i data-lucide="school" class="w-3.5 h-3.5"></i> {{ $student->schoolClass->name ?? 'TANPA KELAS' }}
                                     </span>
                                     <span class="text-[10px] font-bold text-[var(--text-muted)] flex items-center gap-1.5 italic">
-                                        <i data-lucide="{{ $student->gender == 'L' ? 'male' : 'female' }}" class="w-3.5 h-3.5"></i> {{ $student->gender == 'L' ? 'Laki-Laki' : 'Perempuan' }}
+                                        <i data-lucide="{{ optional($student->user)->gender == 'L' ? 'male' : 'female' }}" class="w-3.5 h-3.5"></i> {{ optional($student->user)->gender == 'L' ? 'Laki-Laki' : 'Perempuan' }}
                                     </span>
                                 </div>
                             </td>

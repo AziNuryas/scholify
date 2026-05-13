@@ -43,7 +43,7 @@
             </div>
             <div>
                 <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-1">Wali Kelas</p>
-                <p class="font-outfit font-black text-2xl text-[var(--text-primary)]">{{ \App\Models\User::whereIn('role', ['guru', 'guru_bk'])->has('homeroomClass')->count() }}</p>
+                <p class="font-outfit font-black text-2xl text-[var(--text-primary)]">{{ \App\Models\User::where('role', 'guru')->has('homeroomClass')->count() }}</p>
             </div>
         </a>
     </div>
@@ -118,8 +118,8 @@
                                         <span class="px-3 py-1 rounded-lg bg-blue-100 text-blue-600 text-[9px] font-black border border-blue-200 uppercase tracking-widest w-max">GURU MATA PELAJARAN</span>
                                     @endif
                                     
-                                    @if($teacher->homeroomClass)
-                                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 italic">
+                                    @if($teacher->role !== 'guru_bk' && $teacher->homeroomClass)
+                                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 italic mt-1">
                                             <i data-lucide="award" class="w-3.5 h-3.5"></i> Wali Kelas {{ $teacher->homeroomClass->name }}
                                         </span>
                                     @endif

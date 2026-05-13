@@ -448,37 +448,38 @@ class AdminController extends Controller
 
     // ==================== REPORTS ====================
 
+    private function getReportData(): array
+    {
+        $totalAttendances = \App\Models\Attendance::count();
+        $presentAttendances = \App\Models\Attendance::whereIn('status', ['hadir', 'present'])->count();
+        $attendanceRate = $totalAttendances > 0 ? round(($presentAttendances / $totalAttendances) * 100, 1) : 0;
+
+        return [
+            'totalStudents' => Student::count(),
+            'totalTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->count(),
+            'totalClasses' => Classes::count(),
+            'totalConsultations' => \App\Models\CatatanKonseling::count(),
+            'completedConsultations' => \App\Models\CatatanKonseling::where('status', 'selesai')->count(),
+            'pendingConsultations' => \App\Models\CatatanKonseling::where('status', '!=', 'selesai')->count(),
+            'disciplineRecords' => \App\Models\DisciplinaryRecord::count(),
+            'appointments' => \App\Models\Appointment::count(),
+            'approvedAppointments' => \App\Models\Appointment::whereIn('status', ['approved', 'disetujui'])->count(),
+            'attendanceRate' => $attendanceRate,
+        ];
+    }
+
     public function reports(): View
     {
-        $data = [
-            'totalConsultations' => 456,
-            'completedConsultations' => 234,
-            'pendingConsultations' => 12,
-            'disciplineRecords' => 24,
-            'appointments' => 89,
-            'approvedAppointments' => 67,
-            'attendanceRate' => 94,
-        ];
+        $data = $this->getReportData();
         return view('admin.reports', compact('data'));
     }
 
     public function exportPdf()
     {
-        $data = [
-            'totalStudents' => Student::count(),
-            'totalTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->count(),
-            'totalClasses' => Classes::count(),
-            'totalConsultations' => 456,
-            'completedConsultations' => 234,
-            'pendingConsultations' => 12,
-            'disciplineRecords' => 24,
-            'appointments' => 89,
-            'approvedAppointments' => 67,
-            'attendanceRate' => 94,
-            'recentStudents' => Student::with(['user', 'schoolClass'])->latest()->take(10)->get(),
-            'recentTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->latest()->take(10)->get(),
-            'generatedAt' => now()->isoFormat('dddd, D MMMM YYYY - HH:mm'),
-        ];
+        $data = $this->getReportData();
+        $data['recentStudents'] = Student::with(['user', 'schoolClass'])->latest()->take(10)->get();
+        $data['recentTeachers'] = User::whereIn('role', ['guru', 'guru_bk'])->latest()->take(10)->get();
+        $data['generatedAt'] = now()->isoFormat('dddd, D MMMM YYYY - HH:mm');
 
         $pdf = Pdf::loadView('admin.reports-pdf', $data);
         $pdf->setPaper('A4', 'portrait');
@@ -488,18 +489,7 @@ class AdminController extends Controller
 
     public function exportExcel()
     {
-        $data = [
-            'totalStudents' => Student::count(),
-            'totalTeachers' => User::whereIn('role', ['guru', 'guru_bk'])->count(),
-            'totalClasses' => Classes::count(),
-            'totalConsultations' => 456,
-            'completedConsultations' => 234,
-            'pendingConsultations' => 12,
-            'disciplineRecords' => 24,
-            'appointments' => 89,
-            'approvedAppointments' => 67,
-            'attendanceRate' => 94,
-        ];
+        $data = $this->getReportData();
 
         $filename = 'laporan-schoolify-' . now()->format('Y-m-d') . '.csv';
         $headers = ['Content-Type' => 'text/csv; charset=UTF-8', 'Content-Disposition' => 'attachment; filename="' . $filename . '"'];

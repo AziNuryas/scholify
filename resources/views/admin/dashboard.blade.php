@@ -6,7 +6,7 @@
 <div class="space-y-6 animate-fadeInUp">
 
     {{-- ====== HEADER ====== --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-50">
         <div>
             <h1 class="font-outfit font-black text-2xl text-[var(--text-primary)]">
                 Selamat Datang, <span class="text-indigo-600">{{ Str::words(auth()->user()->name, 2, '') }}</span>! 👋
@@ -16,7 +16,14 @@
             </p>
         </div>
         <div class="flex items-center gap-3">
-            <div class="neo-flat px-4 py-2 rounded-[1rem] flex items-center gap-2">
+            
+            {{-- Custom Dark Date Range Picker Input --}}
+            <div class="relative">
+                <input type="text" id="adminDateRange" class="neo-flat px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--text-primary)] bg-transparent outline-none w-[260px] cursor-pointer" readonly>
+                <i data-lucide="calendar" class="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"></i>
+            </div>
+
+            <div class="neo-flat px-4 py-2.5 rounded-xl flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span class="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest">System Online</span>
             </div>
@@ -256,9 +263,190 @@
 </div>
 
 @push('scripts')
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<style>
+    /* Neumorphism Date Range Picker */
+    .daterangepicker {
+        background-color: var(--bg) !important;
+        border: none !important;
+        border-radius: 24px !important;
+        font-family: 'Inter', sans-serif !important;
+        color: var(--text-primary) !important;
+        box-shadow: 12px 12px 24px rgba(var(--shadow-dark), 0.65),
+                    -12px -12px 24px rgba(var(--shadow-light), 1) !important;
+        overflow: hidden;
+        margin-top: 12px !important;
+    }
+    .daterangepicker::before, .daterangepicker::after { display: none !important; }
+    
+    /* Ranges Sidebar */
+    .daterangepicker .ranges {
+        background-color: var(--bg);
+        float: left;
+        margin: 0;
+        padding: 16px;
+        border-right: 1px solid rgba(var(--shadow-dark), 0.1);
+    }
+    .daterangepicker .ranges ul { width: 160px; }
+    .daterangepicker .ranges li {
+        color: var(--text-secondary);
+        font-size: 13px;
+        padding: 10px 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        margin-bottom: 4px;
+    }
+    .daterangepicker .ranges li:hover { 
+        background-color: transparent; 
+        color: var(--accent);
+        box-shadow: inset 3px 3px 6px rgba(var(--shadow-dark), 0.4),
+                    inset -3px -3px 6px rgba(var(--shadow-light), 0.8);
+    }
+    .daterangepicker .ranges li.active {
+        background-color: var(--bg) !important;
+        color: var(--text-primary) !important;
+        box-shadow: inset 4px 4px 8px rgba(var(--shadow-dark), 0.5),
+                    inset -4px -4px 8px rgba(var(--shadow-light), 0.9) !important;
+        border: none;
+    }
+
+    /* Calendars */
+    .daterangepicker .drp-calendar {
+        background-color: var(--bg);
+        padding: 16px;
+    }
+    .daterangepicker .drp-calendar.left { padding-right: 12px; }
+    .daterangepicker .drp-calendar.right { padding-left: 12px; border-left: 1px solid rgba(var(--shadow-dark), 0.1); }
+    
+    .daterangepicker .calendar-table {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    .daterangepicker .calendar-table th, .daterangepicker .calendar-table td {
+        border: none !important;
+        width: 34px;
+        height: 34px;
+        font-size: 12px;
+        border-radius: 10px !important;
+        color: var(--text-secondary);
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .daterangepicker .calendar-table th { color: var(--text-primary); font-weight: bold; }
+    .daterangepicker .calendar-table th.month { font-size: 14px; padding-bottom: 12px; }
+    .daterangepicker .calendar-table th.next span, .daterangepicker .calendar-table th.prev span {
+        border-color: var(--text-muted) !important;
+    }
+    
+    /* Date States */
+    .daterangepicker td.off, .daterangepicker td.off.in-range, .daterangepicker td.off.start-date, .daterangepicker td.off.end-date {
+        background-color: transparent !important;
+        color: var(--text-muted) !important;
+        opacity: 0.5;
+    }
+    .daterangepicker td.available:hover {
+        background-color: transparent !important;
+        color: var(--accent);
+        box-shadow: 4px 4px 8px rgba(var(--shadow-dark), 0.4),
+                    -4px -4px 8px rgba(var(--shadow-light), 0.8);
+    }
+    .daterangepicker td.in-range {
+        background-color: rgba(90, 24, 154, 0.1) !important;
+        color: var(--accent) !important;
+        border-radius: 0 !important;
+    }
+    .daterangepicker td.active, .daterangepicker td.active:hover {
+        background-color: var(--accent) !important;
+        color: #fff !important;
+        box-shadow: 4px 4px 8px rgba(90, 24, 154, 0.3) !important;
+        border-radius: 10px !important;
+    }
+
+    /* Bottom Buttons Area */
+    .daterangepicker .drp-buttons {
+        border-top: 1px solid rgba(var(--shadow-dark), 0.1);
+        background-color: var(--bg);
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    .daterangepicker .drp-selected {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: bold;
+        margin-right: auto;
+        padding-right: 15px;
+    }
+    .daterangepicker .btn {
+        border-radius: 12px;
+        padding: 8px 18px;
+        font-size: 13px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .daterangepicker .cancelBtn {
+        background-color: var(--bg);
+        color: var(--text-secondary);
+        box-shadow: inset 3px 3px 6px rgba(var(--shadow-dark), 0.5),
+                    inset -3px -3px 6px rgba(var(--shadow-light), 0.6);
+        margin-right: 10px;
+    }
+    .daterangepicker .applyBtn {
+        background-color: var(--bg);
+        color: var(--text-primary);
+        box-shadow: 5px 5px 10px rgba(var(--shadow-dark), 0.6),
+                    -5px -5px 10px rgba(var(--shadow-light), 1);
+    }
+    .daterangepicker .cancelBtn:hover {
+        color: #ef4444;
+    }
+    .daterangepicker .applyBtn:hover {
+        background-color: var(--accent);
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Date Range Picker Init
+    $('#adminDateRange').daterangepicker({
+        startDate: moment().subtract(29, 'days'),
+        endDate: moment(),
+        opens: 'left',
+        drops: 'down',
+        showCustomRangeLabel: true,
+        alwaysShowCalendars: true,
+        ranges: {
+           'Hari Ini': [moment(), moment()],
+           'Kemarin': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+           '7 Hari Terakhir': [moment().subtract(6, 'days'), moment()],
+           '30 Hari Terakhir': [moment().subtract(29, 'days'), moment()],
+           'Bulan Ini': [moment().startOf('month'), moment().endOf('month')],
+           'Bulan Lalu': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        locale: {
+            format: 'DD/MM/YYYY',
+            separator: " - ",
+            applyLabel: "Terapkan",
+            cancelLabel: "Batal",
+            customRangeLabel: "Pilih Manual",
+            daysOfWeek: ["Mg", "Sn", "Sl", "Rb", "Km", "Jm", "Sb"],
+            monthNames: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"],
+            firstDay: 1
+        }
+    });
 
     // Area Chart
     new ApexCharts(document.querySelector('#areaChart'), {

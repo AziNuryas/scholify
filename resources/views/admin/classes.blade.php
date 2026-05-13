@@ -105,8 +105,8 @@
                             </div>
                         </div>
 
-                        <!-- Compact Actions (Hidden initially, show on hover) -->
-                        <div class="mt-4 pt-3 border-t border-[var(--shadow-dark)]/5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <!-- Compact Actions -->
+                        <div class="mt-4 pt-3 border-t border-[var(--shadow-dark)]/5 flex gap-2 transition-opacity">
                             <a href="{{ route('admin.classes.edit', $class->id) }}" class="flex-1 neo-btn py-1.5 rounded-lg text-[9px] font-black text-indigo-600 text-center uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all">
                                 Edit
                             </a>

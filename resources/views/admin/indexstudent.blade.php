@@ -63,7 +63,7 @@
                     </div>
                     <div class="text-center lg:text-left">
                         <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Gender</p>
-                        <p class="text-xs font-black text-[var(--text-primary)] uppercase">{{ $student->gender == 'L' ? 'Laki-Laki' : 'Perempuan' }}</p>
+                        <p class="text-xs font-black text-[var(--text-primary)] uppercase">{{ optional($student->user)->gender == 'L' ? 'Laki-Laki' : 'Perempuan' }}</p>
                     </div>
                     <div class="text-center lg:text-left">
                         <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Terdaftar Sejak</p>
