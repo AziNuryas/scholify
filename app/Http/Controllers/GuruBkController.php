@@ -9,6 +9,9 @@ use App\Models\Student;
 use App\Models\LaporanGuru;
 use App\Models\AsesmenSiswa;
 use App\Models\DeteksiDiniSiswa;
+use App\Models\Appointment;
+use App\Models\Notification;
+use App\Models\CatatanKonseling;
 use App\Services\DeteksiDiniService;
 use Illuminate\Support\Facades\DB;
 
@@ -32,9 +35,22 @@ class GuruBkController extends Controller
         ]);
 
         $stats = [
-            'total_students'     => DB::table('students')->count(),
-            'active_cases'       => DB::table('chats')->where('receiver_id', auth()->id())->distinct('sender_id')->count(),
-            'unread_messages'    => DB::table('chats')->where('receiver_id', auth()->id())->where('is_read', false)->count(),
+            // Total siswa unik yang sudah selesai ditangani (dari catatan konseling)
+            'total_students' => CatatanKonseling::where('guru_bk_id', auth()->id())
+                ->where('status', 'selesai')
+                ->distinct('siswa_id')
+                ->count('siswa_id'),
+
+            // Kasus berjalan = catatan konseling status 'berjalan'
+            'active_cases' => CatatanKonseling::where('guru_bk_id', auth()->id())
+                ->where('status', 'berjalan')
+                ->count(),
+
+            'unread_messages' => DB::table('chats')
+                ->where('receiver_id', auth()->id())
+                ->where('is_read', false)
+                ->count(),
+
             'appointments_today' => \App\Models\Appointment::whereDate('date', today())->count(),
         ];
 
@@ -104,7 +120,10 @@ class GuruBkController extends Controller
             ->orderBy('time', 'desc')
             ->get();
 
-        return view('gurubk.appointments', compact('guru', 'appointments'));
+        // Daftar semua siswa untuk modal panggil siswa
+        $students = \App\Models\Student::with('schoolClass')->orderBy('name')->get();
+
+        return view('gurubk.appointments', compact('guru', 'appointments', 'students'));
     }
 
     public function updateAppointmentStatus(Request $request, $id)
@@ -114,9 +133,93 @@ class GuruBkController extends Controller
         try {
             $appointment = \App\Models\Appointment::findOrFail($id);
             $appointment->update(['status' => $request->status]);
+
+            if (in_array($request->status, ['approved', 'rejected'])) {
+                $this->sendStatusNotification($appointment, $request->status);
+            }
+
             return back()->with('success', 'Status jadwal temu diperbarui.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui status jadwal temu.');
+        }
+    }
+
+    /**
+     * BK membuat jadwal temu (memanggil siswa)
+     */
+    public function storeAppointmentByBk(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'date'       => 'required|date|after_or_equal:today',
+            'time'       => 'required',
+            'notes'      => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $student = \App\Models\Student::findOrFail($request->student_id);
+
+            $appointment = Appointment::create([
+                'student_id'   => $request->student_id,
+                'teacher_id'   => auth()->id(),
+                'date'         => $request->date,
+                'time'         => $request->time,
+                'notes'        => $request->notes,
+                'status'       => 'approved',
+                'initiated_by' => 'teacher',
+            ]);
+
+            $this->sendCallNotification($appointment, $student);
+
+            return back()->with('success', 'Siswa berhasil dipanggil! Notifikasi telah dikirim ke ' . $student->name . '.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal membuat jadwal temu: ' . $e->getMessage());
+        }
+    }
+
+    private function sendCallNotification(Appointment $appointment, $student)
+    {
+        if (!$student->user_id) return;
+
+        $tanggal  = \Carbon\Carbon::parse($appointment->date)->translatedFormat('d F Y');
+        $jam      = \Carbon\Carbon::parse($appointment->time)->format('H:i');
+        $guruName = auth()->user()->name ?? 'Guru BK';
+
+        if (class_exists(\App\Models\Notification::class)) {
+            try {
+                \App\Models\Notification::create([
+                    'user_id' => $student->user_id,
+                    'title'   => 'Panggilan dari Guru BK',
+                    'message' => "Kamu dipanggil oleh {$guruName} untuk jadwal temu pada {$tanggal} pukul {$jam} WIB."
+                                . ($appointment->notes ? " Keperluan: {$appointment->notes}" : ''),
+                    'type'    => 'appointment',
+                    'is_read' => false,
+                    'data'    => json_encode(['appointment_id' => $appointment->id]),
+                ]);
+            } catch (\Exception $e) {}
+        }
+    }
+
+    private function sendStatusNotification(Appointment $appointment, string $status)
+    {
+        $student = $appointment->student;
+        if (!$student || !$student->user_id) return;
+
+        $tanggal    = \Carbon\Carbon::parse($appointment->date)->translatedFormat('d F Y');
+        $jam        = \Carbon\Carbon::parse($appointment->time)->format('H:i');
+        $statusText = $status === 'approved' ? 'disetujui ✓' : 'ditolak ✗';
+
+        if (class_exists(\App\Models\Notification::class)) {
+            try {
+                \App\Models\Notification::create([
+                    'user_id' => $student->user_id,
+                    'title'   => 'Update Jadwal Temu',
+                    'message' => "Permintaan jadwal temu kamu pada {$tanggal} pukul {$jam} WIB telah {$statusText}.",
+                    'type'    => 'appointment',
+                    'is_read' => false,
+                    'data'    => json_encode(['appointment_id' => $appointment->id]),
+                ]);
+            } catch (\Exception $e) {}
         }
     }
 
@@ -125,7 +228,7 @@ class GuruBkController extends Controller
         $guruData = $this->getGuruBk();
         $guru     = collect($guruData ? $guruData->toArray() : []);
 
-        $records  = \App\Models\DisciplinaryRecord::with(['student.schoolClass'])
+        $records = \App\Models\DisciplinaryRecord::with(['student.schoolClass'])
             ->orderBy('created_at', 'desc')
             ->get();
 

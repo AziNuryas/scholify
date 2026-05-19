@@ -9,36 +9,64 @@ use Illuminate\Support\Facades\Auth;
 
 class CatatanKonselingController extends Controller
 {
-    /**
-     * Tampilkan daftar + form tambah catatan konseling.
-     */
     public function index(Request $request)
     {
-        $query = CatatanKonseling::with('siswa')
+        $query = CatatanKonseling::with(['siswa.schoolClass'])
             ->where('guru_bk_id', Auth::id())
             ->latest('tanggal_sesi');
 
-        // Filter pencarian nama siswa
+        // Filter: cari nama siswa
         if ($request->filled('cari')) {
             $query->whereHas('siswa', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->cari . '%');
             });
         }
 
-        // Filter status
+        // Filter: status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // Filter: jenis konseling
+        if ($request->filled('jenis')) {
+            $query->where('jenis_konseling', $request->jenis);
+        }
+
+        // Filter: kelas siswa
+        if ($request->filled('kelas')) {
+            $query->whereHas('siswa.schoolClass', function ($q) use ($request) {
+                $q->where('id', $request->kelas);
+            });
+        }
+
+        // Filter: tanggal dari
+        if ($request->filled('dari')) {
+            $query->whereDate('tanggal_sesi', '>=', $request->dari);
+        }
+
+        // Filter: tanggal sampai
+        if ($request->filled('sampai')) {
+            $query->whereDate('tanggal_sesi', '<=', $request->sampai);
         }
 
         $catatanList = $query->paginate(10)->withQueryString();
         $siswaList   = Student::orderBy('name')->get();
 
-        return view('gurubk.catatan_konseling.index', compact('catatanList', 'siswaList'));
+        // Ambil daftar kelas untuk dropdown filter
+        $kelasList = \App\Models\SchoolClass::orderBy('name')->get();
+
+        // Hitung total per status untuk summary card
+        $totalSemua      = CatatanKonseling::where('guru_bk_id', Auth::id())->count();
+        $totalBerjalan   = CatatanKonseling::where('guru_bk_id', Auth::id())->where('status', 'berjalan')->count();
+        $totalTindakLanjut = CatatanKonseling::where('guru_bk_id', Auth::id())->where('status', 'tindak_lanjut')->count();
+        $totalSelesai    = CatatanKonseling::where('guru_bk_id', Auth::id())->where('status', 'selesai')->count();
+
+        return view('gurubk.catatan_konseling.index', compact(
+            'catatanList', 'siswaList', 'kelasList',
+            'totalSemua', 'totalBerjalan', 'totalTindakLanjut', 'totalSelesai'
+        ));
     }
 
-    /**
-     * Simpan catatan konseling baru.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -58,7 +86,6 @@ class CatatanKonselingController extends Controller
         ]);
 
         $validated['guru_bk_id'] = Auth::id();
-
         CatatanKonseling::create($validated);
 
         return redirect()
@@ -66,29 +93,18 @@ class CatatanKonselingController extends Controller
             ->with('success', 'Catatan konseling berhasil disimpan.');
     }
 
-    /**
-     * Tampilkan detail satu catatan.
-     */
     public function show(CatatanKonseling $catatanKonseling)
     {
         $catatanKonseling->load('siswa', 'guruBk');
-
         return view('gurubk.catatan_konseling.show', compact('catatanKonseling'));
     }
 
-    /**
-     * Form edit catatan.
-     */
     public function edit(CatatanKonseling $catatanKonseling)
     {
         $siswaList = Student::orderBy('name')->get();
-
         return view('gurubk.catatan_konseling.edit', compact('catatanKonseling', 'siswaList'));
     }
 
-    /**
-     * Update catatan konseling.
-     */
     public function update(Request $request, CatatanKonseling $catatanKonseling)
     {
         $validated = $request->validate([
@@ -108,9 +124,6 @@ class CatatanKonselingController extends Controller
             ->with('success', 'Catatan konseling berhasil diperbarui.');
     }
 
-    /**
-     * Hapus catatan konseling.
-     */
     public function destroy(CatatanKonseling $catatanKonseling)
     {
         $catatanKonseling->delete();

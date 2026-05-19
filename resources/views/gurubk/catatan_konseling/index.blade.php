@@ -49,11 +49,48 @@
         max-height: 2000px;
         opacity: 1;
     }
+
+    #filter-panel {
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition: max-height 0.3s ease, opacity 0.2s ease;
+    }
+    #filter-panel.show {
+        max-height: 500px;
+        opacity: 1;
+    }
+
+    .filter-input {
+        width: 100%;
+        font-size: 0.8rem;
+        border-radius: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        outline: none;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        transition: border-color .2s;
+    }
+    .filter-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(124,58,237,0.15);
+    }
+    .filter-label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        margin-bottom: 0.3rem;
+        color: var(--text-muted);
+    }
 </style>
 
 <div class="animate-fadeInUp space-y-6">
 
-    <div class="flex items-center justify-between">
+    {{-- ===== HEADER ===== --}}
+    <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
             <h1 class="text-xl font-semibold" style="color: var(--text-primary)">Catatan Konseling</h1>
             <p class="text-sm mt-1" style="color: var(--text-secondary)">Rekam dan pantau sesi konseling siswa secara terstruktur.</p>
@@ -68,6 +105,27 @@
             </svg>
             Buat Catatan
         </button>
+    </div>
+
+    {{-- ===== SUMMARY CARDS ===== --}}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        @php
+            $cards = [
+                ['label' => 'Total Catatan',   'value' => $totalSemua,         'color' => 'rgba(168,85,247,.15)',  'text' => 'var(--accent-light)'],
+                ['label' => 'Berjalan',         'value' => $totalBerjalan,      'color' => 'rgba(168,85,247,.1)',   'text' => 'var(--accent-light)'],
+                ['label' => 'Tindak Lanjut',    'value' => $totalTindakLanjut,  'color' => 'rgba(251,191,36,.15)', 'text' => '#d97706'],
+                ['label' => 'Selesai',          'value' => $totalSelesai,       'color' => 'rgba(59,130,246,.12)', 'text' => '#2563eb'],
+            ];
+        @endphp
+        @foreach($cards as $card)
+        <div class="neo-flat rounded-xl px-4 py-3 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-base"
+                 style="background: {{ $card['color'] }}; color: {{ $card['text'] }}">
+                {{ $card['value'] }}
+            </div>
+            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ $card['label'] }}</p>
+        </div>
+        @endforeach
     </div>
 
     @if(session('success'))
@@ -165,27 +223,122 @@
 
     {{-- ===== TABEL RIWAYAT ===== --}}
     <div class="neo-flat rounded-2xl p-6">
-        <div class="flex items-center justify-between mb-4">
+
+        {{-- Header tabel + tombol filter --}}
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
             <h2 class="text-sm font-semibold" style="color: var(--text-primary)">Riwayat catatan konseling</h2>
-            <form method="GET" action="{{ route('gurubk.catatan-konseling.index') }}" class="flex gap-2">
-                <input type="text" name="cari" value="{{ request('cari') }}" placeholder="Cari siswa..."
-                       class="text-xs rounded-lg px-3 py-2 w-44 outline-none"
-                       style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)"/>
-                <select name="status"
-                        class="text-xs rounded-lg px-3 py-2 outline-none"
-                        style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
-                    <option value="">Semua status</option>
-                    @foreach(\App\Models\CatatanKonseling::$statusLabels as $val => $lbl)
-                        <option value="{{ $val }}" {{ request('status') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
-                    @endforeach
-                </select>
-                <button class="px-3 py-2 text-xs text-white rounded-lg transition"
-                        style="background: var(--accent)"
-                        onmouseover="this.style.background='var(--accent-hover)'"
-                        onmouseout="this.style.background='var(--accent)'">Cari</button>
+            <div class="flex items-center gap-2">
+                {{-- Badge jumlah filter aktif --}}
+                @php
+                    $activeFilters = collect(['cari','status','jenis','kelas','dari','sampai'])->filter(fn($k) => request()->filled($k))->count();
+                @endphp
+                <button onclick="toggleFilter()" id="btn-filter"
+                        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+                        style="border: 1px solid var(--border); color: var(--text-secondary); background: var(--bg)">
+                    <i class='bx bx-filter-alt'></i>
+                    Filter
+                    @if($activeFilters > 0)
+                    <span class="w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                          style="background: var(--accent)">{{ $activeFilters }}</span>
+                    @endif
+                </button>
+                @if($activeFilters > 0)
+                <a href="{{ route('gurubk.catatan-konseling.index') }}"
+                   class="text-xs px-3 py-1.5 rounded-lg transition"
+                   style="border: 1px solid rgba(239,68,68,.3); color: #f87171; background: rgba(239,68,68,.08)">
+                    <i class='bx bx-x'></i> Reset
+                </a>
+                @endif
+            </div>
+        </div>
+
+        {{-- Panel filter (collapsible) --}}
+        <div id="filter-panel" class="{{ $activeFilters > 0 ? 'show' : '' }}">
+            <form method="GET" action="{{ route('gurubk.catatan-konseling.index') }}"
+                  class="rounded-xl p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                  style="background: rgba(168,85,247,.05); border: 1px solid rgba(168,85,247,.15)">
+
+                {{-- Cari nama --}}
+                <div>
+                    <label class="filter-label">Nama Siswa</label>
+                    <input type="text" name="cari" value="{{ request('cari') }}"
+                           placeholder="Cari nama siswa..."
+                           class="filter-input"/>
+                </div>
+
+                {{-- Filter Kelas --}}
+                <div>
+                    <label class="filter-label">Kelas</label>
+                    <select name="kelas" class="filter-input">
+                        <option value="">Semua kelas</option>
+                        @foreach($kelasList as $kelas)
+                            <option value="{{ $kelas->id }}" {{ request('kelas') == $kelas->id ? 'selected' : '' }}>
+                                {{ $kelas->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Filter Jenis --}}
+                <div>
+                    <label class="filter-label">Jenis Konseling</label>
+                    <select name="jenis" class="filter-input">
+                        <option value="">Semua jenis</option>
+                        @foreach(\App\Models\CatatanKonseling::$jenisLabels as $val => $lbl)
+                            <option value="{{ $val }}" {{ request('jenis') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Filter Status --}}
+                <div>
+                    <label class="filter-label">Status</label>
+                    <select name="status" class="filter-input">
+                        <option value="">Semua status</option>
+                        @foreach(\App\Models\CatatanKonseling::$statusLabels as $val => $lbl)
+                            <option value="{{ $val }}" {{ request('status') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Filter Tanggal Dari --}}
+                <div>
+                    <label class="filter-label">Tanggal Dari</label>
+                    <input type="date" name="dari" value="{{ request('dari') }}" class="filter-input"/>
+                </div>
+
+                {{-- Filter Tanggal Sampai --}}
+                <div>
+                    <label class="filter-label">Tanggal Sampai</label>
+                    <input type="date" name="sampai" value="{{ request('sampai') }}" class="filter-input"/>
+                </div>
+
+                {{-- Tombol --}}
+                <div class="sm:col-span-2 lg:col-span-3 flex justify-end gap-2 pt-1">
+                    <a href="{{ route('gurubk.catatan-konseling.index') }}"
+                       class="px-4 py-1.5 text-xs rounded-lg transition"
+                       style="border: 1px solid var(--border); color: var(--text-secondary)">Reset</a>
+                    <button type="submit"
+                            class="px-5 py-1.5 text-xs text-white rounded-lg font-medium transition"
+                            style="background: var(--accent)"
+                            onmouseover="this.style.background='var(--accent-hover)'"
+                            onmouseout="this.style.background='var(--accent)'">
+                        <i class='bx bx-search'></i> Terapkan Filter
+                    </button>
+                </div>
             </form>
         </div>
 
+        {{-- Info hasil filter --}}
+        @if($activeFilters > 0)
+        <div class="mb-3 text-xs px-3 py-2 rounded-lg flex items-center gap-2"
+             style="background: rgba(168,85,247,.08); color: var(--accent-light)">
+            <i class='bx bx-info-circle'></i>
+            Menampilkan <strong>{{ $catatanList->total() }}</strong> catatan berdasarkan {{ $activeFilters }} filter aktif.
+        </div>
+        @endif
+
+        {{-- Tabel --}}
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -209,7 +362,7 @@
                                 </div>
                                 <div>
                                     <p class="font-medium" style="color: var(--text-primary)">{{ $catatan->siswa->name }}</p>
-                                    <p class="text-xs" style="color: var(--text-muted)">{{ $catatan->siswa->kelas }}</p>
+                                    <p class="text-xs" style="color: var(--text-muted)">{{ $catatan->siswa->kelas ?? ($catatan->siswa->schoolClass->name ?? '-') }}</p>
                                 </div>
                             </div>
                         </td>
@@ -251,13 +404,19 @@
                     @empty
                     <tr>
                         <td colspan="5" class="py-10 text-center text-sm" style="color: var(--text-muted)">
-                            Belum ada catatan konseling.
+                            @if($activeFilters > 0)
+                                Tidak ada catatan yang sesuai dengan filter.
+                                <a href="{{ route('gurubk.catatan-konseling.index') }}" class="underline" style="color: var(--accent-light)">Reset filter</a>
+                            @else
+                                Belum ada catatan konseling.
+                            @endif
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
         @if($catatanList->hasPages())
             <div class="mt-4">{{ $catatanList->links() }}</div>
         @endif
@@ -266,7 +425,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
-    // Init TomSelect langsung saat DOM ready — elemen ada di DOM meski tersembunyi via max-height
     document.addEventListener('DOMContentLoaded', function () {
         new TomSelect('#siswa-select', {
             placeholder: 'Ketik nama atau kelas untuk mencari...',
@@ -281,6 +439,11 @@
         if (form.classList.contains('show')) {
             form.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+    }
+
+    function toggleFilter() {
+        const panel = document.getElementById('filter-panel');
+        panel.classList.toggle('show');
     }
 </script>
 @endsection
