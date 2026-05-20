@@ -10,7 +10,6 @@
     <div class="neo-flat rounded-2xl p-6 sm:p-8 relative overflow-hidden flex items-center justify-between neo-card-hover"
          style="background: linear-gradient(135deg, #5B21B6, #7C3AED);">
         <div class="z-10 relative text-white">
-            <!-- Date Pill -->
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3"
                  style="background: rgba(0,0,0,0.1); box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2), inset -3px -3px 6px rgba(255,255,255,0.1);">
                 <i class='bx bx-calendar text-purple-200 text-sm'></i>
@@ -18,11 +17,9 @@
                     {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                 </p>
             </div>
-
             <h1 class="font-outfit font-extrabold text-2xl sm:text-3xl text-white mb-4">
                 Selamat Datang, {{ explode(',', $guru['name'])[0] }}! 👋
             </h1>
-
             <div class="p-3.5 rounded-xl max-w-md"
                  style="background: rgba(255,255,255,0.05); box-shadow: 4px 4px 8px rgba(0,0,0,0.15), -4px -4px 8px rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08);">
                 <p class="text-sm text-purple-100 leading-relaxed">
@@ -30,12 +27,10 @@
                 </p>
             </div>
         </div>
-
         <div class="hidden sm:flex items-center justify-center w-28 h-28 rounded-full z-10 relative"
              style="background: rgba(0,0,0,0.08); box-shadow: inset 6px 6px 12px rgba(0,0,0,0.25), inset -6px -6px 12px rgba(255,255,255,0.15);">
             <i class='bx bxs-heart-circle text-white/90 text-5xl'></i>
         </div>
-
         <div class="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
         <div class="absolute left-0 bottom-0 w-48 h-48 bg-purple-900/30 rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
     </div>
@@ -51,7 +46,6 @@
                 <h3 class="font-outfit font-black text-2xl text-[var(--text-primary)]">{{ number_format($stats['total_students']) }}</h3>
             </div>
         </div>
-
         <div class="neo-flat rounded-2xl p-6 flex items-center gap-5 neo-card-hover">
             <div class="w-14 h-14 rounded-full neo-pressed flex items-center justify-center text-2xl" style="color: #fb923c">
                 <i class='bx bx-user-voice'></i>
@@ -61,7 +55,6 @@
                 <h3 class="font-outfit font-black text-2xl text-[var(--text-primary)]">{{ $stats['active_cases'] }}</h3>
             </div>
         </div>
-
         <div class="neo-flat rounded-2xl p-6 flex items-center gap-5 neo-card-hover">
             <div class="w-14 h-14 rounded-full neo-pressed flex items-center justify-center text-2xl" style="color: var(--accent-light)">
                 <i class='bx bx-calendar-heart'></i>
@@ -92,11 +85,22 @@
                 </a>
             </div>
 
+            {{-- Filter --}}
+            <div class="flex gap-2 mb-4">
+                <a href="?agenda_filter=today"
+                   class="px-4 py-1.5 rounded-xl text-xs font-bold transition"
+                   style="{{ ($filter ?? 'today') === 'today' ? 'background: var(--accent); color: #fff;' : 'background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary);' }}">
+                    Hari Ini
+                </a>
+                <a href="?agenda_filter=week"
+                   class="px-4 py-1.5 rounded-xl text-xs font-bold transition"
+                   style="{{ ($filter ?? 'today') === 'week' ? 'background: var(--accent); color: #fff;' : 'background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary);' }}">
+                    Minggu Ini
+                </a>
+            </div>
+
             <div class="space-y-3">
-                @forelse($appointments ?? [
-                    ['name' => 'Dimas Aditya', 'class' => 'XII TKR 2', 'topic' => 'Konsultasi SNMPTN & Pemilihan Jurusan', 'time' => '13:00 WIB', 'type' => 'normal'],
-                    ['name' => 'Siti Nurbaya', 'class' => 'X MIPA 1', 'topic' => 'Kasus Pendisiplinan (Ketidakhadiran)', 'time' => '14:30 WIB', 'type' => 'alert'],
-                ] as $appt)
+                @forelse($appointments as $appt)
                 <div class="neo-pressed rounded-xl p-4 flex items-center justify-between group hover-glow transition-all cursor-pointer">
                     <div class="flex items-center gap-4">
                         <div class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0"
@@ -112,14 +116,21 @@
                             </p>
                         </div>
                     </div>
-                    <span class="font-bold text-sm px-3 py-1.5 rounded-xl neo-flat flex-shrink-0 ml-3" style="color: var(--accent-light)">
-                        {{ $appt['time'] ?? '-' }}
-                    </span>
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0 ml-3">
+                        @if(($filter ?? 'today') === 'week')
+                            <span class="text-xs font-medium" style="color: var(--text-muted)">{{ $appt['date'] }}</span>
+                        @endif
+                        <span class="font-bold text-sm px-3 py-1.5 rounded-xl neo-flat" style="color: var(--accent-light)">
+                            {{ $appt['time'] ?? '-' }}
+                        </span>
+                    </div>
                 </div>
                 @empty
                     <div class="neo-pressed rounded-xl p-6 text-center">
                         <i class='bx bx-calendar-x text-3xl text-[var(--text-muted)]'></i>
-                        <p class="text-sm font-bold text-[var(--text-primary)] mt-2">Tidak ada agenda hari ini</p>
+                        <p class="text-sm font-bold text-[var(--text-primary)] mt-2">
+                            Tidak ada agenda {{ ($filter ?? 'today') === 'week' ? 'minggu ini' : 'hari ini' }}
+                        </p>
                     </div>
                 @endforelse
             </div>
@@ -142,7 +153,7 @@
                    style="background: var(--accent); box-shadow: 0 4px 15px rgba(124,58,237,0.4);"
                    onmouseover="this.style.background='var(--accent-hover)'"
                    onmouseout="this.style.background='var(--accent)'">
-                    Isi Laporan
+                    Buat Catatan
                 </a>
             </div>
             <div class="absolute -bottom-10 -right-10 w-40 h-40 rounded-full" style="border: 20px solid rgba(255,255,255,0.04)"></div>

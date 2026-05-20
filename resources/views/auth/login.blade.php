@@ -1,126 +1,256 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Schoolify</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .bg-schoolify { background-color: #1e56f3; }
-        .text-schoolify { color: #1e56f3; }
-    </style>
-</head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+        :root {
+            --bg: #e6edf3;
+            --shadow-dark: 184, 198, 214;
+            --shadow-light: 255, 255, 255;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent: #5A189A;
+            --accent-light: #7B2CBF;
+        }
 
-    <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-100">
+        .dark {
+            --bg: #2b3040;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --accent: #a855f7;
+            --accent-light: #c084fc;
+            --shadow-light: 50, 56, 75;
+            --shadow-dark: 35, 39, 53;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+
+        /* ====== NEUMORPHISM CORE ====== */
+        .neo-flat {
+            background: var(--bg);
+            border-radius: 24px;
+            box-shadow: 12px 12px 24px rgba(var(--shadow-dark), 0.65),
+                        -12px -12px 24px rgba(var(--shadow-light), 1);
+            transition: all 0.3s ease;
+        }
+
+        .neo-pressed {
+            background: var(--bg);
+            border-radius: 16px;
+            box-shadow: inset 6px 6px 12px rgba(var(--shadow-dark), 0.6),
+                        inset -6px -6px 12px rgba(var(--shadow-light), 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .neo-btn {
+            background: var(--bg);
+            border-radius: 16px;
+            box-shadow: 6px 6px 12px rgba(var(--shadow-dark), 0.6),
+                        -6px -6px 12px rgba(var(--shadow-light), 1);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .neo-btn:hover {
+            box-shadow: 3px 3px 6px rgba(var(--shadow-dark), 0.4),
+                        -3px -3px 6px rgba(var(--shadow-light), 0.7),
+                        0 0 20px rgba(90, 24, 154, 0.4);
+            background: var(--accent);
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .neo-btn:active {
+            box-shadow: inset 4px 4px 8px rgba(var(--shadow-dark), 0.6),
+                        inset -4px -4px 8px rgba(var(--shadow-light), 0.8);
+            transform: translateY(0);
+        }
+
+        .neo-input {
+            background: var(--bg);
+            box-shadow: inset 4px 4px 8px rgba(var(--shadow-dark), 0.5),
+                        inset -4px -4px 8px rgba(var(--shadow-light), 0.6);
+            border: none;
+            outline: none;
+            padding: 14px 18px;
+            border-radius: 16px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .neo-input:focus {
+            box-shadow: inset 2px 2px 4px rgba(var(--shadow-dark), 0.5),
+                        inset -2px -2px 4px rgba(var(--shadow-light), 0.6),
+                        0 0 0 2px rgba(90, 24, 154, 0.3);
+        }
+        
+        .neo-input::placeholder { color: var(--text-muted); }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInUp { animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        
+        /* Blue Accent Button */
+        .btn-blue {
+            background: #2563eb; /* Blue 600 */
+            color: white !important;
+            border-radius: 16px;
+            box-shadow: 6px 6px 12px rgba(37, 99, 235, 0.3),
+                        -4px -4px 10px rgba(var(--shadow-light), 0.8),
+                        inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-blue:hover {
+            background: #1d4ed8; /* Blue 700 */
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 8px rgba(37, 99, 235, 0.4),
+                        -2px -2px 5px rgba(var(--shadow-light), 0.7),
+                        0 0 15px rgba(37, 99, 235, 0.4);
+        }
+        .btn-blue:active {
+            box-shadow: inset 4px 4px 8px rgba(30, 58, 138, 0.6),
+                        inset -4px -4px 8px rgba(96, 165, 250, 0.4);
+            transform: translateY(0);
+        }
+    </style>
+    
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    
+    <!-- Theme Toggle (Top Right) -->
+    <button onclick="toggleTheme()" class="absolute top-6 right-6 neo-btn p-3 rounded-xl text-[var(--text-secondary)] outline-none hover:text-[var(--accent)] transition-colors z-20" title="Ubah Tema">
+        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+    </button>
+
+    <div class="w-full max-w-[420px] neo-flat p-8 sm:p-10 relative z-10 animate-fadeInUp">
+        
+        <!-- Logo & Header -->
         <div class="text-center mb-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-schoolify text-white rounded-2xl mb-4 shadow-lg shadow-blue-200">
-                <i class="fas fa-user-graduate text-3xl"></i>
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-5 text-white shadow-lg shadow-blue-500/30 bg-blue-600">
+                <i data-lucide="book-open" class="w-10 h-10"></i>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800">Schoolify</h1>
-            <p class="text-gray-500 text-sm">School Management System</p>
+            <h1 class="font-outfit font-extrabold text-3xl text-[var(--text-primary)] tracking-tight">Scholify</h1>
+            <p class="text-[var(--text-secondary)] text-sm mt-2 font-medium">Sistem Manajemen Sekolah Modern</p>
         </div>
 
         @if($errors->any())
-            <div class="mb-4 p-3 bg-red-100 text-red-600 rounded-xl text-sm border border-red-200">
-                <i class="fas fa-exclamation-circle mr-1"></i> {{ $errors->first() }}
+            <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-600 rounded-xl text-sm font-semibold flex items-start gap-3 shadow-inner">
+                <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i> 
+                <span>{{ $errors->first() }}</span>
             </div>
         @endif
 
-        <form action="{{ route('login.post') }}" method="POST">
+        <form action="{{ route('login.post') }}" method="POST" class="space-y-6 relative z-20">
             @csrf
             
-            <div class="mb-5">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i class="fas fa-envelope"></i>
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider ml-1">Email</label>
+                <div class="relative group">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-muted)] group-focus-within:text-blue-500 transition-colors">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
                     </span>
                     <input type="email" name="email" required 
-                        class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200"
-                        placeholder="admin@school.com">
+                        class="neo-input pl-12"
+                        placeholder="Masukkan alamat email">
                 </div>
             </div>
 
-            <div class="mb-6">
-                <div class="flex justify-between mb-2">
-                    <label class="text-sm font-semibold text-gray-700">Password</label>
-                    <a href="#" class="text-xs font-medium text-schoolify hover:underline">Forgot Password?</a>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center ml-1">
+                    <label class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Password</label>
+                    <a href="#" class="text-xs font-bold text-blue-500 hover:text-[var(--accent)] hover:underline transition-all">Lupa Sandi?</a>
                 </div>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i class="fas fa-lock"></i>
+                <div class="relative group">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-muted)] group-focus-within:text-blue-500 transition-colors">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
                     </span>
                     <input type="password" name="password" id="passwordInput" required 
-                        class="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition duration-200"
+                        class="neo-input pl-12 pr-12"
                         placeholder="••••••••">
                     <button type="button" onclick="togglePassword()"
-                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition duration-200">
-                        <i id="toggleIcon" class="fas fa-eye"></i>
+                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-[var(--text-muted)] hover:text-blue-500 transition duration-200 outline-none">
+                        <i data-lucide="eye" id="toggleIcon" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
 
-            <button type="submit" 
-                class="w-full bg-schoolify hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 transition duration-300 flex items-center justify-center">
-                <span>Login</span>
-                <i class="fas fa-arrow-right ml-2 text-sm"></i>
-            </button>
+            <div class="pt-4">
+                <button type="submit" 
+                    class="w-full btn-blue py-4 text-sm font-bold flex items-center justify-center gap-2">
+                    <span class="tracking-wide">Masuk ke Dashboard</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
         </form>
 
-        <div class="mt-8 text-center border-t border-gray-100 pt-6">
-            <div class="text-xs text-gray-600 bg-blue-50 p-4 rounded-xl text-left inline-block w-full border border-blue-100 shadow-sm">
-                <p class="font-bold mb-2 text-schoolify"><i class="fas fa-info-circle mr-1"></i> Mode Demo Aktif (Gunakan akun ini):</p>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <div class="bg-white p-2 rounded border border-gray-100">
-                        <span class="font-bold text-gray-700 text-[10px] uppercase shadow-sm px-1.5 py-0.5 bg-gray-100 rounded mr-1">ADMIN</span>
-                        <br>admin@school.com<br><span class="text-gray-400">admin123</span>
-                    </div>
-                    <div class="bg-white p-2 rounded border border-gray-100">
-                        <span class="font-bold text-schoolify text-[10px] uppercase shadow-sm px-1.5 py-0.5 bg-blue-100 rounded mr-1">SISWA</span>
-                        <br>siswa@school.com<br><span class="text-gray-400">siswa123</span>
-                    </div>
-                </div>
-
-                {{-- Guru Mapel --}}
-                <div class="mb-2">
-                    <p class="text-[10px] font-bold text-indigo-600 mb-1">GURU</p>
-                    <div class="bg-white p-2 rounded border border-indigo-100 bg-indigo-50/20">
-                        <span class="font-bold text-indigo-600 text-[10px] uppercase px-1.5 py-0.5 bg-indigo-100 rounded mr-1">GURU</span>
-                        guru@school.com | <span class="text-gray-400">guru123</span>
-                    </div>
-                </div>
-
-                {{-- Guru BK --}}
-                <div>
-                    <p class="text-[10px] font-bold text-teal-600 mb-1">GURU BK</p>
-                    <div class="bg-white p-2 rounded border border-teal-100">
-                        <span class="font-bold text-teal-700 text-[10px] uppercase px-1.5 py-0.5 bg-teal-100 rounded mr-1">BK</span>
-                        azibk@gmail.com | <span class="text-gray-400">bk123</span>
-                    </div>
-                </div>
-            </div>
+        <div class="mt-8 text-center">
+            <p class="text-xs font-semibold text-[var(--text-muted)]">
+                &copy; {{ date('Y') }} Scholify. Hak Cipta Dilindungi.
+            </p>
         </div>
     </div>
 
     <script>
+        lucide.createIcons();
+
         function togglePassword() {
             const input = document.getElementById('passwordInput');
             const icon = document.getElementById('toggleIcon');
+            
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.setAttribute('data-lucide', 'eye-off');
             } else {
                 input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.setAttribute('data-lucide', 'eye');
             }
+            lucide.createIcons();
         }
     </script>
-
 </body>
 </html>

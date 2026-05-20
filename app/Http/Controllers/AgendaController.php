@@ -11,11 +11,31 @@ class AgendaController extends Controller
     /**
      * Menampilkan daftar agenda (untuk admin)
      */
-    public function index()
+    public function index(Request $request)
     {
-        $agendas = Agenda::with('creator')
-            ->orderBy('start_date', 'desc')
-            ->paginate(15);
+        $query = Agenda::with('creator');
+
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%')
+                  ->orWhere('location', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        $agendas = $query->orderBy('start_date', 'desc')
+            ->paginate(15)
+            ->withQueryString();
         
         $stats = [
             'total' => Agenda::count(),

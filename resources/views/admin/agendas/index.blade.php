@@ -1,173 +1,208 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Agenda - Schoolify Modern</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-indigo: #6366F1; --primary-rose: #F43F5E; --primary-mint: #10B981; --primary-amber: #F59E0B;
-            --bg-glass: rgba(255, 255, 255, 0.75); --text-primary: #0F172A; --text-secondary: #475569; --text-muted: #94A3B8;
-            --border-glass: rgba(203, 213, 225, 0.5); --sidebar-width: 280px;
-            --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05); --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.08);
-            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1); --shadow-xl: 0 25px 50px -12px rgba(0,0,0,0.15);
-            --shadow-diagonal: 8px 8px 20px rgba(0,0,0,0.06), -5px -5px 15px rgba(255,255,255,0.8);
-            --gradient-indigo: linear-gradient(145deg, #818CF8 0%, #6366F1 100%);
-            --gradient-lavender: linear-gradient(145deg, #A78BFA 0%, #8B5CF6 100%);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(145deg, #F1F5F9 0%, #E2E8F0 100%); color: var(--text-primary); min-height: 100vh; }
-        body::before { content: ''; position: fixed; top: -50%; right: -20%; width: 80%; height: 150%; background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+@extends('layouts.admin')
+@section('title', 'Agenda Sekolah - Schoolify Admin')
+@section('page-title', 'Manajemen Agenda Sekolah')
 
-        .sidebar { position: fixed; left: 24px; top: 24px; bottom: 24px; width: var(--sidebar-width); background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: 32px; z-index: 1000; padding: 24px 16px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: var(--shadow-xl), var(--shadow-diagonal); }
-        .sidebar-header { display: flex; align-items: center; gap: 12px; padding: 0 12px 32px; }
-        .sidebar-header .logo-icon { width: 44px; height: 44px; background: var(--gradient-lavender); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; }
-        .sidebar-header h2 { font-size: 24px; font-weight: 800; font-family: 'Outfit', sans-serif; background: var(--gradient-lavender); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .menu-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin: 24px 12px 10px; }
-        .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
-        .menu-item { padding: 12px 16px; border-radius: 18px; display: flex; align-items: center; gap: 14px; color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: 15px; }
-        .menu-item i { font-size: 20px; width: 24px; }
-        .menu-item:hover { background: rgba(255,255,255,0.9); color: var(--primary-indigo); }
-        .menu-item.active { background: var(--gradient-indigo); color: white; }
-        .logout-container { margin-top: auto; padding-top: 24px; border-top: 1px solid var(--border-glass); }
-        .btn-logout { width: 100%; padding: 14px; background: rgba(248,113,113,0.1); color: var(--primary-rose); border: 1px solid rgba(248,113,113,0.2); border-radius: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-
-        .main-content { margin-left: calc(var(--sidebar-width) + 48px); padding: 24px 32px; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-        .page-header h1 { font-size: 32px; font-weight: 800; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 12px; }
-        .page-header h1 i { color: var(--primary-indigo); background: white; padding: 12px; border-radius: 20px; box-shadow: var(--shadow-sm); }
-        .btn-primary { padding: 14px 28px; background: var(--gradient-indigo); border: none; border-radius: 16px; color: white; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: var(--shadow-md); }
-
-        .alert { padding: 16px 24px; border-radius: 20px; margin-bottom: 28px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); }
-        .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #059669; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
-        .stat-card { background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 20px; padding: 20px; border: 1px solid var(--border-glass); box-shadow: var(--shadow-sm); }
-        .stat-card h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-        .stat-card .value { font-size: 32px; font-weight: 800; color: var(--primary-indigo); }
-
-        .content-card { background: var(--bg-glass); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid var(--border-glass); overflow: hidden; box-shadow: var(--shadow-lg); }
-        .table-wrapper { overflow-x: auto; padding: 0 8px 8px; }
-        .data-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-        .data-table th { text-align: left; padding: 14px 20px; font-size: 11px; text-transform: uppercase; color: var(--text-muted); }
-        .data-table td { padding: 16px 20px; background: white; border: 1px solid var(--border-glass); border-style: solid none; }
-        .data-table td:first-child { border-left-style: solid; border-radius: 16px 0 0 16px; }
-        .data-table td:last-child { border-right-style: solid; border-radius: 0 16px 16px 0; }
-
-        .badge { padding: 4px 12px; border-radius: 30px; font-size: 11px; font-weight: 600; }
-        .badge-ujian { background: rgba(239,68,68,0.12); color: #EF4444; }
-        .badge-rapat { background: rgba(139,92,246,0.12); color: #8B5CF6; }
-        .badge-libur { background: rgba(16,185,129,0.12); color: #10B981; }
-        .badge-kegiatan { background: rgba(59,130,246,0.12); color: #3B82F6; }
-        .badge-lainnya { background: rgba(100,116,139,0.12); color: #64748B; }
-        .badge-active { background: rgba(16,185,129,0.12); color: #10B981; }
-        .badge-inactive { background: rgba(100,116,139,0.12); color: #64748B; }
-        .badge-ongoing { background: rgba(245,158,11,0.12); color: #F59E0B; }
-
-        .action-buttons { display: flex; gap: 8px; }
-        .btn-action { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border-glass); color: var(--text-secondary); text-decoration: none; transition: all 0.2s; }
-        .btn-action:hover { border-color: var(--primary-indigo); color: var(--primary-indigo); }
-        .btn-delete { color: #EF4444; }
-        .btn-delete:hover { border-color: #EF4444; background: rgba(239,68,68,0.08); }
-
-        .pagination { display: flex; justify-content: center; padding: 20px; }
-        .pagination nav { display: flex; gap: 8px; }
-        .pagination a, .pagination span { padding: 8px 16px; border-radius: 10px; background: white; color: var(--text-secondary); text-decoration: none; border: 1px solid var(--border-glass); }
-        .pagination .active { background: var(--gradient-indigo); color: white; border-color: transparent; }
-
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .sidebar { transform: translateX(-120%); } .main-content { margin-left: 24px; } .stats-grid { grid-template-columns: 1fr; } .page-header { flex-direction: column; gap: 16px; align-items: flex-start; } }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <div class="sidebar-header"><div class="logo-icon"><i class="fas fa-cloud"></i></div><h2>Schoolify</h2></div>
-        <div class="sidebar-menu">
-            <p class="menu-label">Menu Utama</p>
-            <a href="{{ route('admin.dashboard') }}" class="menu-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
-            <a href="{{ route('admin.students') }}" class="menu-item"><i class="fas fa-user-graduate"></i><span>Data Siswa</span></a>
-            <a href="{{ route('admin.teachers') }}" class="menu-item"><i class="fas fa-chalkboard-user"></i><span>Data Guru</span></a>
-            <a href="{{ route('admin.agendas.index') }}" class="menu-item active"><i class="fas fa-calendar-alt"></i><span>Agenda</span></a>
-            <a href="{{ route('admin.classes') }}" class="menu-item"><i class="fas fa-door-open"></i><span>Manajemen Kelas</span></a>
-            <p class="menu-label">Lainnya</p>
-            <a href="{{ route('admin.reports') }}" class="menu-item"><i class="fas fa-chart-bar"></i><span>Laporan</span></a>
-            <a href="{{ route('admin.settings') }}" class="menu-item"><i class="fas fa-cog"></i><span>Pengaturan</span></a>
-            <a href="{{ route('admin.profile') }}" class="menu-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
-        </div>
-        <div class="logout-container"><form action="{{ route('logout') }}" method="POST">@csrf<button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</button></form></div>
-    </div>
-
-    <div class="main-content">
-        <div class="page-header">
-            <h1><i class="fas fa-calendar-alt"></i>Agenda</h1>
-            <a href="{{ route('admin.agendas.create') }}" class="btn-primary"><i class="fas fa-plus"></i> Tambah Agenda</a>
-        </div>
-
-        @if(session('success'))
-        <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
-        @endif
-
-        <div class="stats-grid">
-            <div class="stat-card"><h3><i class="fas fa-calendar"></i> Total Agenda</h3><div class="value">{{ $stats['total'] }}</div></div>
-            <div class="stat-card"><h3><i class="fas fa-check-circle"></i> Agenda Aktif</h3><div class="value">{{ $stats['active'] }}</div></div>
-            <div class="stat-card"><h3><i class="fas fa-clock"></i> Akan Datang</h3><div class="value">{{ $stats['upcoming'] }}</div></div>
-            <div class="stat-card"><h3><i class="fas fa-play-circle"></i> Sedang Berlangsung</h3><div class="value">{{ $stats['ongoing'] }}</div></div>
-        </div>
-
-        <div class="content-card">
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Judul</th>
-                            <th>Tipe</th>
-                            <th>Tanggal</th>
-                            <th>Waktu</th>
-                            <th>Target</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($agendas as $agenda)
-                        <tr>
-                            <td><strong>{{ $agenda->title }}</strong></td>
-                            <td><span class="badge {{ $agenda->type_badge_class }}">{{ $agenda->type_label }}</span></td>
-                            <td>{{ $agenda->formatted_date }}</td>
-                            <td>{{ $agenda->formatted_time }}</td>
-                            <td><span class="badge">{{ ucfirst($agenda->target_role) }}</span></td>
-                            <td>
-                                @if(!$agenda->is_active)
-                                    <span class="badge badge-inactive"><i class="fas fa-pause"></i> Nonaktif</span>
-                                @elseif($agenda->is_ongoing)
-                                    <span class="badge badge-ongoing"><i class="fas fa-play"></i> Berlangsung</span>
-                                @else
-                                    <span class="badge badge-active"><i class="fas fa-check"></i> Aktif</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="{{ route('admin.agendas.edit', $agenda->id) }}" class="btn-action"><i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('admin.agendas.delete', $agenda->id) }}" method="POST" onsubmit="return confirm('Hapus agenda ini?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn-action btn-delete"><i class="fas fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="7" style="text-align: center; padding: 40px;"><i class="fas fa-calendar" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i><p>Belum ada agenda. Klik "Tambah Agenda" untuk memulai.</p></td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
+@section('content')
+<div class="space-y-6 animate-fadeInUp">
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="neo-flat rounded-2xl p-4 flex flex-col items-center justify-center text-center neo-card-hover group transition-all">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="calendar" class="w-6 h-6 text-white"></i>
             </div>
-            @if($agendas->hasPages())
-            <div class="pagination">{{ $agendas->links() }}</div>
-            @endif
+            <h3 class="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider mb-1">Total Agenda</h3>
+            <div class="font-outfit font-extrabold text-2xl text-[var(--text-primary)]">{{ $stats['total'] }}</div>
+        </div>
+
+        <div class="neo-flat rounded-2xl p-4 flex flex-col items-center justify-center text-center neo-card-hover group transition-all">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="check-circle-2" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider mb-1">Aktif</h3>
+            <div class="font-outfit font-extrabold text-2xl text-emerald-500">{{ $stats['active'] }}</div>
+        </div>
+
+        <div class="neo-flat rounded-2xl p-4 flex flex-col items-center justify-center text-center neo-card-hover group transition-all">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="clock" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider mb-1">Upcoming</h3>
+            <div class="font-outfit font-extrabold text-2xl text-amber-500">{{ $stats['upcoming'] }}</div>
+        </div>
+
+        <div class="neo-flat rounded-2xl p-4 flex flex-col items-center justify-center text-center neo-card-hover group transition-all">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-400 to-rose-600 shadow-lg shadow-rose-500/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="play-circle" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider mb-1">Berlangsung</h3>
+            <div class="font-outfit font-extrabold text-2xl text-rose-500">{{ $stats['ongoing'] }}</div>
         </div>
     </div>
-</body>
-</html>
+
+    <!-- Filter & Actions Bar -->
+    <div class="neo-flat rounded-3xl p-6">
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+            <form action="{{ route('admin.agendas.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full lg:flex-1">
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari agenda..." class="w-full neo-input py-2.5 pl-9 pr-3 text-xs font-bold">
+                </div>
+                
+                <div class="relative">
+                    <select name="type" class="w-full neo-input appearance-none py-2.5 px-4 text-xs font-bold cursor-pointer" onchange="this.form.submit()">
+                        <option value="">Semua Tipe</option>
+                        <option value="ujian" {{ request('type') == 'ujian' ? 'selected' : '' }}>Ujian</option>
+                        <option value="rapat" {{ request('type') == 'rapat' ? 'selected' : '' }}>Rapat</option>
+                        <option value="libur" {{ request('type') == 'libur' ? 'selected' : '' }}>Libur</option>
+                        <option value="kegiatan" {{ request('type') == 'kegiatan' ? 'selected' : '' }}>Kegiatan</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"></i>
+                </div>
+
+                <div class="relative">
+                    <select name="status" class="w-full neo-input appearance-none py-2.5 px-4 text-xs font-bold cursor-pointer" onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
+                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"></i>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 neo-btn py-2.5 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20">
+                        Filter
+                    </button>
+                    <a href="{{ route('admin.agendas.index') }}" class="neo-btn p-2.5 text-rose-500" title="Reset Filter">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </form>
+
+            <a href="{{ route('admin.agendas.create') }}" class="w-full lg:w-auto neo-btn flex items-center justify-center gap-2 px-8 py-3 text-xs font-black bg-[var(--accent)] text-white shadow-lg shadow-blue-500/30 hover:scale-105 transition-all">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> TAMBAH AGENDA
+            </a>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="neo-flat rounded-[2rem] overflow-hidden">
+        <div class="overflow-x-auto custom-scroll">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] border-b border-[var(--shadow-dark)]/10">
+                        <th class="px-6 py-5">Agenda & Tipe</th>
+                        <th class="px-6 py-5">Waktu Pelaksanaan</th>
+                        <th class="px-6 py-5">Target & Lokasi</th>
+                        <th class="px-6 py-5 text-center">Status</th>
+                        <th class="px-6 py-5 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    @forelse($agendas as $agenda)
+                    <tr class="group hover:bg-white/40 dark:hover:bg-black/10 transition-all duration-300 border-b border-[var(--shadow-dark)]/5 last:border-0">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-4">
+                                @php
+                                    $typeIcon = match($agenda->type) {
+                                        'ujian' => 'book-text',
+                                        'rapat' => 'users',
+                                        'libur' => 'palmtree',
+                                        'kegiatan' => 'sparkles',
+                                        default => 'calendar'
+                                    };
+                                    $typeColor = match($agenda->type) {
+                                        'ujian' => 'text-rose-600 bg-rose-100',
+                                        'rapat' => 'text-amber-600 bg-amber-100',
+                                        'libur' => 'text-emerald-600 bg-emerald-100',
+                                        'kegiatan' => 'text-indigo-600 bg-indigo-100',
+                                        default => 'text-slate-600 bg-slate-100'
+                                    };
+                                @endphp
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center {{ $typeColor }} shadow-inner">
+                                    <i data-lucide="{{ $typeIcon }}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="font-black text-[var(--text-primary)] text-sm group-hover:text-[var(--accent)] transition-colors">{{ $agenda->title }}</p>
+                                    <p class="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">{{ $agenda->type_label }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black text-[var(--text-primary)] flex items-center gap-1.5">
+                                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> {{ $agenda->formatted_date }}
+                                </span>
+                                <span class="text-[10px] text-[var(--text-muted)] font-bold flex items-center gap-1.5 mt-1 italic">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> {{ $agenda->formatted_time }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col gap-1.5">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[9px] font-black border border-slate-200 uppercase tracking-widest w-max">
+                                    <i data-lucide="users" class="w-3 h-3"></i> {{ $agenda->target_role }}
+                                </span>
+                                @if($agenda->location)
+                                <span class="text-[10px] text-[var(--text-muted)] font-bold flex items-center gap-1.5">
+                                    <i data-lucide="map-pin" class="w-3 h-3"></i> {{ $agenda->location }}
+                                </span>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            @if(!$agenda->is_active)
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-400 text-[9px] font-black border border-slate-200 uppercase tracking-widest">
+                                    NONAKTIF
+                                </span>
+                            @elseif($agenda->is_ongoing)
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-600 text-[9px] font-black border border-rose-200 animate-pulse uppercase tracking-widest">
+                                    BERLANGSUNG
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-600 text-[9px] font-black border border-emerald-200 uppercase tracking-widest">
+                                    AKTIF
+                                </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="{{ route('admin.agendas.edit', $agenda->id) }}" class="neo-btn p-2 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-all shadow-sm" title="Edit Agenda">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </a>
+                                <form action="{{ route('admin.agendas.delete', $agenda->id) }}" method="POST" onsubmit="return confirm('Hapus agenda ini?')" class="inline-block">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="neo-btn p-2 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm" title="Hapus Agenda">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <div class="w-20 h-20 bg-slate-100 rounded-[2rem] flex items-center justify-center text-slate-400">
+                                    <i data-lucide="calendar-x" class="w-10 h-10"></i>
+                                </div>
+                                <div>
+                                    <p class="font-black text-slate-600 uppercase tracking-widest">Tidak Ada Agenda</p>
+                                    <p class="text-xs text-slate-400 font-bold mt-1">Belum ada agenda yang terdaftar atau sesuai filter.</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if($agendas->hasPages())
+        <div class="px-8 py-6 border-t border-[var(--shadow-dark)]/5">
+            {{ $agendas->links() }}
+        </div>
+        @endif
+    </div>
+</div>
+@endsection

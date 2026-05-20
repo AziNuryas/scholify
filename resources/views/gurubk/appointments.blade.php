@@ -6,9 +6,17 @@
 @section('content')
 <div class="space-y-6 pt-2 animate-fadeInUp">
 
-    <div class="mb-2">
-        <h1 class="font-outfit font-bold text-3xl mb-1" style="color: var(--text-primary)">Jadwal Temu Siswa</h1>
-        <p class="text-sm" style="color: var(--text-secondary)">Kelola permintaan antrian konsultasi langsung dari siswa.</p>
+    <div class="mb-2 flex items-center justify-between flex-wrap gap-4">
+        <div>
+            <h1 class="font-outfit font-bold text-3xl mb-1" style="color: var(--text-primary)">Jadwal Temu Siswa</h1>
+            <p class="text-sm" style="color: var(--text-secondary)">Kelola permintaan antrian konsultasi langsung dari siswa.</p>
+        </div>
+        {{-- Tombol Panggil Siswa --}}
+        <button onclick="document.getElementById('modal-panggil').classList.remove('hidden')"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white transition hover:scale-105 shadow-md"
+                style="background: var(--accent)">
+            <i class='bx bx-phone-call text-lg'></i> Panggil Siswa
+        </button>
     </div>
 
     @if(session('success'))
@@ -35,6 +43,7 @@
                         <th class="px-6 py-4">Siswa</th>
                         <th class="px-6 py-4">Tanggal &amp; Waktu</th>
                         <th class="px-6 py-4">Catatan/Alasan</th>
+                        <th class="px-6 py-4">Sumber</th>
                         <th class="px-6 py-4">Status</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
@@ -45,10 +54,10 @@
                         onmouseover="this.style.background='rgba(168,85,247,.06)'" onmouseout="this.style.background=''">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <img src="{{ $appt->student->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($appt->student->name) }}"
+                                <img src="{{ $appt->student->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($appt->student->name ?? 'S') }}"
                                      class="w-8 h-8 rounded-full">
                                 <div>
-                                    <p class="font-bold" style="color: var(--text-primary)">{{ $appt->student->name }}</p>
+                                    <p class="font-bold" style="color: var(--text-primary)">{{ $appt->student->name ?? '-' }}</p>
                                     <p class="text-xs" style="color: var(--text-muted)">{{ $appt->student->schoolClass->name ?? '-' }}</p>
                                 </div>
                             </div>
@@ -61,6 +70,18 @@
                         </td>
                         <td class="px-6 py-4 max-w-xs truncate" style="color: var(--text-secondary)" title="{{ $appt->notes }}">
                             {{ $appt->notes ?: '-' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            @if(($appt->initiated_by ?? 'student') === 'teacher')
+                                <span class="px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit"
+                                      style="background: rgba(168,85,247,.15); color: var(--accent-light)">
+                                    <i class='bx bx-phone-call'></i> Panggilan BK
+                                </span>
+                            @else
+                                <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold flex items-center gap-1 w-fit">
+                                    <i class='bx bx-user'></i> Permintaan Siswa
+                                </span>
+                            @endif
                         </td>
                         <td class="px-6 py-4">
                             @if($appt->status === 'pending')
@@ -108,7 +129,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-10 text-center" style="color: var(--text-muted)">
+                        <td colspan="6" class="px-6 py-10 text-center" style="color: var(--text-muted)">
                             Belum ada permintaan jadwal temu.
                         </td>
                     </tr>
@@ -116,6 +137,98 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+{{-- ======================================================= --}}
+{{-- MODAL PANGGIL SISWA                                      --}}
+{{-- ======================================================= --}}
+<div id="modal-panggil"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/30 backdrop-blur-sm">
+    <div class="neo-flat rounded-3xl w-full max-w-md overflow-hidden">
+        {{-- Header --}}
+        <div class="px-6 py-4 flex justify-between items-center" style="border-bottom: 1px solid var(--border); background: var(--bg)">
+            <div class="flex items-center gap-2">
+                <i class='bx bx-phone-call text-xl' style="color: var(--accent-light)"></i>
+                <h3 class="font-outfit font-extrabold text-lg" style="color: var(--text-primary)">Panggil Siswa</h3>
+            </div>
+            <button onclick="document.getElementById('modal-panggil').classList.add('hidden')"
+                    class="w-8 h-8 rounded-full neo-btn flex items-center justify-center transition hover:text-red-500"
+                    style="color: var(--text-muted)">
+                <i class='bx bx-x text-lg'></i>
+            </button>
+        </div>
+
+        {{-- Form --}}
+        <form action="{{ route('gurubk.appointments.call') }}" method="POST"
+              class="p-6 space-y-4" style="background: var(--bg)">
+            @csrf
+
+            {{-- Pilih Siswa --}}
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary)">
+                    Pilih Siswa <span class="text-red-500">*</span>
+                </label>
+                <select name="student_id" required
+                        class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
+                        style="color: var(--text-primary)">
+                    <option value="" disabled selected>-- Pilih siswa --</option>
+                    @foreach($students as $siswa)
+                        <option value="{{ $siswa->id }}">
+                            {{ $siswa->name }}
+                            @if($siswa->schoolClass) — {{ $siswa->schoolClass->name }} @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Tanggal --}}
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary)">
+                    Tanggal <span class="text-red-500">*</span>
+                </label>
+                <input type="date" name="date" required min="{{ date('Y-m-d') }}"
+                       class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
+                       style="color: var(--text-primary)">
+            </div>
+
+            {{-- Jam --}}
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary)">
+                    Jam <span class="text-red-500">*</span>
+                </label>
+                <input type="time" name="time" required
+                       class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
+                       style="color: var(--text-primary)">
+            </div>
+
+            {{-- Keperluan --}}
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary)">
+                    Keperluan / Catatan
+                    <span class="text-[9px] normal-case" style="color: var(--text-muted)">(Opsional)</span>
+                </label>
+                <textarea name="notes" rows="3"
+                          placeholder="Misal: Diskusi perkembangan belajar, tindak lanjut laporan..."
+                          class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold resize-none"
+                          style="color: var(--text-primary)"></textarea>
+            </div>
+
+            {{-- Info --}}
+            <div class="flex items-start gap-2 rounded-xl px-4 py-3 text-xs font-medium"
+                 style="background: rgba(168,85,247,.08); border: 1px solid rgba(168,85,247,.2); color: var(--text-secondary)">
+                <i class='bx bx-info-circle text-base mt-0.5' style="color: var(--accent-light)"></i>
+                <span>Jadwal akan langsung berstatus <strong>Disetujui</strong> dan siswa akan mendapat notifikasi otomatis.</span>
+            </div>
+
+            <div class="pt-1">
+                <button type="submit"
+                        class="w-full py-2.5 rounded-xl text-sm font-bold text-white transition flex items-center justify-center gap-2 shadow-md hover:scale-[1.02]"
+                        style="background: var(--accent)">
+                    <i class='bx bx-phone-call'></i> Kirim Panggilan
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

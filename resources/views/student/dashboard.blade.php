@@ -9,7 +9,6 @@
     <div class="lg:col-span-2 space-y-6">
         
         <!-- Welcome Banner -->
-
         <div class="neo-flat rounded-2xl p-6 sm:p-8 relative overflow-hidden flex items-center justify-between text-white neo-card-hover" style="background: linear-gradient(135deg, #4f46e5, #7e22ce);">
             <div class="z-10 relative">
                 <!-- Date Pill (Pressed Neumorphism) -->
@@ -36,16 +35,60 @@
             </div>
             
             <!-- Decorative background elements -->
-            <!-- Large Blurred Glows -->
             <div class="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
             <div class="absolute left-0 bottom-0 w-48 h-48 bg-purple-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
-            
-            <!-- Floating Neumorphic Shapes -->
             <div class="absolute right-[20%] top-[-10%] w-24 h-24 rounded-full pointer-events-none opacity-60" 
                  style="background: transparent; box-shadow: 6px 6px 12px rgba(0,0,0,0.2), -6px -6px 12px rgba(255,255,255,0.15);"></div>
             <div class="absolute left-[35%] bottom-[-15%] w-32 h-32 rounded-full pointer-events-none opacity-50" 
                  style="background: transparent; box-shadow: inset 8px 8px 16px rgba(0,0,0,0.2), inset -8px -8px 16px rgba(255,255,255,0.15);"></div>
         </div>
+
+        {{-- ============================================================ --}}
+        {{-- BANNER PANGGILAN BK — muncul hanya jika ada panggilan aktif  --}}
+        {{-- ============================================================ --}}
+        @if(isset($panggilanBk) && $panggilanBk->isNotEmpty())
+        <div class="rounded-2xl border-2 p-5 animate-fadeInUp"
+             style="background: rgba(168,85,247,.08); border-color: rgba(168,85,247,.4)">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                     style="background: rgba(168,85,247,.2)">
+                    <i class='bx bx-phone-call text-xl' style="color: var(--accent-light, #a855f7)"></i>
+                </div>
+                <div>
+                    <p class="font-outfit font-bold text-base" style="color: var(--text-primary)">
+                        Kamu dipanggil oleh Guru BK!
+                    </p>
+                    <p class="text-xs" style="color: var(--text-muted)">
+                        Hadir sesuai jadwal yang telah ditentukan.
+                    </p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                @foreach($panggilanBk as $p)
+                <div class="flex items-center justify-between rounded-xl px-4 py-3 text-sm"
+                     style="background: rgba(168,85,247,.1)">
+                    <div class="flex items-center gap-2">
+                        <i class='bx bx-calendar-event' style="color: var(--accent-light, #a855f7)"></i>
+                        <span class="font-bold" style="color: var(--text-primary)">
+                            {{ \Carbon\Carbon::parse($p->date)->translatedFormat('d F Y') }}
+                            pukul {{ \Carbon\Carbon::parse($p->time)->format('H:i') }} WIB
+                        </span>
+                        @if($p->notes)
+                        <span class="text-xs hidden sm:inline" style="color: var(--text-muted)">
+                            — {{ Str::limit($p->notes, 40) }}
+                        </span>
+                        @endif
+                    </div>
+                    <a href="{{ route('student.appointments') }}"
+                       class="text-xs font-bold px-3 py-1.5 rounded-lg transition hover:scale-105 whitespace-nowrap"
+                       style="background: rgba(168,85,247,.2); color: var(--accent-light, #a855f7)">
+                        Lihat Detail
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         <!-- Jadwal dan Grafik (Side by Side) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -158,6 +201,43 @@
             </div>
         </div>
 
+        {{-- ============================================================ --}}
+        {{-- CARD PANGGILAN BK di sidebar                                  --}}
+        {{-- ============================================================ --}}
+        @if(isset($panggilanBk) && $panggilanBk->isNotEmpty())
+        <div class="neo-flat rounded-2xl p-5 neo-card-hover border-2"
+             style="border-color: rgba(168,85,247,.35)">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                     style="background: rgba(168,85,247,.15)">
+                    <i class='bx bx-phone-call text-xl' style="color: var(--accent-light, #a855f7)"></i>
+                </div>
+                <div>
+                    <h3 class="font-outfit font-extrabold text-sm" style="color: var(--text-primary)">Panggilan BK</h3>
+                    <p class="text-[10px]" style="color: var(--text-muted)">{{ $panggilanBk->count() }} jadwal aktif</p>
+                </div>
+            </div>
+            @foreach($panggilanBk->take(2) as $p)
+            <div class="neo-pressed rounded-xl px-3 py-2.5 mb-2 text-xs">
+                <p class="font-bold" style="color: var(--text-primary)">
+                    {{ \Carbon\Carbon::parse($p->date)->format('d M Y') }}
+                </p>
+                <p class="font-semibold mt-0.5" style="color: var(--accent-light, #a855f7)">
+                    Pukul {{ \Carbon\Carbon::parse($p->time)->format('H:i') }} WIB
+                </p>
+                @if($p->notes)
+                <p class="mt-1 truncate" style="color: var(--text-muted)">{{ $p->notes }}</p>
+                @endif
+            </div>
+            @endforeach
+            <a href="{{ route('student.appointments') }}"
+               class="mt-2 block w-full text-center text-xs font-bold py-2 rounded-xl transition hover:scale-[1.02]"
+               style="background: rgba(168,85,247,.15); color: var(--accent-light, #a855f7)">
+                Lihat Semua Jadwal
+            </a>
+        </div>
+        @endif
+
         <!-- Tugas Mendesak -->
         <div class="neo-flat rounded-2xl p-6 neo-card-hover">
             <div class="flex justify-between items-center mb-5">
@@ -229,8 +309,13 @@
                         $startOfMonth = now()->startOfMonth();
                         $endOfMonth = now()->endOfMonth();
                         $daysInMonth = now()->daysInMonth;
-                        $firstDayOfWeek = $startOfMonth->dayOfWeekIso; // 1 (Mon) to 7 (Sun)
+                        $firstDayOfWeek = $startOfMonth->dayOfWeekIso;
                         $today = now()->day;
+
+                        // Tandai tanggal yang ada panggilan BK
+                        $bkDates = isset($panggilanBk)
+                            ? $panggilanBk->map(fn($p) => \Carbon\Carbon::parse($p->date)->day)->toArray()
+                            : [];
                     @endphp
 
                     @for($i = 1; $i < $firstDayOfWeek; $i++)
@@ -242,14 +327,26 @@
                             $currentDate = $startOfMonth->copy()->day($day);
                             $isSunday = $currentDate->dayOfWeekIso == 7;
                             $isToday = $day == $today;
+                            $hasBk = in_array($day, $bkDates);
                         @endphp
-                        <div class="h-6 flex items-center justify-center text-[10px] font-bold rounded-lg transition-all
+                        <div class="h-6 flex items-center justify-center text-[10px] font-bold rounded-lg transition-all relative
                             {{ $isToday ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : ($isSunday ? 'text-red-500' : 'text-[var(--text-primary)] hover:bg-[var(--shadow-dark)]/5') }}">
                             {{ $day }}
+                            @if($hasBk && !$isToday)
+                            <span class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                                  style="background: var(--accent-light, #a855f7)"></span>
+                            @endif
                         </div>
                     @endfor
                 </div>
             </div>
+
+            @if(isset($panggilanBk) && $panggilanBk->isNotEmpty())
+            <div class="mt-2 flex items-center gap-1.5 px-1">
+                <span class="w-2 h-2 rounded-full inline-block" style="background: var(--accent-light, #a855f7)"></span>
+                <span class="text-[9px] font-semibold" style="color: var(--text-muted)">Jadwal BK</span>
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -257,10 +354,13 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        var chartDataCategories = {!! json_encode($chartData['categories'] ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']) !!};
+        var chartDataSeries = {!! json_encode($chartData['series'] ?? [0, 0, 0, 0, 0, 0, 0]) !!};
+
         var options = {
             series: [{
-                name: 'Nilai Rata-rata',
-                data: [78, 82, 80, 85, 88, 86, 90] // Dummy data for chart
+                name: 'Nilai Terbaru',
+                data: chartDataSeries
             }],
             chart: {
                 height: 250,
@@ -289,7 +389,7 @@
             dataLabels: { enabled: false },
             stroke: { curve: 'smooth', width: 3 },
             xaxis: {
-                categories: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                categories: chartDataCategories,
                 axisBorder: { show: false },
                 axisTicks: { show: false },
                 labels: {

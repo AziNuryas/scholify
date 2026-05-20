@@ -17,6 +17,7 @@ use App\Http\Controllers\AsesmenController;
 use App\Http\Controllers\CatatanKonselingController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\JadwalPelajaranController;
 use App\Http\Middleware\CheckRole;
 
 /*
@@ -33,11 +34,11 @@ Route::middleware('guest')->group(function () {
 
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
-    
+
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/api/agendas', [AgendaController::class, 'calendarEvents'])->name('api.agendas');
-    
+
     // Notifications
     Route::prefix('notifications')->name('notifications.')->controller(NotificationController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -47,8 +48,10 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/delete-all', 'destroyAll')->name('delete-all');
         Route::post('/mark-all-read', 'markAllRead')->name('mark-all-read');
     });
-    
+
+    // =========================================================
     // STUDENT AREA
+    // =========================================================
     Route::middleware([CheckRole::class . ':siswa'])->prefix('student')->name('student.')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('/schedule', [StudentMenuController::class, 'schedule'])->name('schedule');
@@ -75,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/notifications/{id}', [StudentMenuController::class, 'deleteNotification'])->name('notifications.delete');
         Route::delete('/notifications/delete-all', [StudentMenuController::class, 'deleteAllNotifications'])->name('notifications.delete-all');
         Route::post('/notifications/mark-all-read', [StudentMenuController::class, 'markAllNotificationsAsRead'])->name('notifications.mark-all-read');
-        
+
         Route::prefix('asesmen')->name('asesmen.')->group(function () {
             Route::get('/', [AsesmenController::class, 'index'])->name('index');
             Route::get('/isi/{jenis}', [AsesmenController::class, 'isi'])->name('isi');
@@ -83,35 +86,41 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/hasil/{asesmen}', [AsesmenController::class, 'hasil'])->name('hasil');
         });
     });
-    
+
+    // =========================================================
     // GURU BK AREA
+    // =========================================================
     Route::middleware('auth')->prefix('guru-bk')->name('gurubk.')->group(function () {
 
         Route::controller(GuruBkController::class)->group(function () {
             Route::get('/dashboard', 'index')->name('dashboard');
-    
+
             Route::get('/profile', 'profile')->name('profile');
             Route::post('/profile', 'updateProfile')->name('profile.update');
-    
+
             Route::get('/appointments', 'appointments')->name('appointments');
+            // PENTING: route /call harus SEBELUM /{id}/status
+            Route::post('/appointments/call', 'storeAppointmentByBk')->name('appointments.call');
             Route::post('/appointments/{id}/status', 'updateAppointmentStatus')->name('appointments.status');
-    
+
             Route::get('/discipline', 'discipline')->name('discipline');
             Route::post('/discipline', 'storeDiscipline')->name('discipline.store');
-    
+
             // Catatan Konseling
             Route::resource('catatan-konseling', CatatanKonselingController::class);
-    
+
             // Deteksi Dini & Asesmen
             Route::get('/deteksi-asesmen', 'deteksiAsesmen')->name('deteksi-asesmen.index');
-    
+
             // Laporan dari Guru (BK menindaklanjuti)
             Route::get('/laporan', 'laporanIndex')->name('laporan.index');
             Route::patch('/laporan/{laporan}/proses', 'laporanProses')->name('laporan.proses');
         });
     });
-    
-    // GURU MAPEL AREA (VERSI GABUNGAN)
+
+    // =========================================================
+    // GURU MAPEL AREA
+    // =========================================================
     Route::middleware([CheckRole::class . ':guru'])->prefix('guru')->name('guru.')->group(function () {
         Route::controller(GuruController::class)->group(function () {
             Route::get('/dashboard', 'dashboard')->name('dashboard');
@@ -153,11 +162,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{laporan}', [LaporanSiswaController::class, 'show'])->name('show');
         });
     });
-    
+
+    // =========================================================
     // ADMIN AREA
+    // =========================================================
     Route::middleware([CheckRole::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-        
+
         // Student Management
         Route::get('/students', [AdminController::class, 'students'])->name('students');
         Route::get('/students/create', [AdminController::class, 'createStudent'])->name('students.create');
@@ -166,7 +177,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/students/{id}/edit', [AdminController::class, 'editStudent'])->name('students.edit');
         Route::put('/students/{id}', [AdminController::class, 'updateStudent'])->name('students.update');
         Route::delete('/students/{id}', [AdminController::class, 'deleteStudent'])->name('students.delete');
-        
+
         // Teacher Management
         Route::get('/teachers', [AdminController::class, 'teachers'])->name('teachers');
         Route::get('/teachers/create', [AdminController::class, 'createTeacher'])->name('teachers.create');
@@ -174,7 +185,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/teachers/{id}/edit', [AdminController::class, 'editTeacher'])->name('teachers.edit');
         Route::put('/teachers/{id}', [AdminController::class, 'updateTeacher'])->name('teachers.update');
         Route::delete('/teachers/{id}', [AdminController::class, 'deleteTeacher'])->name('teachers.delete');
-        
+
         // Agenda Management
         Route::get('/agendas', [AgendaController::class, 'index'])->name('agendas.index');
         Route::get('/agendas/create', [AgendaController::class, 'create'])->name('agendas.create');
@@ -183,7 +194,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/agendas/{id}', [AgendaController::class, 'update'])->name('agendas.update');
         Route::delete('/agendas/{id}', [AgendaController::class, 'destroy'])->name('agendas.delete');
         Route::post('/agendas/{id}/toggle', [AgendaController::class, 'toggleActive'])->name('agendas.toggle');
-        
+
         // Class Management
         Route::get('/classes', [AdminController::class, 'classes'])->name('classes');
         Route::get('/classes/create', [AdminController::class, 'createClass'])->name('classes.create');
@@ -193,22 +204,30 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/classes/{id}', [AdminController::class, 'deleteClass'])->name('classes.delete');
         Route::post('/classes/{class}/add-student', [AdminController::class, 'addStudentToClass'])->name('classes.add-student');
         Route::delete('/classes/{class}/remove-student/{student}', [AdminController::class, 'removeStudentFromClass'])->name('classes.remove-student');
-        
+
+        // Jadwal Pelajaran
+        Route::resource('jadwal', JadwalPelajaranController::class);
+        Route::get('/jadwal/export-pdf', [JadwalPelajaranController::class, 'exportPdf'])->name('jadwal.export-pdf');
+        Route::get('/jadwal/export-excel', [JadwalPelajaranController::class, 'exportExcel'])->name('jadwal.export-excel');
+        Route::post('/jadwal/{id}/toggle-status', [JadwalPelajaranController::class, 'toggleStatus'])->name('jadwal.toggle-status');
+
         // Reports
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
         Route::get('/reports/export-pdf', [AdminController::class, 'exportPdf'])->name('reports.export-pdf');
         Route::get('/reports/export-excel', [AdminController::class, 'exportExcel'])->name('reports.export-excel');
-        
+
         // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
-        
+
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
         Route::put('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
     });
-    
+
+    // =========================================================
     // BK / KONSELOR - Deteksi Dini & Asesmen
+    // =========================================================
     Route::middleware([CheckRole::class . ':guru_bk'])->prefix('bk')->name('bk.')->group(function () {
         Route::prefix('deteksi-dini')->name('deteksi.')->group(function () {
             Route::get('/', [DeteksiDiniController::class, 'index'])->name('index');
@@ -221,4 +240,5 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/refresh-skor', [DeteksiDiniController::class, 'refreshSemuaSkor'])->name('refresh-skor');
         });
     });
+
 });
