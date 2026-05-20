@@ -41,8 +41,8 @@ class StudentDashboardController extends Controller
             if ($studentModel->class_id) {
                 // Gunakan try-catch per blok agar satu error tidak merusak seluruh halaman
                 try {
-                    $schedulesQuery = \App\Models\Schedule::with(['subject', 'teacher'])
-                        ->where('class_id', $studentModel->class_id)
+                    $schedulesQuery = \App\Models\JadwalPelajaran::with(['guru'])
+                        ->where('school_class_id', $studentModel->class_id)
                         ->get();
                 } catch (\Exception $e) {}
             }
@@ -50,10 +50,10 @@ class StudentDashboardController extends Controller
             $todaySchedules = [];
             foreach ($schedulesQuery as $sched) {
                 $todaySchedules[] = [
-                    'time'    => ($sched->start_time ?? '00:00') . ' - ' . ($sched->end_time ?? '00:00'),
-                    'subject' => $sched->subject->name ?? 'Mata Pelajaran',
-                    'teacher' => $sched->teacher->name ?? 'Guru',
-                    'room'    => $sched->room ?? '-',
+                    'time'    => (\Carbon\Carbon::parse($sched->jam_mulai)->format('H:i') ?? '00:00') . ' - ' . (\Carbon\Carbon::parse($sched->jam_selesai)->format('H:i') ?? '00:00'),
+                    'subject' => $sched->mata_pelajaran ?? 'Mata Pelajaran',
+                    'teacher' => $sched->guru->name ?? 'Guru',
+                    'room'    => $sched->ruangan ?? '-',
                     'status'  => 'upcoming' 
                 ];
             }

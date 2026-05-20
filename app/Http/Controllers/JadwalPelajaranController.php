@@ -92,7 +92,7 @@ class JadwalPelajaranController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'school_class_id' => 'required|exists:school_classes,id',
+            'school_class_id' => 'required|exists:classes,id',
             'guru_id'         => 'required|exists:teachers,id',
             'mata_pelajaran'  => 'required|string|max:100',
             'hari'            => ['required', Rule::in(self::HARI)],
@@ -127,10 +127,108 @@ class JadwalPelajaranController extends Controller
                 ->withErrors(['jam_mulai' => 'Jadwal bentrok dengan jadwal lain pada kelas dan hari yang sama.']);
         }
 
-        JadwalPelajaran::create($validated);
+        $jadwal = JadwalPelajaran::create($validated);
+
+        // Sinkronisasi dengan tabel schedules lama agar muncul di Dashboard Guru
+        $subject = \App\Models\Subject::firstOrCreate(['name' => $validated['mata_pelajaran']]);
+        \App\Models\Schedule::create([
+            'class_id'    => $validated['school_class_id'],
+            'subject_id'  => $subject->id,
+            'teacher_id'  => $validated['guru_id'],
+            'day_of_week' => $validated['hari'],
+            'start_time'  => $validated['jam_mulai'],
+            'end_time'    => $validated['jam_selesai'],
+            'room'        => $validated['ruangan'],
+        ]);
 
         return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal pelajaran berhasil ditambahkan!');
+    }
+
+    // ── CREATE BULK ─────────────────────────────────────────
+    public function createBulk()
+    {
+        $classes  = SchoolClass::orderBy('name')->get();
+        $teachers = Teacher::orderBy('name')->get();
+        $hari     = self::HARI;
+        $mapel    = self::MAPEL;
+
+        $tahunSekarang = now()->year;
+        $tahunAjaranOptions = [
+            ($tahunSekarang - 1) . '/' . $tahunSekarang,
+            $tahunSekarang . '/' . ($tahunSekarang + 1),
+            ($tahunSekarang + 1) . '/' . ($tahunSekarang + 2),
+        ];
+
+        return view('admin.createjadwal_bulk', compact(
+            'classes', 'teachers', 'hari', 'mapel', 'tahunAjaranOptions'
+        ));
+    }
+
+    // ── STORE BULK ──────────────────────────────────────────
+    public function storeBulk(Request $request)
+    {
+        $request->validate([
+            'school_class_id' => 'required|exists:classes,id',
+            'semester'        => 'required|in:1,2',
+            'tahun_ajaran'    => 'required|string|max:10',
+            'jadwal'          => 'required|array|min:1',
+            'jadwal.*.hari'            => ['required', Rule::in(self::HARI)],
+            'jadwal.*.jam_mulai'       => 'required|date_format:H:i',
+            'jadwal.*.jam_selesai'     => 'required|date_format:H:i|after:jadwal.*.jam_mulai',
+            'jadwal.*.mata_pelajaran'  => 'required|string|max:100',
+            'jadwal.*.guru_id'         => 'required|exists:teachers,id',
+            'jadwal.*.ruangan'         => 'nullable|string|max:50',
+        ]);
+
+        $classId = $request->school_class_id;
+        $semester = $request->semester;
+        $tahunAjaran = $request->tahun_ajaran;
+        
+        $count = 0;
+
+        foreach ($request->jadwal as $j) {
+            // Cek bentrok jadwal (opsional, bisa di skip agar lebih cepat)
+            $bentrok = $this->cekBentrok($classId, $j['hari'], $j['jam_mulai'], $j['jam_selesai']);
+            
+            if ($bentrok) {
+                // Lanjutkan ke jadwal berikutnya jika bentrok, atau lempar error
+                // Untuk bulk insert, lebih baik skip yang bentrok atau biarkan saja
+                continue;
+            }
+
+            // Simpan JadwalPelajaran
+            $jadwalBaru = JadwalPelajaran::create([
+                'school_class_id' => $classId,
+                'guru_id'         => $j['guru_id'],
+                'mata_pelajaran'  => $j['mata_pelajaran'],
+                'hari'            => $j['hari'],
+                'jam_mulai'       => $j['jam_mulai'],
+                'jam_selesai'     => $j['jam_selesai'],
+                'ruangan'         => $j['ruangan'],
+                'semester'        => $semester,
+                'tahun_ajaran'    => $tahunAjaran,
+                'status'          => 'aktif',
+                'keterangan'      => null,
+            ]);
+
+            // Sinkronisasi dengan tabel schedules lama
+            $subject = \App\Models\Subject::firstOrCreate(['name' => $j['mata_pelajaran']]);
+            \App\Models\Schedule::create([
+                'class_id'    => $classId,
+                'subject_id'  => $subject->id,
+                'teacher_id'  => $j['guru_id'],
+                'day_of_week' => $j['hari'],
+                'start_time'  => $j['jam_mulai'],
+                'end_time'    => $j['jam_selesai'],
+                'room'        => $j['ruangan'],
+            ]);
+            
+            $count++;
+        }
+
+        return redirect()->route('admin.jadwal.index')
+            ->with('success', "$count Jadwal pelajaran kelas berhasil ditambahkan secara massal!");
     }
 
     // ── SHOW ────────────────────────────────────────────────
@@ -164,7 +262,7 @@ class JadwalPelajaranController extends Controller
     public function update(Request $request, JadwalPelajaran $jadwal)
     {
         $validated = $request->validate([
-            'school_class_id' => 'required|exists:school_classes,id',
+            'school_class_id' => 'required|exists:classes,id',
             'guru_id'         => 'required|exists:teachers,id',
             'mata_pelajaran'  => 'required|string|max:100',
             'hari'            => ['required', Rule::in(self::HARI)],
@@ -192,7 +290,32 @@ class JadwalPelajaranController extends Controller
                 ->withErrors(['jam_mulai' => 'Jadwal bentrok dengan jadwal lain pada kelas dan hari yang sama.']);
         }
 
+        // Simpan data lama untuk mencari schedule yang akan diupdate
+        $oldHari = $jadwal->hari;
+        $oldJamMulai = $jadwal->jam_mulai;
+        $oldClassId = $jadwal->school_class_id;
+
         $jadwal->update($validated);
+
+        // Sinkronisasi update ke tabel schedules lama
+        $subject = \App\Models\Subject::firstOrCreate(['name' => $validated['mata_pelajaran']]);
+        
+        $schedule = \App\Models\Schedule::where([
+            'class_id' => $oldClassId,
+            'day_of_week' => $oldHari,
+        ])->whereTime('start_time', \Carbon\Carbon::parse($oldJamMulai)->format('H:i:s'))->first();
+
+        if ($schedule) {
+            $schedule->update([
+                'class_id'    => $validated['school_class_id'],
+                'subject_id'  => $subject->id,
+                'teacher_id'  => $validated['guru_id'],
+                'day_of_week' => $validated['hari'],
+                'start_time'  => $validated['jam_mulai'],
+                'end_time'    => $validated['jam_selesai'],
+                'room'        => $validated['ruangan'],
+            ]);
+        }
 
         return redirect()->route('admin.jadwal.index')
             ->with('success', 'Jadwal pelajaran berhasil diperbarui!');
@@ -201,6 +324,12 @@ class JadwalPelajaranController extends Controller
     // ── DESTROY ─────────────────────────────────────────────
     public function destroy(JadwalPelajaran $jadwal)
     {
+        // Hapus juga dari tabel schedules lama
+        \App\Models\Schedule::where([
+            'class_id' => $jadwal->school_class_id,
+            'day_of_week' => $jadwal->hari,
+        ])->whereTime('start_time', \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i:s'))->delete();
+
         $jadwal->delete();
 
         return redirect()->route('admin.jadwal.index')

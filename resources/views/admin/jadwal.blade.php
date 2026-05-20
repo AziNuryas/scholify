@@ -63,8 +63,8 @@
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
             </form>
-            <a href="{{ route('admin.jadwal.create') }}" class="neo-btn px-6 py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-black flex items-center gap-2 shadow-lg shadow-blue-500/30 hover:scale-105 transition-all">
-                <i data-lucide="plus-circle" class="w-5 h-5"></i> TAMBAH JADWAL
+            <a href="{{ route('admin.jadwal.create-bulk') }}" class="neo-btn px-6 py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-black flex items-center gap-2 shadow-lg shadow-blue-500/30 hover:scale-105 transition-all">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> TAMBAH JADWAL (GRID)
             </a>
         </div>
     </div>

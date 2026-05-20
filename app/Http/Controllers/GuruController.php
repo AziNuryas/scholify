@@ -203,7 +203,7 @@ class GuruController extends Controller
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
         
         // Selected day (default hari ini)
-        $selectedDay = $this->getDayName(Carbon::now()->dayOfWeek);
+        $selectedDay = request('day', $this->getDayName(Carbon::now()->dayOfWeek));
         
         // Ambil semua jadwal mengajar
         $schedules = Schedule::with(['subject', 'schoolClass'])

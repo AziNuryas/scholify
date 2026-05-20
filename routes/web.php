@@ -205,6 +205,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/classes/{class}/add-student', [AdminController::class, 'addStudentToClass'])->name('classes.add-student');
         Route::delete('/classes/{class}/remove-student/{student}', [AdminController::class, 'removeStudentFromClass'])->name('classes.remove-student');
 
+        // Jadwal Pelajaran Bulk
+        Route::get('/jadwal/create-bulk', [JadwalPelajaranController::class, 'createBulk'])->name('jadwal.create-bulk');
+        Route::post('/jadwal/store-bulk', [JadwalPelajaranController::class, 'storeBulk'])->name('jadwal.store-bulk');
+        
         // Jadwal Pelajaran
         Route::resource('jadwal', JadwalPelajaranController::class);
         Route::get('/jadwal/export-pdf', [JadwalPelajaranController::class, 'exportPdf'])->name('jadwal.export-pdf');
