@@ -249,6 +249,7 @@ class GuruController extends Controller
 
     /**
      * HALAMAN ABSENSI GURU
+     * SEMUA KELAS AKAN MUNCUL (TIDAK HANYA YANG PUNYA JADWAL)
      */
     public function absensi(Request $request)
     {
@@ -266,10 +267,11 @@ class GuruController extends Controller
         $scheduleId = $request->get('schedule_id');
         $date = $request->get('date', date('Y-m-d'));
         
-        // Ambil semua kelas yang diajar oleh guru ini
-        $classes = SchoolClass::whereHas('schedules', function($q) use ($teacherId) {
-            $q->where('teacher_id', $teacherId);
-        })->get();
+        // ========== PERUBAHAN UTAMA ==========
+        // Ambil SEMUA kelas (sama seperti di admin/students-edit)
+        // Kelas yang sudah dibuat di admin akan langsung muncul di sini
+        $classes = SchoolClass::orderBy('name')->get();
+        // ====================================
         
         // Ambil semua jadwal guru
         $allSchedules = Schedule::with(['subject', 'schoolClass'])
