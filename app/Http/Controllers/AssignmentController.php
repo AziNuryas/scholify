@@ -14,7 +14,7 @@ use Carbon\Carbon;
 class AssignmentController extends Controller
 {
     /**
-     * Display a listing of the assignments (untuk Guru).
+     * Display a listing of the assignments (untuk Guru) dengan form create.
      */
     public function index()
     {
@@ -44,29 +44,11 @@ class AssignmentController extends Controller
             ->latest()
             ->paginate(10);
 
-        // ✅ AMBIL SEMUA KELAS DAN MATA PELAJARAN UNTUK FORM
+        // AMBIL SEMUA KELAS DAN MATA PELAJARAN UNTUK FORM
         $classes = SchoolClass::orderBy('name')->get();
         $subjects = Subject::orderBy('name')->get();
 
         return view('guru.tugas', compact('assignments', 'classes', 'subjects'));
-    }
-
-    /**
-     * Show form untuk membuat tugas baru.
-     */
-    public function create()
-    {
-        $teacher = Auth::user()->teacher;
-
-        if (!$teacher) {
-            abort(403, 'User bukan guru');
-        }
-        
-        // AMBIL SEMUA KELAS (tidak hanya yang ada di schedules)
-        $classes = SchoolClass::orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
-        
-        return view('guru.tugas-create', compact('classes', 'subjects'));
     }
 
     /**
@@ -128,28 +110,6 @@ class AssignmentController extends Controller
     }
 
     /**
-     * Show form untuk edit tugas.
-     */
-    public function edit($id)
-    {
-        $teacher = Auth::user()->teacher;
-
-        if (!$teacher) {
-            abort(403, 'User bukan guru');
-        }
-
-        $assignment = Assignment::where('teacher_id', $teacher->id)
-            ->where('id', $id)
-            ->firstOrFail();
-        
-        // AMBIL SEMUA KELAS (tidak hanya yang ada di schedules)
-        $classes = SchoolClass::orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
-        
-        return view('guru.tugas-edit', compact('assignment', 'classes', 'subjects'));
-    }
-
-    /**
      * Update the specified assignment in storage.
      */
     public function update(Request $request, $id)
@@ -183,7 +143,7 @@ class AssignmentController extends Controller
             return redirect()->route('guru.tugas')->with('success', $message);
         }
 
-        // Update data tugas biasa
+        // Update data tugas biasa (jika diperlukan nanti)
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',

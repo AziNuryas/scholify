@@ -138,14 +138,15 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/nilai', 'store')->name('nilai.store');
         });
 
+        // =========================================================
+        // ASSIGNMENT ROUTES - (Tanpa create dan edit terpisah)
+        // =========================================================
         Route::controller(AssignmentController::class)->group(function () {
-            Route::get('/tugas', 'index')->name('tugas');
-            Route::get('/tugas/create', 'create')->name('tugas.create');
-            Route::post('/tugas', 'store')->name('tugas.store');
-            Route::get('/tugas/{id}/edit', 'edit')->name('tugas.edit');
-            Route::put('/tugas/{id}', 'update')->name('tugas.update');
-            Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
-            Route::post('/tugas/{id}/toggle', 'toggleComplete')->name('tugas.toggle');
+            Route::get('/tugas', 'index')->name('tugas');                       // Halaman utama (form + list)
+            Route::post('/tugas', 'store')->name('tugas.store');                // Simpan tugas baru
+            Route::put('/tugas/{id}', 'update')->name('tugas.update');          // Update (toggle complete)
+            Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');     // Hapus tugas
+            Route::post('/tugas/{id}/toggle', 'toggleComplete')->name('tugas.toggle'); // API toggle (AJAX)
         });
 
         Route::controller(AnnouncementController::class)->group(function () {

@@ -27,6 +27,16 @@
         </div>
     </div>
 
+    {{-- Alert Success --}}
+    @if(session('success'))
+    <div class="neo-flat p-4 rounded-xl border-l-4 border-emerald-500 bg-emerald-50/50">
+        <div class="flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+            <p class="text-sm text-emerald-700">{{ session('success') }}</p>
+        </div>
+    </div>
+    @endif
+
     <div class="grid lg:grid-cols-12 gap-6">
         
         {{-- =========================
@@ -49,11 +59,11 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                            Judul Tugas
+                            Judul Tugas <span class="text-rose-400">*</span>
                         </label>
                         <input type="text" name="title" value="{{ old('title') }}"
                                placeholder="Contoh: Tugas Basis Data Pertemuan 5"
-                               class="neo-input w-full text-sm">
+                               class="neo-input w-full text-sm" required>
                         @error('title')
                             <p class="text-rose-400 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -71,7 +81,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                                Kelas
+                                Kelas <span class="text-rose-400">*</span>
                             </label>
                             <select name="class_id" class="neo-input w-full text-sm" required>
                                 <option value="">Pilih Kelas</option>
@@ -85,7 +95,7 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                                Mata Pelajaran
+                                Mata Pelajaran <span class="text-rose-400">*</span>
                             </label>
                             <select name="subject_id" class="neo-input w-full text-sm" required>
                                 <option value="">Pilih Mapel</option>
@@ -136,9 +146,12 @@
                             </label>
                             <p id="fileName" class="text-xs text-[var(--accent)] mt-2 hidden"></p>
                         </div>
+                        @error('file')
+                            <p class="text-rose-400 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
-                    <button class="neo-btn w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all">
+                    <button type="submit" class="neo-btn w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all bg-[var(--accent)] text-white hover:opacity-90">
                         <i data-lucide="save" class="w-4 h-4"></i>
                         Simpan Tugas
                     </button>
@@ -162,12 +175,12 @@
                         </div>
                     </div>
                     <div class="neo-pressed px-3 py-1.5 rounded-full">
-                        <span class="text-xs font-semibold text-[var(--text-primary)]">{{ $assignments->count() ?? 0 }}</span>
+                        <span class="text-xs font-semibold text-[var(--text-primary)]">{{ $assignments->total() ?? 0 }}</span>
                         <span class="text-xs text-[var(--text-muted)]"> Total Tugas</span>
                     </div>
                 </div>
                 
-                <!-- Filter Buttons - Soft design -->
+                <!-- Filter Buttons -->
                 <div class="flex gap-2 mb-5 flex-wrap">
                     <button onclick="filterTasks('all')" id="filterAll" class="filter-btn neo-flat px-4 py-2 rounded-xl text-xs font-semibold transition-all active">
                         <i data-lucide="grid" class="w-3.5 h-3.5 inline mr-1"></i>
@@ -190,7 +203,7 @@
                              data-status="{{ $task->is_completed ? 'completed' : 'active' }}">
                             <div class="flex justify-between items-start gap-3">
                                 <div class="flex-1 min-w-0">
-                                    <!-- Badges - softer colors -->
+                                    <!-- Badges -->
                                     <div class="flex flex-wrap gap-2 mb-3">
                                         @php
                                             $typeStyles = [
@@ -218,7 +231,7 @@
                                         @if($task->due_date)
                                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-[var(--text-secondary)] bg-[var(--bg)]">
                                                 <i data-lucide="calendar" class="w-3 h-3"></i>
-                                                {{ \Carbon\Carbon::parse($task->due_date)->format('d M Y') }}
+                                                {{ \Carbon\Carbon::parse($task->due_date)->format('d M Y H:i') }}
                                             </span>
                                         @endif
                                         
@@ -253,7 +266,7 @@
                                     @endif
                                 </div>
 
-                                <!-- Action Buttons - softer -->
+                                <!-- Action Buttons -->
                                 <div class="flex gap-2">
                                     <form action="{{ route('guru.tugas.update', $task->id) }}" method="POST" class="inline">
                                         @csrf
@@ -293,6 +306,13 @@
                         </div>
                     @endforelse
                 </div>
+
+                <!-- Pagination -->
+                @if($assignments->hasPages())
+                <div class="mt-5 pt-3 border-t border-[var(--shadow-dark)]/10">
+                    {{ $assignments->links() }}
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -313,7 +333,7 @@
         opacity: 0.7;
     }
     
-    /* Filter button styles - soft */
+    /* Filter button styles */
     .filter-btn {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         color: var(--text-secondary);
@@ -381,7 +401,7 @@
         background: rgba(var(--accent-color), 0.3);
     }
     
-    /* Form select arrow - subtle */
+    /* Form select arrow */
     select.neo-input {
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");

@@ -322,91 +322,51 @@
                     @endforelse
                 </div>
 
-                <a href="{{ route('guru.tugas.create') }}" class="w-full mt-5 neo-btn py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:gap-3">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
+                <a href="{{ route('guru.tugas') }}" class="w-full mt-5 neo-btn py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:gap-3">
                     Buat Tugas Baru
                 </a>
             </div>
         </div>
 
-        {{-- Siswa Berprestasi & Pengumuman --}}
+        {{-- Pengumuman Terbaru (Siswa Berprestasi telah dihapus) --}}
         <div class="col-span-12 lg:col-span-6">
-            <div class="space-y-6">
-                {{-- Siswa Berprestasi --}}
-                <div class="neo-card p-6">
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
-                            <i data-lucide="crown" class="w-5 h-5 text-amber-500"></i>
-                        </div>
-                        <h3 class="font-outfit font-bold text-xl text-[var(--text-primary)]">Siswa Berprestasi</h3>
+            <div class="neo-card p-6">
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
+                        <i data-lucide="megaphone" class="w-5 h-5 text-pink-500"></i>
                     </div>
-
-                    <div class="space-y-3">
-                        @forelse(($siswaBerprestasi ?? [])->take(5) as $siswa)
-                        <div class="flex items-center justify-between p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer"
-                             onclick="window.location.href='{{ route('guru.raport') }}?student_id={{ $siswa->id }}'">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 neo-flat rounded-full flex items-center justify-center font-bold text-[var(--accent)]">
-                                    {{ substr($siswa->name ?? 'Siswa', 0, 2) }}
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-[var(--text-primary)]">{{ $siswa->name ?? 'Siswa' }}</p>
-                                    <p class="text-xs text-[var(--text-muted)]">{{ $siswa->class->name ?? 'Kelas' }}</p>
-                                </div>
-                            </div>
-                            <div class="neo-pressed px-3 py-1 rounded-lg">
-                                <span class="font-bold text-[var(--accent)]">{{ round($siswa->average_score ?? 0) }}</span>
-                                <span class="text-[10px] text-[var(--text-muted)]">/100</span>
-                            </div>
-                        </div>
-                        @empty
-                        <div class="text-center py-8 text-[var(--text-muted)]">
-                            <i data-lucide="award" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
-                            <p>Belum ada data prestasi.</p>
-                            <p class="text-xs mt-1">Segera nilai tugas siswa untuk melihat prestasi 🏆</p>
-                        </div>
-                        @endforelse
-                    </div>
+                    <h3 class="font-outfit font-bold text-xl text-[var(--text-primary)]">Pengumuman Terbaru</h3>
                 </div>
 
-                {{-- Pengumuman Terbaru --}}
-                <div class="neo-card p-6">
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="neo-pressed w-10 h-10 rounded-xl flex items-center justify-center">
-                            <i data-lucide="megaphone" class="w-5 h-5 text-pink-500"></i>
-                        </div>
-                        <h3 class="font-outfit font-bold text-xl text-[var(--text-primary)]">Pengumuman Terbaru</h3>
-                    </div>
-
-                    <div class="space-y-3">
-                        @forelse(($pengumumanTerbaru ?? [])->take(3) as $pengumuman)
-                        <div class="p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer"
-                             onclick="window.location.href='{{ route('guru.pengumuman') }}'">
-                            <div class="flex items-start gap-3">
-                                <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="bell" class="w-4 h-4 text-[var(--accent)]"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-[var(--text-primary)] text-sm">{{ $pengumuman->title }}</p>
-                                    <p class="text-xs text-[var(--text-muted)] mt-0.5">{{ Str::limit($pengumuman->content, 60) }}</p>
-                                    <span class="text-[10px] text-[var(--text-muted)] mt-1 block">
-                                        {{ \Carbon\Carbon::parse($pengumuman->created_at)->locale('id')->diffForHumans() }}
-                                    </span>
-                                </div>
+                <div class="space-y-3">
+                    @forelse(($pengumumanTerbaru ?? [])->take(5) as $pengumuman)
+                    <div class="p-3 rounded-xl hover:neo-pressed transition-all cursor-pointer"
+                         onclick="window.location.href='{{ route('guru.pengumuman') }}'">
+                        <div class="flex items-start gap-3">
+                            <div class="neo-pressed w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="bell" class="w-4 h-4 text-[var(--accent)]"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-[var(--text-primary)] text-sm">{{ $pengumuman->title }}</p>
+                                <p class="text-xs text-[var(--text-muted)] mt-0.5">{{ Str::limit($pengumuman->content, 80) }}</p>
+                                <span class="text-[10px] text-[var(--text-muted)] mt-1 block">
+                                    {{ \Carbon\Carbon::parse($pengumuman->created_at)->locale('id')->diffForHumans() }}
+                                </span>
                             </div>
                         </div>
-                        @empty
-                        <div class="text-center py-8 text-[var(--text-muted)]">
-                            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
-                            <p>Tidak ada pengumuman terbaru.</p>
-                        </div>
-                        @endforelse
                     </div>
-
-                    <a href="{{ route('guru.pengumuman') }}" class="w-full mt-4 neo-btn py-2 rounded-xl text-sm font-semibold text-center block transition-all hover:gap-2">
-                        Lihat Semua Pengumuman
-                    </a>
+                    @empty
+                    <div class="text-center py-8 text-[var(--text-muted)]">
+                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                        <p>Tidak ada pengumuman terbaru.</p>
+                        <p class="text-xs mt-1">Pengumuman akan muncul di sini 📢</p>
+                    </div>
+                    @endforelse
                 </div>
+
+                <a href="{{ route('guru.pengumuman') }}" class="w-full mt-4 neo-btn py-2 rounded-xl text-sm font-semibold text-center block transition-all hover:gap-2">
+                    Lihat Semua Pengumuman
+                </a>
             </div>
         </div>
     </div>
