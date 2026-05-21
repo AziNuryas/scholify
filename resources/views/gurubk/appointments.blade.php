@@ -11,7 +11,6 @@
             <h1 class="font-outfit font-bold text-3xl mb-1" style="color: var(--text-primary)">Jadwal Temu Siswa</h1>
             <p class="text-sm" style="color: var(--text-secondary)">Kelola permintaan antrian konsultasi langsung dari siswa.</p>
         </div>
-        {{-- Tombol Panggil Siswa --}}
         <button onclick="document.getElementById('modal-panggil').classList.remove('hidden')"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white transition hover:scale-105 shadow-md"
                 style="background: var(--accent)">
@@ -140,9 +139,7 @@
     </div>
 </div>
 
-{{-- ======================================================= --}}
-{{-- MODAL PANGGIL SISWA                                      --}}
-{{-- ======================================================= --}}
+{{-- MODAL PANGGIL SISWA --}}
 <div id="modal-panggil"
      class="hidden fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/30 backdrop-blur-sm">
     <div class="neo-flat rounded-3xl w-full max-w-md overflow-hidden">
@@ -160,9 +157,12 @@
         </div>
 
         {{-- Form --}}
-        <form action="{{ route('gurubk.appointments.call') }}" method="POST"
+        <form id="form-panggil" action="{{ route('gurubk.appointments.call') }}" method="POST"
               class="p-6 space-y-4" style="background: var(--bg)">
             @csrf
+
+            {{-- Hidden input time yang akan diisi JS --}}
+            <input type="hidden" name="time" id="input-time-final">
 
             {{-- Pilih Siswa --}}
             <div>
@@ -192,14 +192,41 @@
                        style="color: var(--text-primary)">
             </div>
 
-            {{-- Jam --}}
+            {{-- Jam — dropdown 24 jam --}}
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--text-secondary)">
                     Jam <span class="text-red-500">*</span>
                 </label>
-                <input type="time" name="time" required
-                       class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
-                       style="color: var(--text-primary)">
+                <div class="flex gap-2">
+                    {{-- Dropdown Jam --}}
+                    <select id="select-jam" required
+                            class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
+                            style="color: var(--text-primary)">
+                        <option value="" disabled selected>Jam</option>
+                        @for($h = 6; $h <= 18; $h++)
+                            <option value="{{ str_pad($h, 2, '0', STR_PAD_LEFT) }}">
+                                {{ str_pad($h, 2, '0', STR_PAD_LEFT) }}
+                            </option>
+                        @endfor
+                    </select>
+
+                    {{-- Separator --}}
+                    <div class="flex items-center font-bold text-lg" style="color: var(--text-muted)">:</div>
+
+                    {{-- Dropdown Menit --}}
+                    <select id="select-menit" required
+                            class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
+                            style="color: var(--text-primary)">
+                        <option value="" disabled selected>Menit</option>
+                        <option value="00">00</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                    </select>
+
+                    {{-- Label WIB --}}
+                </div>
+                <p id="error-jam" class="text-xs text-red-400 mt-1 hidden">Jam dan menit wajib dipilih.</p>
             </div>
 
             {{-- Keperluan --}}
@@ -231,4 +258,21 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('form-panggil').addEventListener('submit', function(e) {
+        const jam   = document.getElementById('select-jam').value;
+        const menit = document.getElementById('select-menit').value;
+        const error = document.getElementById('error-jam');
+
+        if (!jam || !menit) {
+            e.preventDefault();
+            error.classList.remove('hidden');
+            return;
+        }
+
+        error.classList.add('hidden');
+        document.getElementById('input-time-final').value = jam + ':' + menit + ':00';
+    });
+</script>
 @endsection

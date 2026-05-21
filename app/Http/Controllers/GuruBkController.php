@@ -43,7 +43,7 @@ class GuruBkController extends Controller
 
             // Kasus berjalan = catatan konseling status 'berjalan'
             'active_cases' => CatatanKonseling::where('guru_bk_id', auth()->id())
-                ->where('status', 'berjalan')
+                ->where('status', '!=', 'selesai')
                 ->count(),
 
             'unread_messages' => DB::table('chats')
