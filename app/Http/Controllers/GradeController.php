@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Grade;
-use App\Models\SchoolClass; // ⬅️ sesuaikan nama model
+use App\Models\SchoolClass;
 use App\Models\Subject;
 
 class GradeController extends Controller
@@ -15,7 +15,7 @@ class GradeController extends Controller
     {
         $students = Student::all();
 
-        // 🔥 TAMBAHAN WAJIB
+        // TAMBAHAN WAJIB
         $classes = SchoolClass::all(); 
         $subjects = Subject::all();
 
@@ -25,22 +25,38 @@ class GradeController extends Controller
     // simpan nilai
     public function store(Request $request)
     {
-        foreach ($request->grades as $studentId => $data) {
+        // Validasi input
+        $request->validate([
+            'grades' => 'required|array',
+            'grades.*.score' => 'nullable|numeric|min:0|max:100',
+        ]);
 
-            Grade::updateOrCreate(
-                [
-                    'student_id' => $studentId,
-                    'subject_id' => $request->subject_id ?? 1, // 🔥 dinamis
-                    'type' => $request->type ?? 'UTS',
-                    'semester' => 'Ganjil',
-                    'academic_year' => '2026',
-                ],
-                [
-                    'score' => $data['score'] ?? null,
-                ]
-            );
+        $savedCount = 0;
+
+        foreach ($request->grades as $studentId => $data) {
+            // 🔥 PERBAIKAN: Hanya simpan jika score tidak null
+            if (isset($data['score']) && $data['score'] !== '' && $data['score'] !== null) {
+                
+                Grade::updateOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'subject_id' => $request->subject_id ?? 1,
+                        'type' => $request->type ?? 'UTS',
+                        'semester' => 'Ganjil',
+                        'academic_year' => '2026',
+                    ],
+                    [
+                        'score' => $data['score'],
+                    ]
+                );
+                $savedCount++;
+            }
         }
 
-        return back()->with('success', 'Nilai berhasil disimpan');
+        if ($savedCount == 0) {
+            return back()->with('warning', 'Tidak ada nilai yang diisi!');
+        }
+
+        return back()->with('success', "{$savedCount} nilai berhasil disimpan");
     }
 }
