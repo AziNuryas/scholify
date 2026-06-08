@@ -35,13 +35,11 @@ class GuruBkController extends Controller
         ]);
 
         $stats = [
-            // Total siswa unik yang sudah selesai ditangani (dari catatan konseling)
             'total_students' => CatatanKonseling::where('guru_bk_id', auth()->id())
                 ->where('status', 'selesai')
                 ->distinct('siswa_id')
                 ->count('siswa_id'),
 
-            // Kasus berjalan = catatan konseling status 'berjalan'
             'active_cases' => CatatanKonseling::where('guru_bk_id', auth()->id())
                 ->where('status', '!=', 'selesai')
                 ->count(),
@@ -110,15 +108,36 @@ class GuruBkController extends Controller
         return back()->with('success', 'Profil Guru BK berhasil diperbarui!');
     }
 
-    public function appointments()
+    public function appointments(Request $request)
     {
         $guruData = $this->getGuruBk();
         $guru     = collect($guruData ? $guruData->toArray() : []);
 
-        $appointments = \App\Models\Appointment::with(['student.schoolClass'])
+        $query = \App\Models\Appointment::with(['student.schoolClass'])
             ->orderBy('date', 'desc')
-            ->orderBy('time', 'desc')
-            ->get();
+            ->orderBy('time', 'desc');
+
+        // Filter Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter Sumber (initiated_by)
+        if ($request->filled('sumber')) {
+            $query->where('initiated_by', $request->sumber);
+        }
+
+        // Filter Dari Tanggal
+        if ($request->filled('dari')) {
+            $query->whereDate('date', '>=', $request->dari);
+        }
+
+        // Filter Sampai Tanggal
+        if ($request->filled('sampai')) {
+            $query->whereDate('date', '<=', $request->sampai);
+        }
+
+        $appointments = $query->paginate(15)->withQueryString();
 
         // Daftar semua siswa untuk modal panggil siswa
         $students = \App\Models\Student::with('schoolClass')->orderBy('name')->get();
@@ -144,9 +163,6 @@ class GuruBkController extends Controller
         }
     }
 
-    /**
-     * BK membuat jadwal temu (memanggil siswa)
-     */
     public function storeAppointmentByBk(Request $request)
     {
         $request->validate([
