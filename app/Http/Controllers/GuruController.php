@@ -43,8 +43,11 @@ class GuruController extends Controller
         foreach ($schedules as $schedule) {
             $start = Carbon::parse($schedule->start_time);
             $end = Carbon::parse($schedule->end_time);
-            $totalJam += $start->diffInHours($end);
+            if ($end->greaterThan($start)) {
+                $totalJam += $end->diffInMinutes($start) / 60;
+            }
         }
+        $totalJam = round($totalJam, 1);
         
         $tugasPerluDinilai = Assignment::where('teacher_id', $teacherId)
             ->whereHas('submissions', function($q) {
@@ -77,8 +80,11 @@ class GuruController extends Controller
         foreach ($jadwal as $j) {
             $start = Carbon::parse($j->start_time);
             $end = Carbon::parse($j->end_time);
-            $totalJamHariIni += $start->diffInHours($end);
+            if ($end->greaterThan($start)) {
+                $totalJamHariIni += $end->diffInMinutes($start) / 60;
+            }
         }
+        $totalJamHariIni = round($totalJamHariIni, 1);
         
         $now = Carbon::now();
         $progressMengajar = 0;
@@ -140,7 +146,7 @@ class GuruController extends Controller
             ->map(function($item) {
                 $student = $item->student;
                 if ($student) {
-                    $student->average_score = $item->average_score;
+                    $student->average_score = round($item->average_score, 1);
                 }
                 return $student;
             })
@@ -191,8 +197,11 @@ class GuruController extends Controller
         foreach ($schedulesAll as $schedule) {
             $start = Carbon::parse($schedule->start_time);
             $end = Carbon::parse($schedule->end_time);
-            $totalJam += $start->diffInHours($end);
+            if ($end->greaterThan($start)) {
+                $totalJam += $end->diffInMinutes($start) / 60;
+            }
         }
+        $totalJam = round($totalJam, 1);
         
         // Hitung total kelas yang diajar
         $totalKelas = Schedule::where('teacher_id', $teacherId)
@@ -249,7 +258,6 @@ class GuruController extends Controller
 
     /**
      * HALAMAN ABSENSI GURU
-     * SEMUA KELAS AKAN MUNCUL (TIDAK HANYA YANG PUNYA JADWAL)
      */
     public function absensi(Request $request)
     {
@@ -267,11 +275,8 @@ class GuruController extends Controller
         $scheduleId = $request->get('schedule_id');
         $date = $request->get('date', date('Y-m-d'));
         
-        // ========== PERUBAHAN UTAMA ==========
-        // Ambil SEMUA kelas (sama seperti di admin/students-edit)
-        // Kelas yang sudah dibuat di admin akan langsung muncul di sini
+        // Ambil SEMUA kelas
         $classes = SchoolClass::orderBy('name')->get();
-        // ====================================
         
         // Ambil semua jadwal guru
         $allSchedules = Schedule::with(['subject', 'schoolClass'])
@@ -302,7 +307,6 @@ class GuruController extends Controller
                 foreach ($students as $student) {
                     $attendance = $existingAttendances->get($student->id);
                     $student->attendance_status = $attendance ? $attendance->status : 'hadir';
-                    $student->attendance_notes = $attendance ? $attendance->notes : '';
                     $student->attendance_id = $attendance ? $attendance->id : null;
                 }
             }
@@ -327,8 +331,11 @@ class GuruController extends Controller
         foreach ($schedulesAll as $schedule) {
             $start = Carbon::parse($schedule->start_time);
             $end = Carbon::parse($schedule->end_time);
-            $totalJam += $start->diffInHours($end);
+            if ($end->greaterThan($start)) {
+                $totalJam += $end->diffInMinutes($start) / 60;
+            }
         }
+        $totalJam = round($totalJam, 1);
         
         // Hitung total kelas yang diajar
         $totalKelas = Schedule::where('teacher_id', $teacherId)
@@ -379,7 +386,7 @@ class GuruController extends Controller
     }
 
     /**
-     * SIMPAN ABSENSI
+     * SIMPAN ABSENSI - TANPA NOTES
      */
     public function absensiStore(Request $request)
     {
@@ -388,7 +395,6 @@ class GuruController extends Controller
             'date' => 'required|date',
             'attendance' => 'required|array',
             'attendance.*' => 'required|in:hadir,izin,sakit,alpha',
-            'notes' => 'nullable|array',
         ]);
         
         $user = Auth::user();
@@ -402,7 +408,6 @@ class GuruController extends Controller
                 ],
                 [
                     'status' => $status,
-                    'notes' => $request->notes[$studentId] ?? null,
                     'class_id' => $request->class_id,
                     'recorded_by' => $teacher ? $teacher->id : null,
                     'recorded_at' => now(),

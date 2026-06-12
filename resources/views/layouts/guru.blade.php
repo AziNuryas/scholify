@@ -311,12 +311,7 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <!-- Search -->
-                    <div class="hidden md:flex items-center neo-pressed rounded-full px-5 py-2.5 w-64">
-                        <i data-lucide="search" class="w-4 h-4 text-[var(--text-muted)]"></i>
-                        <input type="text" placeholder="Cari sesuatu..." class="bg-transparent border-none outline-none text-sm ml-3 w-full text-[var(--text-primary)] placeholder-[var(--text-muted)]">
-                    </div>
-
+                    <!-- Search Section Removed -->
                     <!-- Theme Toggle -->
                     <button onclick="toggleTheme()" class="neo-btn p-2.5 rounded-xl text-[var(--text-secondary)] outline-none hover:text-[var(--accent)] transition-colors" title="Ubah Tema">
                         <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
