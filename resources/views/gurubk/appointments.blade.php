@@ -6,16 +6,9 @@
 @section('content')
 <div class="space-y-6 pt-2 animate-fadeInUp">
 
-    <div class="mb-2 flex items-center justify-between flex-wrap gap-4">
-        <div>
-            <h1 class="font-outfit font-bold text-3xl mb-1" style="color: var(--text-primary)">Jadwal Temu Siswa</h1>
-            <p class="text-sm" style="color: var(--text-secondary)">Kelola permintaan antrian konsultasi langsung dari siswa.</p>
-        </div>
-        <button onclick="document.getElementById('modal-panggil').classList.remove('hidden')"
-                class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white transition hover:scale-105 shadow-md"
-                style="background: var(--accent)">
-            <i class='bx bx-phone-call text-lg'></i> Panggil Siswa
-        </button>
+    <div class="mb-2">
+        <h1 class="font-outfit font-bold text-3xl mb-1" style="color: var(--text-primary)">Jadwal Temu Siswa</h1>
+        <p class="text-sm" style="color: var(--text-secondary)">Kelola permintaan antrian konsultasi langsung dari siswa.</p>
     </div>
 
     @if(session('success'))
@@ -31,9 +24,92 @@
     </div>
     @endif
 
+    {{-- Filter --}}
+    <div class="neo-flat rounded-2xl p-4">
+        <form method="GET" action="{{ route('gurubk.appointments') }}" class="flex flex-wrap gap-3 items-end">
+
+            {{-- Filter Status --}}
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Status</label>
+                <select name="status"
+                        class="text-xs rounded-lg px-3 py-2 outline-none"
+                        style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+                    <option value="">Semua Status</option>
+                    <option value="pending"   {{ request('status') === 'pending'   ? 'selected' : '' }}>Menunggu</option>
+                    <option value="approved"  {{ request('status') === 'approved'  ? 'selected' : '' }}>Disetujui</option>
+                    <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Selesai</option>
+                    <option value="rejected"  {{ request('status') === 'rejected'  ? 'selected' : '' }}>Ditolak</option>
+                </select>
+            </div>
+
+            {{-- Filter Sumber --}}
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Sumber</label>
+                <select name="sumber"
+                        class="text-xs rounded-lg px-3 py-2 outline-none"
+                        style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+                    <option value="">Semua Sumber</option>
+                    <option value="teacher" {{ request('sumber') === 'teacher' ? 'selected' : '' }}>Panggilan BK</option>
+                    <option value="student" {{ request('sumber') === 'student' ? 'selected' : '' }}>Permintaan Siswa</option>
+                </select>
+            </div>
+
+            {{-- Filter Tanggal Dari --}}
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Dari Tanggal</label>
+                <input type="date" name="dari"
+                       value="{{ request('dari') }}"
+                       class="text-xs rounded-lg px-3 py-2 outline-none"
+                       style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+            </div>
+
+            {{-- Filter Tanggal Sampai --}}
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Sampai Tanggal</label>
+                <input type="date" name="sampai"
+                       value="{{ request('sampai') }}"
+                       class="text-xs rounded-lg px-3 py-2 outline-none"
+                       style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+            </div>
+
+            {{-- Tombol Filter + Reset --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="px-4 py-2 text-xs text-white rounded-lg transition"
+                        style="background: var(--accent)"
+                        onmouseover="this.style.background='var(--accent-hover)'"
+                        onmouseout="this.style.background='var(--accent)'">
+                    <i class='bx bx-filter-alt'></i> Filter
+                </button>
+                @if(request()->hasAny(['status','sumber','dari','sampai']))
+                    <a href="{{ route('gurubk.appointments') }}"
+                       class="px-4 py-2 text-xs rounded-lg transition flex items-center gap-1"
+                       style="border: 1px solid var(--border); color: var(--text-secondary)">
+                        <i class='bx bx-x'></i> Reset
+                    </a>
+                @endif
+            </div>
+
+            {{-- Tombol Panggil Siswa (paling kanan) --}}
+            <div class="ml-auto">
+                <button type="button"
+                        onclick="document.getElementById('modal-panggil').classList.remove('hidden')"
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white transition hover:scale-105 shadow-md"
+                        style="background: var(--accent)">
+                    <i class='bx bx-phone-call text-lg'></i> Panggil Siswa
+                </button>
+            </div>
+
+        </form>
+    </div>
+
     <div class="neo-flat rounded-2xl overflow-hidden">
         <div class="p-6 flex justify-between items-center" style="border-bottom: 1px solid var(--border)">
             <h2 class="font-outfit font-bold text-lg" style="color: var(--text-primary)">Daftar Permintaan Jadwal</h2>
+            <span class="text-xs font-medium px-3 py-1 rounded-full"
+                  style="background: rgba(168,85,247,.12); color: var(--accent-light)">
+                {{ $appointments->total() }} data
+            </span>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -136,6 +212,12 @@
                 </tbody>
             </table>
         </div>
+
+        @if($appointments->hasPages())
+            <div class="px-6 py-4" style="border-top: 1px solid var(--border)">
+                {{ $appointments->appends(request()->query())->links() }}
+            </div>
+        @endif
     </div>
 </div>
 
@@ -198,7 +280,6 @@
                     Jam <span class="text-red-500">*</span>
                 </label>
                 <div class="flex gap-2">
-                    {{-- Dropdown Jam --}}
                     <select id="select-jam" required
                             class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
                             style="color: var(--text-primary)">
@@ -209,11 +290,7 @@
                             </option>
                         @endfor
                     </select>
-
-                    {{-- Separator --}}
                     <div class="flex items-center font-bold text-lg" style="color: var(--text-muted)">:</div>
-
-                    {{-- Dropdown Menit --}}
                     <select id="select-menit" required
                             class="w-full neo-input rounded-xl px-4 py-2.5 text-sm font-semibold"
                             style="color: var(--text-primary)">
@@ -223,8 +300,6 @@
                         <option value="30">30</option>
                         <option value="45">45</option>
                     </select>
-
-                    {{-- Label WIB --}}
                 </div>
                 <p id="error-jam" class="text-xs text-red-400 mt-1 hidden">Jam dan menit wajib dipilih.</p>
             </div>

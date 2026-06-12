@@ -143,11 +143,13 @@
                                     <p><span class="font-medium" style="color: var(--text-primary)">Dilaporkan oleh:</span>
                                         {{ $item->guru->name ?? '-' }}
                                     </p>
-                                    <p class="pt-1">{{ $item->deskripsi }}</p>
+                                    {{-- FIX: break-words agar teks panjang tidak overflow --}}
+                                    <p class="pt-1 break-words" style="overflow-wrap: break-word; word-break: break-word;">{{ $item->deskripsi }}</p>
                                     @if($item->tindak_lanjut)
                                         <div class="pt-2 mt-2" style="border-top: 1px solid var(--border)">
                                             <p class="text-xs font-medium" style="color: var(--text-muted)">Tindak lanjut sebelumnya:</p>
-                                            <p class="text-sm mt-0.5" style="color: var(--text-primary)">{{ $item->tindak_lanjut }}</p>
+                                            {{-- FIX: break-words agar teks panjang tidak overflow --}}
+                                            <p class="text-sm mt-0.5 break-words" style="color: var(--text-primary); overflow-wrap: break-word; word-break: break-word;">{{ $item->tindak_lanjut }}</p>
                                         </div>
                                     @endif
                                 </div>
@@ -170,10 +172,11 @@
                                         <label class="block text-xs font-medium mb-1" style="color: var(--text-muted)">
                                             Catatan Tindak Lanjut <span class="text-red-400">*</span>
                                         </label>
+                                        {{-- FIX: overflow-wrap pada textarea agar tidak melebar ke samping --}}
                                         <textarea name="tindak_lanjut" rows="3"
                                                   placeholder="Tuliskan tindakan yang sudah atau akan dilakukan BK..."
                                                   class="w-full text-sm rounded-lg px-3 py-2 outline-none"
-                                                  style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">{{ $item->tindak_lanjut }}</textarea>
+                                                  style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary); overflow-wrap: break-word; word-break: break-word; resize: vertical;">{{ $item->tindak_lanjut }}</textarea>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <button type="submit"

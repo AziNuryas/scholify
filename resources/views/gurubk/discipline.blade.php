@@ -79,20 +79,39 @@
         </div>
     </div>
 
-    <!-- Modal Add Discipline -->
-    <div id="modal-add-discipline" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden" style="background: var(--bg-card)">
-            <div class="p-6 flex justify-between items-center" style="border-bottom: 1px solid var(--border)">
+</div>
+
+{{-- Modal Add Discipline — di luar div konten utama agar tidak ter-clip --}}
+<div id="modal-add-discipline"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background: rgba(0,0,0,.5); backdrop-filter: blur(4px);"
+     onclick="if(event.target===this) this.classList.add('hidden')">
+
+    <div class="rounded-3xl w-full max-w-lg shadow-2xl relative flex flex-col"
+         style="background: var(--bg-card); max-height: 90vh;">
+
+        {{-- Header --}}
+        <div class="p-6 flex justify-between items-center flex-shrink-0"
+             style="border-bottom: 1px solid var(--border)">
+            <div class="flex items-center gap-2">
+                <i class='bx bx-shield-x text-xl' style="color: var(--accent-light)"></i>
                 <h3 class="font-outfit font-bold text-xl" style="color: var(--text-primary)">Catat Pelanggaran Baru</h3>
-                <button onclick="document.getElementById('modal-add-discipline').classList.add('hidden')"
-                        style="color: var(--text-muted)" class="hover:text-red-400 transition-colors">
-                    <i class='bx bx-x text-2xl'></i>
-                </button>
             </div>
+            <button onclick="document.getElementById('modal-add-discipline').classList.add('hidden')"
+                    class="w-8 h-8 rounded-full flex items-center justify-center transition hover:bg-red-100 hover:text-red-500"
+                    style="color: var(--text-muted)">
+                <i class='bx bx-x text-xl'></i>
+            </button>
+        </div>
+
+        {{-- Form (scrollable) --}}
+        <div class="overflow-y-auto flex-1">
             <form action="{{ route('gurubk.discipline.store') }}" method="POST" class="p-6 space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-sm font-bold mb-1" style="color: var(--text-secondary)">Pilih Siswa</label>
+                    <label class="block text-sm font-bold mb-1.5" style="color: var(--text-secondary)">
+                        Pilih Siswa <span class="text-red-400">*</span>
+                    </label>
                     <select name="student_id" required
                             class="w-full rounded-xl px-4 py-2.5 text-sm outline-none"
                             style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
@@ -102,14 +121,20 @@
                         @endforeach
                     </select>
                 </div>
+
                 <div>
-                    <label class="block text-sm font-bold mb-1" style="color: var(--text-secondary)">Tanggal</label>
+                    <label class="block text-sm font-bold mb-1.5" style="color: var(--text-secondary)">
+                        Tanggal <span class="text-red-400">*</span>
+                    </label>
                     <input type="date" name="date" required value="{{ date('Y-m-d') }}"
                            class="w-full rounded-xl px-4 py-2.5 text-sm outline-none"
                            style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
                 </div>
+
                 <div>
-                    <label class="block text-sm font-bold mb-1" style="color: var(--text-secondary)">Pilih Pelanggaran</label>
+                    <label class="block text-sm font-bold mb-1.5" style="color: var(--text-secondary)">
+                        Jenis Pelanggaran <span class="text-red-400">*</span>
+                    </label>
                     <select name="violation_type" required
                             class="w-full rounded-xl px-4 py-2.5 text-sm outline-none"
                             style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
@@ -121,30 +146,45 @@
                         <option value="Lainnya">Lainnya</option>
                     </select>
                 </div>
+
                 <div>
-                    <label class="block text-sm font-bold mb-1" style="color: var(--text-secondary)">Poin Hukuman</label>
-                    <input type="number" name="points" required placeholder="0"
+                    <label class="block text-sm font-bold mb-1.5" style="color: var(--text-secondary)">
+                        Poin Hukuman <span class="text-red-400">*</span>
+                    </label>
+                    <input type="number" name="points" required placeholder="0" min="0"
                            class="w-full rounded-xl px-4 py-2.5 text-sm outline-none"
                            style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
                 </div>
+
                 <div>
-                    <label class="block text-sm font-bold mb-1" style="color: var(--text-secondary)">Keterangan / Kronologi Singkat</label>
+                    <label class="block text-sm font-bold mb-1.5" style="color: var(--text-secondary)">
+                        Keterangan / Kronologi Singkat <span class="text-red-400">*</span>
+                    </label>
                     <textarea name="description" rows="3" required
-                              class="w-full rounded-xl px-4 py-2 text-sm outline-none"
+                              placeholder="Tuliskan kronologi singkat pelanggaran..."
+                              class="w-full rounded-xl px-4 py-2 text-sm outline-none resize-none"
                               style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)"></textarea>
                 </div>
-                <div class="pt-2">
+
+                <div class="pt-2 flex gap-3">
+                    <button type="button"
+                            onclick="document.getElementById('modal-add-discipline').classList.add('hidden')"
+                            class="flex-1 py-2.5 rounded-xl font-bold text-sm transition"
+                            style="border: 1px solid var(--border); color: var(--text-secondary)">
+                        Batal
+                    </button>
                     <button type="submit"
-                            class="w-full text-white rounded-xl py-3 font-bold transition"
+                            class="flex-1 text-white rounded-xl py-2.5 font-bold text-sm transition"
                             style="background: var(--accent); box-shadow: 0 4px 14px rgba(124,58,237,.3)"
                             onmouseover="this.style.background='var(--accent-hover)'"
                             onmouseout="this.style.background='var(--accent)'">
-                        Simpan Catatan
+                        <i class='bx bx-save mr-1'></i> Simpan Catatan
                     </button>
                 </div>
             </form>
         </div>
-    </div>
 
+    </div>
 </div>
+
 @endsection
