@@ -176,7 +176,7 @@
 
                         @if($status == 'ongoing')
                             <div class="mt-4 pt-3 border-t border-[var(--shadow-dark)]/10 flex gap-3">
-                                <a href="{{ route('guru.absensi') }}?class_id={{ $item->class_id }}&schedule_id={{ $item->id }}" 
+                                <a href="{{ route('guru.rekap.absensi') }}?class_id={{ $item->class_id }}&schedule_id={{ $item->id }}" 
                                    class="neo-btn flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2">
                                     <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                                     Buka Absensi

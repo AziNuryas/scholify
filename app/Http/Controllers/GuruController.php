@@ -257,9 +257,9 @@ class GuruController extends Controller
     }
 
     /**
-     * HALAMAN ABSENSI GURU
+     * HALAMAN REKAP ABSENSI SISWA
      */
-    public function absensi(Request $request)
+    public function rekapAbsensi(Request $request)
     {
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->first();
@@ -270,152 +270,220 @@ class GuruController extends Controller
         
         $teacherId = $teacher->id;
         
-        // Ambil parameter filter
         $classId = $request->get('class_id');
-        $scheduleId = $request->get('schedule_id');
-        $date = $request->get('date', date('Y-m-d'));
+        $studentId = $request->get('student_id');
+        $startDate = $request->get('start_date', date('Y-m-d', strtotime('-30 days')));
+        $endDate = $request->get('end_date', date('Y-m-d'));
         
-        // Ambil SEMUA kelas
-        $classes = SchoolClass::orderBy('name')->get();
+        $classes = SchoolClass::whereHas('schedules', function($q) use ($teacherId) {
+            $q->where('teacher_id', $teacherId);
+        })->orderBy('name')->get();
         
-        // Ambil semua jadwal guru
-        $allSchedules = Schedule::with(['subject', 'schoolClass'])
-            ->where('teacher_id', $teacherId)
-            ->orderBy('day_of_week')
-            ->orderBy('start_time')
-            ->get();
-        
-        // Filter jadwal berdasarkan kelas jika ada
-        $schedules = $allSchedules;
-        if ($classId) {
-            $schedules = $allSchedules->where('class_id', $classId);
-        }
-        
-        // Ambil daftar siswa berdasarkan kelas yang dipilih
         $students = collect();
         if ($classId) {
             $class = SchoolClass::find($classId);
             if ($class) {
                 $students = $class->students;
-                
-                // Cek status absensi untuk setiap siswa pada tanggal yang dipilih
-                $existingAttendances = Attendance::whereDate('date', $date)
-                    ->whereIn('student_id', $students->pluck('id'))
-                    ->get()
-                    ->keyBy('student_id');
-                
-                foreach ($students as $student) {
-                    $attendance = $existingAttendances->get($student->id);
-                    $student->attendance_status = $attendance ? $attendance->status : 'hadir';
-                    $student->attendance_id = $attendance ? $attendance->id : null;
-                }
             }
         }
         
-        // Hitung statistik untuk card
-        $hadirCount = 0;
-        $izinCount = 0;
-        $sakitCount = 0;
-        $alphaCount = 0;
-        
-        if ($students->count() > 0) {
-            $hadirCount = $students->where('attendance_status', 'hadir')->count();
-            $izinCount = $students->where('attendance_status', 'izin')->count();
-            $sakitCount = $students->where('attendance_status', 'sakit')->count();
-            $alphaCount = $students->where('attendance_status', 'alpha')->count();
-        }
-        
-        // Hitung total jam mengajar
-        $schedulesAll = Schedule::where('teacher_id', $teacherId)->get();
-        $totalJam = 0;
-        foreach ($schedulesAll as $schedule) {
-            $start = Carbon::parse($schedule->start_time);
-            $end = Carbon::parse($schedule->end_time);
-            if ($end->greaterThan($start)) {
-                $totalJam += $end->diffInMinutes($start) / 60;
+        $absensi = collect();
+        if ($classId) {
+            $query = Attendance::with('student')
+                ->whereIn('student_id', $students->pluck('id'))
+                ->whereBetween('date', [$startDate, $endDate]);
+            
+            if ($studentId) {
+                $query->where('student_id', $studentId);
             }
-        }
-        $totalJam = round($totalJam, 1);
-        
-        // Hitung total kelas yang diajar
-        $totalKelas = Schedule::where('teacher_id', $teacherId)
-            ->distinct('class_id')
-            ->count('class_id');
-        
-        // Cari jadwal berikutnya untuk card info
-        $today = Carbon::today();
-        $hariIni = $this->getDayName($today->dayOfWeek);
-        $now = Carbon::now();
-        $currentTime = $now->format('H:i:s');
-        
-        $nextSchedule = Schedule::with(['subject', 'schoolClass'])
-            ->where('teacher_id', $teacherId)
-            ->where('day_of_week', $hariIni)
-            ->where('start_time', '>', $currentTime)
-            ->orderBy('start_time', 'asc')
-            ->first();
-        
-        $nextClassTime = null;
-        if ($nextSchedule) {
-            $startTime = Carbon::parse($nextSchedule->start_time);
-            $nextClassTime = $startTime->format('H:i') . ' WIB';
+            
+            $absensi = $query->orderBy('date', 'desc')->get();
         }
         
-        // Daftar hari untuk sidebar
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-        $selectedDay = $hariIni;
+        $statistikSiswa = [];
+        foreach ($students as $student) {
+            $studentAbsensi = $absensi->where('student_id', $student->id);
+            $statistikSiswa[$student->id] = [
+                'nama' => $student->name,
+                'nis' => $student->nis,
+                'hadir' => $studentAbsensi->where('status', 'hadir')->count(),
+                'izin' => $studentAbsensi->where('status', 'izin')->count(),
+                'sakit' => $studentAbsensi->where('status', 'sakit')->count(),
+                'alpha' => $studentAbsensi->where('status', 'alpha')->count(),
+                'total' => $studentAbsensi->count(),
+            ];
+        }
         
-        return view('guru.absensi', compact(
-            'students',
-            'classes',
-            'schedules',
-            'classId',
-            'scheduleId',
-            'date',
-            'hadirCount',
-            'izinCount',
-            'sakitCount',
-            'alphaCount',
-            'totalJam',
-            'totalKelas',
-            'nextSchedule',
-            'nextClassTime',
-            'hariList',
-            'selectedDay'
+        return view('guru.rekap-absensi', compact(
+            'classes', 'students', 'absensi', 'statistikSiswa',
+            'classId', 'studentId', 'startDate', 'endDate'
         ));
     }
 
     /**
-     * SIMPAN ABSENSI - TANPA NOTES
+     * HALAMAN INPUT NILAI SISWA
      */
-    public function absensiStore(Request $request)
+    public function nilai(Request $request)
     {
+        $user = Auth::user();
+        $teacher = Teacher::where('user_id', $user->id)->first();
+        
+        if (!$teacher) {
+            return redirect()->back()->with('error', 'Data guru tidak ditemukan');
+        }
+        
+        $teacherId = $teacher->id;
+        
+        // Ambil kelas yang diajar guru
+        $classes = SchoolClass::whereHas('schedules', function($q) use ($teacherId) {
+            $q->where('teacher_id', $teacherId);
+        })->orderBy('name')->get();
+        
+        // Ambil mata pelajaran yang diajar guru
+        $subjectIds = Schedule::where('teacher_id', $teacherId)
+            ->distinct('subject_id')
+            ->pluck('subject_id');
+        
+        $subjects = Subject::whereIn('id', $subjectIds)->orderBy('name')->get();
+        
+        // Filter
+        $classId = $request->get('class_id');
+        $subjectId = $request->get('subject_id');
+        $assessmentType = $request->get('assessment_type');
+        
+        $students = collect();
+        
+        if ($classId && $subjectId) {
+            $class = SchoolClass::find($classId);
+            if ($class) {
+                $students = $class->students;
+                
+                foreach ($students as $student) {
+                    $query = Grade::where('student_id', $student->id)
+                        ->where('subject_id', $subjectId);
+                    
+                    if ($assessmentType) {
+                        $query->where('assessment_type', $assessmentType);
+                    }
+                    
+                    $grade = $query->first();
+                    $student->grade = $grade;
+                }
+            }
+        }
+        
+        return view('guru.nilai', compact('classes', 'subjects', 'students', 'classId', 'subjectId', 'assessmentType'));
+    }
+
+    /**
+     * SIMPAN NILAI SISWA (MASSAL ATAU SINGLE VIA AJAX)
+     */
+    public function nilaiStore(Request $request)
+    {
+        // PERBAIKAN: ganti school_classes menjadi classes
         $request->validate([
             'class_id' => 'required|exists:classes,id',
-            'date' => 'required|date',
-            'attendance' => 'required|array',
-            'attendance.*' => 'required|in:hadir,izin,sakit,alpha',
+            'subject_id' => 'required|exists:subjects,id',
+            'grades' => 'required|array',
+            'grades.*.score' => 'nullable|numeric|min:0|max:100',
+            'grades.*.assessment_type' => 'nullable|string|in:tugas,quiz,uts,uas,praktikum',
+            'grades.*.notes' => 'nullable|string',
         ]);
         
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->first();
         
-        foreach ($request->attendance as $studentId => $status) {
-            Attendance::updateOrCreate(
-                [
-                    'student_id' => $studentId,
-                    'date' => $request->date,
-                ],
-                [
-                    'status' => $status,
-                    'class_id' => $request->class_id,
-                    'recorded_by' => $teacher ? $teacher->id : null,
-                    'recorded_at' => now(),
-                ]
-            );
+        if (!$teacher) {
+            if ($request->ajax() || $request->has('_ajax')) {
+                return response()->json(['success' => false, 'message' => 'Data guru tidak ditemukan']);
+            }
+            return redirect()->back()->with('error', 'Data guru tidak ditemukan');
         }
         
-        return redirect()->back()->with('success', 'Absensi berhasil disimpan');
+        $savedCount = 0;
+        $lastGrade = null;
+        
+        DB::beginTransaction();
+        
+        try {
+            foreach ($request->grades as $studentId => $gradeData) {
+                // Skip jika tidak ada nilai
+                if (empty($gradeData['score']) && empty($gradeData['assessment_type'])) {
+                    continue;
+                }
+                
+                $student = Student::find($studentId);
+                if (!$student) {
+                    continue;
+                }
+                
+                // Update atau create nilai
+                $grade = Grade::updateOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'subject_id' => $request->subject_id,
+                        'assessment_type' => $gradeData['assessment_type'] ?? 'tugas',
+                    ],
+                    [
+                        'score' => !empty($gradeData['score']) ? $gradeData['score'] : null,
+                        'class_id' => $request->class_id,
+                        'teacher_id' => $teacher->id,
+                        'notes' => $gradeData['notes'] ?? null,
+                    ]
+                );
+                
+                $lastGrade = $grade;
+                $savedCount++;
+            }
+            
+            DB::commit();
+            
+            $message = "Berhasil menyimpan {$savedCount} nilai";
+            
+            if ($request->ajax() || $request->has('_ajax')) {
+                return response()->json([
+                    'success' => true, 
+                    'message' => $message,
+                    'saved_count' => $savedCount,
+                    'grade' => $lastGrade
+                ]);
+            }
+            
+            return redirect()->route('guru.nilai', [
+                'class_id' => $request->class_id,
+                'subject_id' => $request->subject_id,
+                'assessment_type' => $request->assessment_type
+            ])->with('success', $message);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($request->ajax() || $request->has('_ajax')) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ]);
+            }
+            
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * UPDATE NILAI SINGLE (LEGACY)
+     */
+    public function nilaiUpdate(Request $request)
+    {
+        $request->validate([
+            'grade_id' => 'required|exists:grades,id',
+            'score' => 'required|numeric|min:0|max:100',
+        ]);
+        
+        $grade = Grade::findOrFail($request->grade_id);
+        $grade->score = $request->score;
+        $grade->save();
+        
+        return redirect()->back()->with('success', 'Nilai berhasil diupdate');
     }
 
     /**
@@ -454,15 +522,15 @@ class GuruController extends Controller
         
         $teacherId = $teacher->id;
         
-        // Ambil kelas yang diajar
         $classes = SchoolClass::whereHas('schedules', function($q) use ($teacherId) {
             $q->where('teacher_id', $teacherId);
         })->get();
         
-        // Ambil mata pelajaran yang diajar
-        $subjects = Subject::whereHas('schedules', function($q) use ($teacherId) {
-            $q->where('teacher_id', $teacherId);
-        })->distinct()->get();
+        $subjectIds = Schedule::where('teacher_id', $teacherId)
+            ->distinct('subject_id')
+            ->pluck('subject_id');
+        
+        $subjects = Subject::whereIn('id', $subjectIds)->get();
         
         return view('guru.tugas-create', compact('classes', 'subjects'));
     }
@@ -473,7 +541,7 @@ class GuruController extends Controller
     public function tugasStore(Request $request)
     {
         $request->validate([
-            'class_id' => 'required|exists:school_classes,id',
+            'class_id' => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -509,7 +577,6 @@ class GuruController extends Controller
         
         $teacherId = $teacher->id;
         
-        // Ambil kelas yang diajar
         $classes = SchoolClass::whereHas('schedules', function($q) use ($teacherId) {
             $q->where('teacher_id', $teacherId);
         })->with(['students', 'subjects'])->get();
@@ -528,23 +595,6 @@ class GuruController extends Controller
             ->paginate(10);
         
         return view('guru.pengumuman', compact('announcements'));
-    }
-
-    /**
-     * UPDATE NILAI
-     */
-    public function nilaiUpdate(Request $request)
-    {
-        $request->validate([
-            'grade_id' => 'required|exists:grades,id',
-            'score' => 'required|numeric|min:0|max:100',
-        ]);
-        
-        $grade = Grade::findOrFail($request->grade_id);
-        $grade->score = $request->score;
-        $grade->save();
-        
-        return redirect()->back()->with('success', 'Nilai berhasil diupdate');
     }
 
     /**
@@ -571,10 +621,15 @@ class GuruController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:15',
             'address' => 'nullable|string',
+            'password' => 'nullable|min:8|confirmed',
         ]);
         
         $user->name = $request->name;
         $user->email = $request->email;
+        
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
         $user->save();
         
         if ($teacher) {

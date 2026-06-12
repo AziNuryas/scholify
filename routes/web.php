@@ -99,20 +99,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/profile', 'updateProfile')->name('profile.update');
 
             Route::get('/appointments', 'appointments')->name('appointments');
-            // PENTING: route /call harus SEBELUM /{id}/status
             Route::post('/appointments/call', 'storeAppointmentByBk')->name('appointments.call');
             Route::post('/appointments/{id}/status', 'updateAppointmentStatus')->name('appointments.status');
 
             Route::get('/discipline', 'discipline')->name('discipline');
             Route::post('/discipline', 'storeDiscipline')->name('discipline.store');
 
-            // Catatan Konseling
             Route::resource('catatan-konseling', CatatanKonselingController::class);
 
-            // Deteksi Dini & Asesmen
             Route::get('/deteksi-asesmen', 'deteksiAsesmen')->name('deteksi-asesmen.index');
 
-            // Laporan dari Guru (BK menindaklanjuti)
             Route::get('/laporan', 'laporanIndex')->name('laporan.index');
             Route::patch('/laporan/{laporan}/proses', 'laporanProses')->name('laporan.proses');
         });
@@ -122,33 +118,31 @@ Route::middleware(['auth'])->group(function () {
     // GURU MAPEL AREA
     // =========================================================
     Route::middleware([CheckRole::class . ':guru'])->prefix('guru')->name('guru.')->group(function () {
+        
+        // ROUTE NILAI - DIBUAT EKSPLISIT AGAR POST BEKERJA
+        Route::get('/nilai', [GuruController::class, 'nilai'])->name('nilai');
+        Route::post('/nilai', [GuruController::class, 'nilaiStore'])->name('nilai.store');
+        
         Route::controller(GuruController::class)->group(function () {
             Route::get('/dashboard', 'dashboard')->name('dashboard');
             Route::get('/jadwal', 'jadwal')->name('jadwal');
-            Route::get('/absensi', 'absensi')->name('absensi');
-            Route::post('/absensi/store', 'absensiStore')->name('absensi.store');
             Route::get('/raport', 'raport')->name('raport');
             Route::get('/profil', 'profil')->name('profil');
             Route::post('/profil/update', 'profilUpdate')->name('profil.update');
             Route::post('/nilai/update', 'nilaiUpdate')->name('nilai.update');
+            Route::get('/rekap-absensi', 'rekapAbsensi')->name('rekap.absensi');
         });
 
-        Route::controller(GradeController::class)->group(function () {
-            Route::get('/nilai', 'index')->name('nilai');
-            Route::post('/nilai', 'store')->name('nilai.store');
-        });
-
-        // =========================================================
-        // ASSIGNMENT ROUTES - (Tanpa create dan edit terpisah)
-        // =========================================================
+        // ASSIGNMENT ROUTES
         Route::controller(AssignmentController::class)->group(function () {
-            Route::get('/tugas', 'index')->name('tugas');                       // Halaman utama (form + list)
-            Route::post('/tugas', 'store')->name('tugas.store');                // Simpan tugas baru
-            Route::put('/tugas/{id}', 'update')->name('tugas.update');          // Update (toggle complete)
-            Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');     // Hapus tugas
-            Route::post('/tugas/{id}/toggle', 'toggleComplete')->name('tugas.toggle'); // API toggle (AJAX)
+            Route::get('/tugas', 'index')->name('tugas');
+            Route::post('/tugas', 'store')->name('tugas.store');
+            Route::put('/tugas/{id}', 'update')->name('tugas.update');
+            Route::delete('/tugas/{id}', 'destroy')->name('tugas.destroy');
+            Route::post('/tugas/{id}/toggle', 'toggleComplete')->name('tugas.toggle');
         });
 
+        // ANNOUNCEMENT ROUTES
         Route::controller(AnnouncementController::class)->group(function () {
             Route::get('/pengumuman', 'guruIndex')->name('pengumuman');
             Route::post('/pengumuman', 'store')->name('pengumuman.store');
@@ -156,6 +150,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/pengumuman/download/{id}', 'download')->name('pengumuman.download');
         });
 
+        // LAPORAN SISWA ROUTES
         Route::prefix('laporan-siswa')->name('laporan.')->group(function () {
             Route::get('/', [LaporanSiswaController::class, 'index'])->name('index');
             Route::get('/buat', [LaporanSiswaController::class, 'create'])->name('create');
@@ -170,7 +165,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware([CheckRole::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
-        // Student Management
         Route::get('/students', [AdminController::class, 'students'])->name('students');
         Route::get('/students/create', [AdminController::class, 'createStudent'])->name('students.create');
         Route::post('/students', [AdminController::class, 'storeStudent'])->name('students.store');
@@ -179,7 +173,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/students/{id}', [AdminController::class, 'updateStudent'])->name('students.update');
         Route::delete('/students/{id}', [AdminController::class, 'deleteStudent'])->name('students.delete');
 
-        // Teacher Management
         Route::get('/teachers', [AdminController::class, 'teachers'])->name('teachers');
         Route::get('/teachers/create', [AdminController::class, 'createTeacher'])->name('teachers.create');
         Route::post('/teachers', [AdminController::class, 'storeTeacher'])->name('teachers.store');
@@ -187,7 +180,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/teachers/{id}', [AdminController::class, 'updateTeacher'])->name('teachers.update');
         Route::delete('/teachers/{id}', [AdminController::class, 'deleteTeacher'])->name('teachers.delete');
 
-        // Agenda Management
         Route::get('/agendas', [AgendaController::class, 'index'])->name('agendas.index');
         Route::get('/agendas/create', [AgendaController::class, 'create'])->name('agendas.create');
         Route::post('/agendas', [AgendaController::class, 'store'])->name('agendas.store');
@@ -196,7 +188,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/agendas/{id}', [AgendaController::class, 'destroy'])->name('agendas.delete');
         Route::post('/agendas/{id}/toggle', [AgendaController::class, 'toggleActive'])->name('agendas.toggle');
 
-        // Class Management
         Route::get('/classes', [AdminController::class, 'classes'])->name('classes');
         Route::get('/classes/create', [AdminController::class, 'createClass'])->name('classes.create');
         Route::post('/classes', [AdminController::class, 'storeClass'])->name('classes.store');
@@ -206,26 +197,21 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/classes/{class}/add-student', [AdminController::class, 'addStudentToClass'])->name('classes.add-student');
         Route::delete('/classes/{class}/remove-student/{student}', [AdminController::class, 'removeStudentFromClass'])->name('classes.remove-student');
 
-        // Jadwal Pelajaran Bulk
         Route::get('/jadwal/create-bulk', [JadwalPelajaranController::class, 'createBulk'])->name('jadwal.create-bulk');
         Route::post('/jadwal/store-bulk', [JadwalPelajaranController::class, 'storeBulk'])->name('jadwal.store-bulk');
         
-        // Jadwal Pelajaran
         Route::resource('jadwal', JadwalPelajaranController::class);
         Route::get('/jadwal/export-pdf', [JadwalPelajaranController::class, 'exportPdf'])->name('jadwal.export-pdf');
         Route::get('/jadwal/export-excel', [JadwalPelajaranController::class, 'exportExcel'])->name('jadwal.export-excel');
         Route::post('/jadwal/{id}/toggle-status', [JadwalPelajaranController::class, 'toggleStatus'])->name('jadwal.toggle-status');
 
-        // Reports
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
         Route::get('/reports/export-pdf', [AdminController::class, 'exportPdf'])->name('reports.export-pdf');
         Route::get('/reports/export-excel', [AdminController::class, 'exportExcel'])->name('reports.export-excel');
 
-        // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
 
-        // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
         Route::put('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
     });

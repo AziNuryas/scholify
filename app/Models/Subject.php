@@ -25,4 +25,28 @@ class Subject extends Model
     {
         return $this->hasMany(Kkm::class);
     }
+
+    /**
+     * Relasi ke Grades (Nilai)
+     */
+    public function grades(): HasMany
+    {
+        return $this->hasMany(Grade::class, 'subject_id');
+    }
+
+    /**
+     * Relasi ke Schedules (Jadwal)
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'subject_id');
+    }
+
+    /**
+     * Relasi ke Assignments (Tugas)
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class, 'subject_id');
+    }
 }

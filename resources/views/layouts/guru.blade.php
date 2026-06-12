@@ -233,7 +233,7 @@
                     $menus = [
                         ['route' => 'guru.dashboard', 'icon' => 'layout-dashboard', 'label' => 'Dashboard', 'color' => 'text-indigo-500'],
                         ['route' => 'guru.jadwal', 'icon' => 'calendar', 'label' => 'Jadwal Kelas', 'color' => 'text-emerald-500'],
-                        ['route' => 'guru.absensi', 'icon' => 'user-check', 'label' => 'Absensi', 'color' => 'text-orange-500'],
+                        ['route' => 'guru.rekap.absensi', 'icon' => 'clipboard-list', 'label' => 'Rekap Absensi', 'color' => 'text-teal-500'], // <-- TAMBAHKAN BARIS INI
                         ['route' => 'guru.nilai', 'icon' => 'edit-3', 'label' => 'Nilai & Rapor', 'color' => 'text-amber-500'],
                         ['route' => 'guru.tugas', 'icon' => 'clipboard-list', 'label' => 'Tugas', 'color' => 'text-blue-500'],
                         ['route' => 'guru.pengumuman', 'icon' => 'megaphone', 'label' => 'Pengumuman', 'color' => 'text-pink-500'],

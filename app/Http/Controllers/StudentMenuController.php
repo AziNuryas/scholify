@@ -11,6 +11,7 @@ use App\Models\Chat;
 use App\Models\Attendance;
 use App\Models\Submission;
 use App\Models\UserNotification;
+use App\Models\Grade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -188,6 +189,9 @@ class StudentMenuController extends Controller
         }
     }
 
+    /**
+     * Menampilkan halaman nilai siswa dengan jenis penilaian
+     */
     public function grades()
     {
         $studentData = $this->getStudent();
@@ -198,14 +202,22 @@ class StudentMenuController extends Controller
 
         if ($studentId) {
             try {
-                $grades = collect(
-                    DB::table('grades')
-                        ->join('subjects', 'grades.subject_id', '=', 'subjects.id')
-                        ->select('grades.*', 'subjects.name as subject_name')
-                        ->where('student_id', $studentId)
-                        ->get()
-                );
-            } catch (\Exception $e) {}
+                // Ambil nilai dengan join ke subjects dan pastikan assessment_type ada
+                $grades = Grade::with('subject')
+                    ->where('student_id', $studentId)
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                    ->map(function($grade) {
+                        // Set default assessment_type jika null
+                        if (!$grade->assessment_type) {
+                            $grade->assessment_type = 'tugas';
+                        }
+                        return $grade;
+                    });
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Grades fetch error: ' . $e->getMessage());
+                $grades = collect([]);
+            }
         }
 
         return view('student.grades', compact('student', 'grades'));
@@ -573,6 +585,7 @@ class StudentMenuController extends Controller
 
         return back()->with('success', 'Pengaturan berhasil disimpan!');
     }
+    
     public function materials()
     {
         $studentData = $this->getStudent();

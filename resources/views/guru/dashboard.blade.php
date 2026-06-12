@@ -135,7 +135,7 @@
                 <div class="space-y-3">
                     @forelse(($jadwal ?? [])->take(4) as $item)
                     <div class="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg)] hover:neo-flat transition-all duration-300 cursor-pointer"
-                         onclick="window.location.href='{{ route('guru.absensi') }}?class_id={{ $item->class_id }}'">
+                         onclick="window.location.href='{{ route('guru.rekap.absensi') }}?class_id={{ $item->class_id }}'">
                         <div class="neo-pressed rounded-xl px-4 py-2 text-center min-w-[100px]">
                             <i data-lucide="clock" class="w-3 h-3 text-[var(--text-muted)] mx-auto mb-1"></i>
                             <span class="text-xs font-bold text-[var(--text-primary)]">
@@ -328,7 +328,7 @@
             </div>
         </div>
 
-        {{-- Pengumuman Terbaru (Siswa Berprestasi telah dihapus) --}}
+        {{-- Pengumuman Terbaru --}}
         <div class="col-span-12 lg:col-span-6">
             <div class="neo-card p-6">
                 <div class="flex items-center gap-3 mb-5">
