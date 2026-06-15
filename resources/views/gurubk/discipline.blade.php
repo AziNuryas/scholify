@@ -4,20 +4,45 @@
 @section('page-title', 'Catatan Disiplin')
 
 @section('content')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css"/>
+<style>
+    .ts-wrapper.single .ts-control, .ts-control {
+        border: 1px solid var(--border) !important;
+        border-radius: 0.5rem !important;
+        padding: 0.35rem 0.75rem !important;
+        font-size: 0.75rem !important;
+        color: var(--text-primary) !important;
+        background: var(--bg) !important;
+        box-shadow: none !important;
+        min-height: unset !important;
+        cursor: pointer;
+    }
+    .ts-wrapper.single.focus .ts-control, .ts-wrapper.focus .ts-control {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 2px rgba(124,58,237,0.2) !important;
+        outline: none !important;
+    }
+    .ts-dropdown {
+        border: 1px solid var(--border) !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        font-size: 0.75rem !important;
+        background: var(--bg-card) !important;
+        overflow: hidden;
+        z-index: 9999 !important;
+    }
+    .ts-dropdown .option { padding: 0.5rem 0.75rem !important; color: var(--text-primary) !important; }
+    .ts-dropdown .option:hover, .ts-dropdown .option.active {
+        background: rgba(168,85,247,.12) !important;
+        color: var(--accent-light) !important;
+    }
+    .ts-wrapper .placeholder { color: var(--text-muted) !important; }
+</style>
 <div class="space-y-6 pt-2 animate-fadeInUp">
 
-    <div class="flex justify-between items-end mb-2">
-        <div>
-            <h1 class="font-outfit font-bold text-3xl mb-1" style="color: var(--text-primary)">Catatan Disiplin</h1>
-            <p class="text-sm" style="color: var(--text-secondary)">Kelola riwayat pelanggaran dan poin kedisiplinan siswa.</p>
-        </div>
-        <button onclick="document.getElementById('modal-add-discipline').classList.remove('hidden')"
-                class="text-white px-5 py-2.5 rounded-xl font-bold transition flex items-center gap-2"
-                style="background: var(--accent); box-shadow: 0 4px 14px rgba(124,58,237,.3)"
-                onmouseover="this.style.background='var(--accent-hover)'"
-                onmouseout="this.style.background='var(--accent)'">
-            <i class='bx bx-plus'></i> Tambah Catatan
-        </button>
+    <div class="mb-2">
+        <h1 class="font-outfit font-bold text-3xl mb-1" style="color: var(--text-primary)">Catatan Disiplin</h1>
+        <p class="text-sm" style="color: var(--text-secondary)">Kelola riwayat pelanggaran dan poin kedisiplinan siswa.</p>
     </div>
 
     @if(session('success'))
@@ -27,9 +52,97 @@
     </div>
     @endif
 
+    {{-- Filter --}}
+    <div class="neo-flat rounded-2xl p-4">
+        <form method="GET" action="{{ route('gurubk.discipline') }}" class="flex flex-wrap gap-3 items-end">
+
+            {{-- Filter Siswa --}}
+            <div class="flex flex-col gap-1" style="min-width: 200px;">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Siswa</label>
+                <select id="filter-siswa" name="siswa_id">
+                    <option value="">Semua Siswa</option>
+                    @foreach($siswa as $s)
+                        <option value="{{ $s->id }}" {{ request('siswa_id') == $s->id ? 'selected' : '' }}>
+                            {{ $s->name }} ({{ $s->schoolClass->name ?? '-' }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Filter Jenis Pelanggaran --}}
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Jenis Pelanggaran</label>
+                <select name="jenis"
+                        class="text-xs rounded-lg px-3 py-2 outline-none"
+                        style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+                    <option value="">Semua Jenis</option>
+                    <option value="Terlambat Masuk"      {{ request('jenis') === 'Terlambat Masuk'      ? 'selected' : '' }}>Terlambat Masuk</option>
+                    <option value="Bolos Sekolah"         {{ request('jenis') === 'Bolos Sekolah'         ? 'selected' : '' }}>Bolos Sekolah</option>
+                    <option value="Atribut Tidak Lengkap" {{ request('jenis') === 'Atribut Tidak Lengkap' ? 'selected' : '' }}>Atribut Tidak Lengkap</option>
+                    <option value="Berkelahi"             {{ request('jenis') === 'Berkelahi'             ? 'selected' : '' }}>Berkelahi</option>
+                    <option value="Merokok"               {{ request('jenis') === 'Merokok'               ? 'selected' : '' }}>Merokok</option>
+                    <option value="Lainnya"               {{ request('jenis') === 'Lainnya'               ? 'selected' : '' }}>Lainnya</option>
+                </select>
+            </div>
+
+            {{-- Filter Dari Tanggal --}}
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Dari Tanggal</label>
+                <input type="date" name="dari" value="{{ request('dari') }}"
+                       class="text-xs rounded-lg px-3 py-2 outline-none"
+                       style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+            </div>
+
+            {{-- Filter Sampai Tanggal --}}
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted)">Sampai Tanggal</label>
+                <input type="date" name="sampai" value="{{ request('sampai') }}"
+                       class="text-xs rounded-lg px-3 py-2 outline-none"
+                       style="background: var(--bg); border: 1px solid var(--border); color: var(--text-primary)">
+            </div>
+
+            {{-- Tombol Filter + Reset --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="px-4 py-2 text-xs text-white rounded-lg transition flex items-center gap-1"
+                        style="background: var(--accent)"
+                        onmouseover="this.style.background='var(--accent-hover)'"
+                        onmouseout="this.style.background='var(--accent)'">
+                    <i class='bx bx-filter-alt'></i> Filter
+                </button>
+                @if(request()->hasAny(['siswa_id','jenis','dari','sampai']))
+                    <a href="{{ route('gurubk.discipline') }}"
+                       class="px-4 py-2 text-xs rounded-lg transition flex items-center gap-1"
+                       style="border: 1px solid var(--border); color: var(--text-secondary)">
+                        <i class='bx bx-x'></i> Reset
+                    </a>
+                @endif
+            </div>
+
+            {{-- Tombol Tambah Catatan (paling kanan) --}}
+            <div class="ml-auto">
+                <button type="button"
+                        onclick="document.getElementById('modal-add-discipline').classList.remove('hidden')"
+                        class="text-white px-5 py-2 rounded-xl font-bold text-sm transition flex items-center gap-2"
+                        style="background: var(--accent); box-shadow: 0 4px 14px rgba(124,58,237,.3)"
+                        onmouseover="this.style.background='var(--accent-hover)'"
+                        onmouseout="this.style.background='var(--accent)'">
+                    <i class='bx bx-plus'></i> Tambah Catatan
+                </button>
+            </div>
+
+        </form>
+    </div>
+
     <div class="neo-flat rounded-2xl overflow-hidden">
         <div class="p-6 flex justify-between items-center" style="border-bottom: 1px solid var(--border)">
             <h2 class="font-outfit font-bold text-lg" style="color: var(--text-primary)">Riwayat Pelanggaran Terbaru</h2>
+            @if($records->count() > 0)
+            <span class="text-xs font-medium px-3 py-1 rounded-full"
+                  style="background: rgba(168,85,247,.12); color: var(--accent-light)">
+                {{ $records->count() }} data
+            </span>
+            @endif
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -70,18 +183,30 @@
                     @empty
                     <tr>
                         <td colspan="5" class="px-6 py-10 text-center" style="color: var(--text-muted)">
-                            Belum ada catatan pelanggaran.
+                            @if(request()->hasAny(['siswa_id','jenis','dari','sampai']))
+                                Tidak ada data yang sesuai filter.
+                                <a href="{{ route('gurubk.discipline') }}" class="underline" style="color: var(--accent-light)">Reset filter</a>
+                            @else
+                                Belum ada catatan pelanggaran.
+                            @endif
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        {{-- Pagination --}}
+        @if($records->hasPages())
+            <div class="px-6 py-4" style="border-top: 1px solid var(--border)">
+                {{ $records->appends(request()->query())->links() }}
+            </div>
+        @endif
     </div>
 
 </div>
 
-{{-- Modal Add Discipline — di luar div konten utama agar tidak ter-clip --}}
+{{-- Modal Add Discipline --}}
 <div id="modal-add-discipline"
      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
      style="background: rgba(0,0,0,.5); backdrop-filter: blur(4px);"
@@ -187,4 +312,21 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new TomSelect('#filter-siswa', {
+            placeholder: 'Cari nama siswa...',
+            searchField: ['text'],
+            maxOptions: 200,
+            create: false,
+            allowEmptyOption: true,
+            render: {
+                no_results: function() {
+                    return '<div style="padding:.5rem .75rem;color:var(--text-muted);font-size:.75rem;">Siswa tidak ditemukan</div>';
+                }
+            }
+        });
+    });
+</script>
 @endsection

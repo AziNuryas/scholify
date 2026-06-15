@@ -117,30 +117,21 @@ class GuruBkController extends Controller
             ->orderBy('date', 'desc')
             ->orderBy('time', 'desc');
 
-        // Filter Status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
-        // Filter Sumber (initiated_by)
         if ($request->filled('sumber')) {
             $query->where('initiated_by', $request->sumber);
         }
-
-        // Filter Dari Tanggal
         if ($request->filled('dari')) {
             $query->whereDate('date', '>=', $request->dari);
         }
-
-        // Filter Sampai Tanggal
         if ($request->filled('sampai')) {
             $query->whereDate('date', '<=', $request->sampai);
         }
 
         $appointments = $query->paginate(15)->withQueryString();
-
-        // Daftar semua siswa untuk modal panggil siswa
-        $students = \App\Models\Student::with('schoolClass')->orderBy('name')->get();
+        $students     = \App\Models\Student::with('schoolClass')->orderBy('name')->get();
 
         return view('gurubk.appointments', compact('guru', 'appointments', 'students'));
     }
@@ -239,16 +230,31 @@ class GuruBkController extends Controller
         }
     }
 
-    public function discipline()
+    // ← DIPERBAIKI: tambah Request, filter, dan paginate
+    public function discipline(Request $request)
     {
         $guruData = $this->getGuruBk();
         $guru     = collect($guruData ? $guruData->toArray() : []);
 
-        $records = \App\Models\DisciplinaryRecord::with(['student.schoolClass'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = \App\Models\DisciplinaryRecord::with(['student.schoolClass'])
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc');
 
-        $siswa = \App\Models\Student::with('schoolClass')->get();
+        if ($request->filled('siswa_id')) {
+            $query->where('student_id', $request->siswa_id);
+        }
+        if ($request->filled('jenis')) {
+            $query->where('violation_type', $request->jenis);
+        }
+        if ($request->filled('dari')) {
+            $query->whereDate('date', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $query->whereDate('date', '<=', $request->sampai);
+        }
+
+        $records = $query->paginate(20)->withQueryString();
+        $siswa   = \App\Models\Student::with('schoolClass')->orderBy('name')->get();
 
         return view('gurubk.discipline', compact('guru', 'records', 'siswa'));
     }
